@@ -118,7 +118,9 @@ class SingleViewPresentation extends Presentation {
       int viewId,
       Object createParams,
       OnFocusChangeListener focusChangeListener) {
-    super(new ImmContext(outerContext), display);
+    // BD MOD:
+    //super(new ImmContext(outerContext), display);
+    super(outerContext, display, viewFactory.getPresentationTheme());
     this.viewFactory = viewFactory;
     this.accessibilityEventsDelegate = accessibilityEventsDelegate;
     this.viewId = viewId;
