@@ -289,8 +289,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             Any methods that rely on advancing the clock.
     virtual fml::TimePoint GetCurrentTimePoint() = 0;
 
-    // BD ADD:
+    // BD ADD: START
     virtual int64_t GetEngineMainEnterMicros() = 0;
+    virtual void AddNextFrameCallback(fml::closure callback) = 0;
+    // END
   };
 
   //----------------------------------------------------------------------------
@@ -983,6 +985,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   friend class testing::ShellTest;
+
+  // BD ADD:
+  // |RuntimeDelegate|
+  void AddNextFrameCallback(fml::closure callback) override;
 
   // BD ADD:
   int64_t GetEngineMainEnterMicros() override;

@@ -37,6 +37,7 @@ class MockDelegate : public Engine::Delegate {
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
   MOCK_METHOD0(GetCurrentTimePoint, fml::TimePoint());
   // BD: ADD START
+  MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
   MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
   // END
 };
@@ -64,6 +65,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
   // BD: ADD START
+  MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
   MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
   // END
 };
