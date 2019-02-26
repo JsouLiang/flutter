@@ -1399,6 +1399,19 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
   return latest_frame_target_time_.value();
 }
 
+// BD ADD: START
+void Shell::AddNextFrameCallback(fml::closure callback) {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr(), callback = std::move(callback)]() {
+        if (rasterizer) {
+          rasterizer->AddNextFrameCallback([callback = std::move(callback)](){
+            callback();
+          });
+        };
+      });
+}
+// END
+
 // |ServiceProtocol::Handler|
 fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(
     std::string_view method) const {

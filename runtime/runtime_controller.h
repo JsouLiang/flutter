@@ -661,6 +661,10 @@ class RuntimeController : public PlatformConfigurationClient {
       const std::vector<std::string>& supported_locale_data) override;
 
   // BD ADD:
+  // |PlatformConfigurationClient|
+  void AddNextFrameCallback(fml::closure callback) override;
+
+  // BD ADD:
   int64_t GetEngineMainEnterMicros() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);

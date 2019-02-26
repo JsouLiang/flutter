@@ -89,6 +89,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
   fml::scoped_nsobject<FlutterView> _flutterView;
   fml::scoped_nsobject<UIView> _splashScreenView;
   fml::ScopedBlock<void (^)(void)> _flutterViewRenderedCallback;
+  fml::ScopedBlock<void (^)(void)> _flutterViewFirstFrameCallback;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   flutter::ViewportMetrics _viewportMetrics;
@@ -593,6 +594,39 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)setFlutterViewDidRenderCallback:(void (^)(void))callback {
   _flutterViewRenderedCallback.reset(callback, fml::OwnershipPolicy::Retain);
+}
+
+- (void)setFlutterViewFirstFrameCallback:(void (^)())callback {
+  _flutterViewFirstFrameCallback.reset(callback, fml::OwnershipPolicy::Retain);
+  
+  auto weak_platform_view = [_engine.get() platformView];
+  if (!weak_platform_view) {
+    return;
+  }
+  __unsafe_unretained auto weak_flutter_view_controller = self;
+  // This is on the platform thread.
+  weak_platform_view->SetNextFrameCallback([weak_platform_view, weak_flutter_view_controller,
+                                            task_runner = [_engine.get() platformTaskRunner]]() {
+    // This is on the GPU thread.
+    task_runner->PostTask([weak_platform_view, weak_flutter_view_controller]() {
+      // We check if the weak platform view is alive. If it is alive, then the view controller
+      // also has to be alive since the view controller owns the platform view via the shell
+      // association. Thus, we are not convinced that the unsafe unretained weak object is in
+      // fact alive.
+      if (weak_platform_view) {
+        [weak_flutter_view_controller responseTheFirstFrameCallIfNeeded];
+      }
+    });
+  });
+}
+
+#pragma mark - First Frame CallBack
+
+- (void)responseTheFirstFrameCallIfNeeded {
+  if (_flutterViewFirstFrameCallback != nil) {
+    _flutterViewFirstFrameCallback.get()();
+    _flutterViewFirstFrameCallback.reset();
+  }
 }
 
 #pragma mark - Surface creation and teardown updates

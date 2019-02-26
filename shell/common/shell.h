@@ -607,6 +607,9 @@ class Shell final : public PlatformView::Delegate,
   // |Rasterizer::Delegate|
   fml::TimePoint GetLatestFrameTargetTime() const override;
 
+  // BD ADD
+  void AddNextFrameCallback(fml::closure callback) override;
+
   // |ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
       std::string_view method) const override;

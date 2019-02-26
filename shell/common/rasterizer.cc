@@ -668,7 +668,22 @@ void Rasterizer::SetExternalViewEmbedder(
   external_view_embedder_ = view_embedder;
 }
 
+// BD ADD: START
+void Rasterizer::AddNextFrameCallback(fml::closure callback) {
+  next_frame_callbacks_.push_back(callback);
+}
+// END
+
 void Rasterizer::FireNextFrameCallbackIfPresent() {
+  if (!next_frame_callbacks_.empty()) {
+    for(auto it = next_frame_callbacks_.begin(); it != next_frame_callbacks_.end(); ++it) {
+      // BD MOD: START
+      // (*it)();
+      task_runners_.GetUITaskRunner()->PostTask(*it);
+      // END
+    }
+    next_frame_callbacks_.clear();
+  }
   if (!next_frame_callback_) {
     return;
   }

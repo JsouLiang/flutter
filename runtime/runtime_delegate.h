@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/fml/closure.h"
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/text/font_collection.h"
@@ -30,6 +31,7 @@ class RuntimeDelegate {
 
   virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) = 0;
 
+
   virtual FontCollection& GetFontCollection() = 0;
 
   virtual void OnRootIsolateCreated() = 0;
@@ -42,7 +44,10 @@ class RuntimeDelegate {
   virtual std::unique_ptr<std::vector<std::string>>
   ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) = 0;
-  
+
+  // BD ADD:
+  virtual void AddNextFrameCallback(fml::closure callback) = 0;
+
   // BD ADD:
   virtual int64_t GetEngineMainEnterMicros() = 0;
 

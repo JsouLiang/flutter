@@ -351,6 +351,9 @@ class Rasterizer final : public SnapshotDelegate {
   ///
   void SetNextFrameCallback(const fml::closure& callback);
 
+  // BD ADD:
+  void AddNextFrameCallback(fml::closure callback);
+
   //----------------------------------------------------------------------------
   /// @brief Set the External View Embedder. This is done on shell
   ///        initialization. This is non-null on platforms that support
@@ -460,6 +463,9 @@ class Rasterizer final : public SnapshotDelegate {
   fml::TaskRunnerAffineWeakPtrFactory<Rasterizer> weak_factory_;
   std::shared_ptr<ExternalViewEmbedder> external_view_embedder_;
   bool shared_engine_block_thread_merging_ = false;
+
+  // BD ADD:
+  std::vector<fml::closure> next_frame_callbacks_;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,

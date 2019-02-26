@@ -9,6 +9,9 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
+//BD: ADD
+#include "flutter/fml/make_copyable.h"
+
 namespace flutter {
 
 Window::Window(int64_t window_id, ViewportMetrics metrics)

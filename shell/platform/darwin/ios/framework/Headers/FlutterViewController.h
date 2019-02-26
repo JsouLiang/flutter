@@ -116,6 +116,13 @@ FLUTTER_DARWIN_EXPORT
  */
 - (void)setFlutterViewDidRenderCallback:(void (^)(void))callback;
 
+
+/**
+ Registers a callback that will be invoked the next frame has been rendered.
+ The callback will be fired only once.
+ */
+- (void)setFlutterViewFirstFrameCallback:(void (^)(void))callback;
+
 /**
  * Returns the file name for the given asset.
  * The returned file name can be used to access the asset in the application's
