@@ -352,6 +352,9 @@ class Rasterizer final : public SnapshotDelegate {
   ///
   void SetNextFrameCallback(const fml::closure& callback);
 
+  // BD ADD:
+  void AddNextFrameCallback(fml::closure callback);
+
   //----------------------------------------------------------------------------
   /// @brief Set the External View Embedder. This is done on shell
   ///        initialization. This is non-null on platforms that support
@@ -459,6 +462,9 @@ class Rasterizer final : public SnapshotDelegate {
   sk_sp<SkImage> MakeRasterSnapshot(
       std::function<void(SkCanvas*)> draw_callback,
       SkISize picture_size) override;
+
+  // BD ADD:
+  std::vector<fml::closure> next_frame_callbacks_;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,

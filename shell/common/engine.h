@@ -289,8 +289,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             Any methods that rely on advancing the clock.
     virtual fml::TimePoint GetCurrentTimePoint() = 0;
 
-    // BD ADD:
+    // BD ADD: START
     virtual int64_t GetEngineMainEnterMicros() = 0;
+    virtual void AddNextFrameCallback(fml::closure callback) = 0;
+    // END
   };
 
   //----------------------------------------------------------------------------
@@ -978,6 +980,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
   fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
+
+  // BD ADD:
+  // |RuntimeDelegate|
+  void AddNextFrameCallback(fml::closure callback) override;
 
   // BD ADD:
   int64_t GetEngineMainEnterMicros() override;

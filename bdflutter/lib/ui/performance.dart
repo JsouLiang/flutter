@@ -15,6 +15,8 @@ class Performance {
   TimeToFirstFrameMicrosCallback? onTimeToFirstFrameMicros;
   int timeToFrameworkInitMicros = 0;
   int timeToFirstFrameMicros = 0;
+
+  void addNextFrameCallback(VoidCallback callback) native 'Performance_addNextFrameCallback';
 }
 
 /// The [Performance] singleton.

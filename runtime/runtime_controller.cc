@@ -463,6 +463,10 @@ RuntimeController::Locale::Locale(std::string language_code_,
 RuntimeController::Locale::~Locale() = default;
 
 // BD ADD: START
+void RuntimeController::AddNextFrameCallback(fml::closure callback) {
+  client_.AddNextFrameCallback(callback);
+}
+
 int64_t RuntimeController::GetEngineMainEnterMicros() {
   return client_.GetEngineMainEnterMicros();
 }

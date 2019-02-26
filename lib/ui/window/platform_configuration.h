@@ -18,6 +18,9 @@
 #include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/dart_persistent_value.h"
 
+// BD ADD:
+#include "flutter/fml/closure.h"
+
 namespace flutter {
 class FontCollection;
 class PlatformMessage;
@@ -177,6 +180,7 @@ class PlatformConfigurationClient {
       const std::vector<std::string>& supported_locale_data) = 0;
 
   // BD ADD: START
+  virtual void AddNextFrameCallback(fml::closure callback) = 0;
   virtual int64_t GetEngineMainEnterMicros() = 0;
   // END
 

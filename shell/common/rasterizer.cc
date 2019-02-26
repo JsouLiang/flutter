@@ -783,7 +783,22 @@ fml::RefPtr<fml::RasterThreadMerger> Rasterizer::GetRasterThreadMerger() {
   return raster_thread_merger_;
 }
 
+// BD ADD: START
+void Rasterizer::AddNextFrameCallback(fml::closure callback) {
+  next_frame_callbacks_.push_back(callback);
+}
+// END
+
 void Rasterizer::FireNextFrameCallbackIfPresent() {
+  // BD MOD: START
+  if (!next_frame_callbacks_.empty()) {
+    for (auto it = next_frame_callbacks_.begin();
+         it != next_frame_callbacks_.end(); ++it) {
+      delegate_.GetTaskRunners().GetUITaskRunner()->PostTask(*it);
+    }
+    next_frame_callbacks_.clear();
+  }
+  // END
   if (!next_frame_callback_) {
     return;
   }

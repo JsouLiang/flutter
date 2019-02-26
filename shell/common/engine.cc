@@ -507,6 +507,12 @@ void Engine::OnRootIsolateCreated() {
   delegate_.OnRootIsolateCreated();
 }
 
+// BD ADD: START
+void Engine::AddNextFrameCallback(fml::closure callback) {
+  delegate_.AddNextFrameCallback(callback);
+}
+// END
+
 void Engine::UpdateIsolateDescription(const std::string isolate_name,
                                       int64_t isolate_port) {
   delegate_.UpdateIsolateDescription(isolate_name, isolate_port);
