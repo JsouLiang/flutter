@@ -261,7 +261,22 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
+  ldflags = [
+    "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
+    # BD ADD: START LiuXia
+    "-Wl,-rename_section,__TEXT,__text,__BD_TEXT,__text",
+    "-Wl,-rename_section,__TEXT,__stubs,__BD_TEXT,__stubs",
+    "-Wl,-rename_section,__TEXT,__stub_helper,__BD_TEXT,__stub_helper",
+    "-Wl,-rename_section,__TEXT,__const,__BD_TEXT,__const",
+    "-Wl,-rename_section,__TEXT,__cstring,__BD_TEXT,__cstring",
+    "-Wl,-rename_section,__TEXT,__gcc_except_tab,__BD_TEXT,__gcc_except_tab",
+    "-Wl,-rename_section,__TEXT,__objc_classname,__BD_TEXT,__objc_classname",
+    "-Wl,-rename_section,__TEXT,__objc_methname,__BD_TEXT,__objc_methname",
+    "-Wl,-rename_section,__TEXT,__objc_methtype,__BD_TEXT,__objc_methtype",
+    "-Wl,-rename_section,__TEXT,__ustring,__BD_TEXT,__ustring",
+    "-Wl,-segprot,__BD_TEXT,rx,rx"
+    # END
+   ]
 
   public = _flutter_framework_headers
 
