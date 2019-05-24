@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Sends touch information from Android to Flutter in a format that Flutter understands. */
 public class AndroidTouchProcessor {
@@ -74,6 +76,9 @@ public class AndroidTouchProcessor {
 
   private final boolean trackMotionEvents;
 
+  ///dart层接受触摸事件的deviceId，用于防止down和cancel事件不一致的情况
+  private List<Integer> deviceList = new ArrayList<>();
+
   /**
    * Constructs an {@code AndroidTouchProcessor} that will send touch event data to the Flutter
    * execution context represented by the given {@link FlutterRenderer}.
@@ -110,6 +115,8 @@ public class AndroidTouchProcessor {
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
+      // BD ADD:
+      deviceList.add(event.getPointerId(event.getActionIndex()));
     } else if (updateForMultiplePointers) {
       // ACTION_UP and ACTION_POINTER_UP may contain position updates for other pointers.
       // We are converting these updates to move events here in order to preserve this data.
@@ -121,9 +128,21 @@ public class AndroidTouchProcessor {
               event, p, PointerChange.MOVE, POINTER_DATA_FLAG_BATCHED, transformMatrix, packet);
         }
       }
+      // BD ADD:
+      deviceList.remove(Integer.valueOf(event.getPointerId(event.getActionIndex())));
       // It's important that we're sending the UP event last. This allows PlatformView
       // to correctly batch everything back into the original Android event if needed.
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
+    // BD ADD: START
+    } else if (maskedAction == MotionEvent.ACTION_CANCEL) {
+      for (int p = 0; p < pointerCount; p++) {
+        int device = event.getPointerId(p);
+        if (deviceList.contains(device)) {
+          deviceList.remove(Integer.valueOf(device));
+          addPointerForIndex(event, p, pointerChange, 0,transformMatrix, packet);
+        }
+      }
+    // END
     } else {
       // ACTION_MOVE may not actually mean all pointers have moved
       // but it's the responsibility of a later part of the system to
