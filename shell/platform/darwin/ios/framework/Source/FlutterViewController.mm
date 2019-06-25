@@ -779,8 +779,13 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationBecameActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationBecameActive");
-  if (_viewportMetrics.physical_width)
-    [self surfaceUpdated:YES];
+  bool optimiseEnabled = [[NSUserDefaults standardUserDefaults]
+      boolForKey:@"flutter_optimise_enter_foreground_surface_enabled"];
+    
+  if (_viewportMetrics.physical_width &&
+      ((optimiseEnabled && self.view.window) || !optimiseEnabled)) {
+      [self surfaceUpdated:YES];
+  }
   [self goToApplicationLifecycle:@"AppLifecycleState.resumed"];
 }
 
