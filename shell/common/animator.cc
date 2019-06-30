@@ -278,10 +278,6 @@ void Animator::AwaitVSyncForBackground() {
   waiter_->AsyncWaitForVsync(
       [self = weak_factory_.GetWeakPtr()](fml::TimePoint frame_start_time,
                                           fml::TimePoint frame_target_time) {
-        if (!self->paused_) {
-          self->pending_frame_semaphore_.Signal();
-          return;
-        }
         if (self) {
           self->BeginFrame(frame_start_time, frame_target_time);
         }
