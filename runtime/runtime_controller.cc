@@ -481,4 +481,12 @@ void RuntimeController::ExitApp() {
 }
 // END
 
+// BD ADD: START
+std::vector<double> RuntimeController::GetFps(int thread_type,
+                                              int fps_type,
+                                              bool do_clear) {
+  return client_.GetFps(thread_type, fps_type, do_clear);
+}
+// END
+
 }  // namespace flutter

@@ -75,6 +75,62 @@ fml::TimeDelta Stopwatch::AverageDelta() const {
   return sum / kMaxSamples;
 }
 
+// BD ADD: START
+int Stopwatch::GetMaxSamples() {
+  return kMaxSamples;
+}
+
+std::vector<double> Stopwatch::GetFps(int type) const {
+  double one_frame_ms = frame_budget_.count();
+  double fps = 0;
+  std::vector<double> result;
+  if (type == kAvgFpsType) {
+    int drop_count = 0;
+    int frame_count = 0;
+    double frame_time_ms;
+    double totalTime = 0;
+    for (size_t i = 0; i < kMaxSamples; i++) {
+      frame_time_ms = laps_[i].ToMillisecondsF();
+      if (frame_time_ms > 0) {
+        totalTime += frame_time_ms;
+        frame_count++;
+        if (frame_time_ms > one_frame_ms) {
+          drop_count += (int)UnitFrameInterval(frame_time_ms);
+        }
+      }
+    }
+    fps =
+        frame_count > 0 ? 60.0 * frame_count / (frame_count + drop_count) : 60;
+    result.resize(4);
+    result[0] = fps;
+    result[1] = frame_count > 0 ? totalTime / frame_count : 0;
+    result[2] = frame_count;
+    result[3] = drop_count;
+
+  } else if (type == kWorstFpsType) {
+    double max_frame_ms = Stopwatch::MaxDelta().ToMillisecondsF();
+    if (max_frame_ms < one_frame_ms) {
+      fps = 1e3 / one_frame_ms;
+    } else {
+      fps = 1e3 / max_frame_ms;
+    }
+    result.resize(4);
+    result[0] = fps;
+    result[1] = max_frame_ms;
+    result[2] = 0;
+    result[3] = 0;
+  }
+  return result;
+}
+
+void Stopwatch::ClearFps() {
+  const fml::TimeDelta zero_delta = fml::TimeDelta::Zero();
+  for (size_t i = 0; i < kMaxSamples; i++) {
+    laps_[i] = zero_delta;
+  }
+}
+// END
+
 // Initialize the SkSurface for drawing into. Draws the base background and any
 // timing data from before the initial Visualize() call.
 void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {

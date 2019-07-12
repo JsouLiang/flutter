@@ -14,6 +14,11 @@
 
 namespace flutter {
 
+// BD ADD: START
+static const int kAvgFpsType = 1;
+static const int kWorstFpsType = 2;
+// END
+
 class Stopwatch {
  public:
   Stopwatch(fml::Milliseconds frame_budget = fml::kDefaultFrameBudget);
@@ -37,6 +42,12 @@ class Stopwatch {
   void Stop();
 
   void SetLapTime(const fml::TimeDelta& delta);
+
+  // BD ADD: START
+  std::vector<double> GetFps(int type = kAvgFpsType) const;
+  void ClearFps();
+  static int GetMaxSamples();
+  // END
 
  private:
   inline double UnitFrameInterval(double time_ms) const;

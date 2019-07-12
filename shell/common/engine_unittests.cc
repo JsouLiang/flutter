@@ -39,6 +39,7 @@ class MockDelegate : public Engine::Delegate {
   // BD: ADD START
   MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
   MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  MOCK_METHOD3(GetFps, std::vector<double>(int, int, bool));
   // END
 };
 
@@ -67,6 +68,7 @@ class MockRuntimeDelegate : public RuntimeDelegate {
   // BD: ADD START
   MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
   MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  MOCK_METHOD3(GetFps, std::vector<double>(int, int, bool));
   // END
 };
 
