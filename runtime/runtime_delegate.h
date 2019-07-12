@@ -50,6 +50,9 @@ class RuntimeDelegate {
 
   // BD ADD:
   virtual int64_t GetEngineMainEnterMicros() = 0;
+  
+  // BD ADD:
+  virtual std::vector<double> GetFps(int thread_type, int fps_type, bool do_clear) = 0;
 
   virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
 

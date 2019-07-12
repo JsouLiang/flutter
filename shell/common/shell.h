@@ -690,6 +690,11 @@ class Shell final : public PlatformView::Delegate,
 
   fml::WeakPtrFactory<Shell> weak_factory_;
   friend class testing::ShellTest;
+  
+  // BD ADD:
+  std::vector<double> GetFps(int thread_type,
+                int fps_type = kAvgFpsType,
+                bool do_clear = false) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);
 };

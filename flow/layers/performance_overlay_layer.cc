@@ -24,8 +24,10 @@ void VisualizeStopWatch(SkCanvas* canvas,
                         bool show_labels,
                         const std::string& label_prefix,
                         const std::string& font_path) {
-  const int label_x = 8;    // distance from x
-  const int label_y = -10;  // distance from y+height
+  const int label_x = 8;  // distance from x
+  // BD MOD:
+  // const int label_y = -10;  // distance from y+height
+  const int label_y = -25;  // distance from y+height
 
   if (show_graph) {
     SkRect visualization_rect = SkRect::MakeXYWH(x, y, width, height);
@@ -36,7 +38,9 @@ void VisualizeStopWatch(SkCanvas* canvas,
     auto text = PerformanceOverlayLayer::MakeStatisticsText(
         stopwatch, label_prefix, font_path);
     SkPaint paint;
-    paint.setColor(SK_ColorGRAY);
+    // BD MOD:
+    // paint.setColor(SK_ColorGRAY);
+    paint.setColor(SK_ColorRED);
     canvas->drawTextBlob(text, x + label_x, y + height + label_y, paint);
   }
 }
@@ -55,12 +59,19 @@ sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
 
   double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
   double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
+  // BD ADD:
+  double fps = stopwatch.GetFps()[0];
   std::stringstream stream;
   stream.setf(std::ios::fixed | std::ios::showpoint);
   stream << std::setprecision(1);
   stream << label_prefix << "  "
-         << "max " << max_ms_per_frame << " ms/frame, "
-         << "avg " << average_ms_per_frame << " ms/frame";
+        // BD MOD: START
+        // << "max " << max_ms_per_frame << " ms/frame, "
+        // << "avg " << average_ms_per_frame << " ms/frame";
+        << "max=" << max_ms_per_frame 
+        << " avg=" << average_ms_per_frame
+        << " fps=" << fps;
+        // END
   auto text = stream.str();
   return SkTextBlob::MakeFromText(text.c_str(), text.size(), font,
                                   SkTextEncoding::kUTF8);

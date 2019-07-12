@@ -588,6 +588,10 @@ int64_t Engine::GetEngineMainEnterMicros() {
 void Engine::ExitApp() {
   runtime_controller_->ExitApp();
 }
+
+std::vector<double> Engine::GetFps(int thread_type, int fps_type, bool do_clear) {
+  return delegate_.GetFps(thread_type, fps_type, do_clear);
+}
 // END
 
 }  // namespace flutter

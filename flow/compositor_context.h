@@ -18,6 +18,10 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
 namespace flutter {
+// BD ADD: START
+static const int kUiThreadType = 1;
+static const int kGpuThreadType = 2;
+// END
 
 class LayerTree;
 
@@ -118,7 +122,9 @@ class CompositorContext {
 
   const Counter& frame_count() const { return frame_count_; }
 
-  const Stopwatch& raster_time() const { return raster_time_; }
+  // BD MOD:
+  // const Stopwatch& raster_time() const { return raster_time_; }
+  Stopwatch& raster_time() { return raster_time_; }
 
   Stopwatch& ui_time() { return ui_time_; }
 
