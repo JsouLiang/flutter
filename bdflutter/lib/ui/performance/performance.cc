@@ -2,8 +2,10 @@
 
 #include "performance.h"
 #include "bdflutter/common/fps_recorder.h"
+#include "flutter/flow/instrumentation.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/lib/ui/window/window.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -106,6 +108,28 @@ void Performance_obtainFps(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, data_handle);
 }
 
+void Performance_getMaxSamples(Dart_NativeArguments args) {
+  int max_samples = Stopwatch::GetMaxSamples();
+  Dart_SetIntegerReturnValue(args, max_samples);
+}
+
+void performance_getFps(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  int thread_type =
+      tonic::DartConverter<int>::FromArguments(args, 1, exception);
+  int fps_type = tonic::DartConverter<int>::FromArguments(args, 2, exception);
+  bool do_clear = tonic::DartConverter<bool>::FromArguments(args, 3, exception);
+  std::vector<double> fpsInfo =
+      UIDartState::Current()->platform_configuration()->client()->GetFps(
+          thread_type, fps_type, do_clear);
+  Dart_Handle data_handle = Dart_NewList(fpsInfo.size());
+  for (std::vector<int>::size_type i = 0; i != fpsInfo.size(); i++) {
+    Dart_Handle value = Dart_NewDouble(fpsInfo[i]);
+    Dart_ListSetAt(data_handle, i, value);
+  }
+  Dart_SetReturnValue(args, data_handle);
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -115,6 +139,8 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
        true},
       {"Performance_startRecordFps", Performance_startRecordFps, 2, true},
       {"Performance_obtainFps", Performance_obtainFps, 3, true},
+      {"Performance_getMaxSamples", Performance_getMaxSamples, 1, true},
+      {"performance_getFps", performance_getFps, 4, true},
   });
 }
 

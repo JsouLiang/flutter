@@ -292,6 +292,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     // BD ADD: START
     virtual int64_t GetEngineMainEnterMicros() = 0;
     virtual void AddNextFrameCallback(fml::closure callback) = 0;
+    virtual std::vector<double> GetFps(int thread_type,
+                                       int fps_type,
+                                       bool do_clear) = 0;
     // END
   };
 
@@ -991,6 +994,11 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // BD ADD:
   int64_t GetEngineMainEnterMicros() override;
+
+  // BD ADD:
+  std::vector<double> GetFps(int thread_type,
+                             int fps_type,
+                             bool do_clear) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };

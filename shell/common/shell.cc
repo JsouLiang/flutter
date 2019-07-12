@@ -1468,6 +1468,39 @@ void Shell::AddNextFrameCallback(fml::closure callback) {
 }
 // END
 
+// BD ADD: START
+std::vector<double> Shell::GetFps(int thread_type,
+                                  int fps_type,
+                                  bool do_clear) {
+  std::vector<double> result;
+  fml::WeakPtr<Rasterizer> rasterizer = rasterizer_->GetWeakPtr();
+  if (rasterizer) {
+    if (thread_type == kUiThreadType) {
+      result = rasterizer->compositor_context()->ui_time().GetFps(fps_type);
+      if (do_clear) {
+        task_runners_.GetUITaskRunner()->PostTask(
+            [rasterizer = rasterizer_->GetWeakPtr()] {
+              if (rasterizer) {
+                rasterizer->compositor_context()->ui_time().ClearFps();
+              }
+            });
+      }
+    } else if (thread_type == kGpuThreadType) {
+      result = rasterizer->compositor_context()->raster_time().GetFps(fps_type);
+      if (do_clear) {
+        task_runners_.GetRasterTaskRunner()->PostTask(
+            [rasterizer = rasterizer_->GetWeakPtr()] {
+              if (rasterizer) {
+                rasterizer->compositor_context()->raster_time().ClearFps();
+              }
+            });
+      }
+    }
+  }
+  return result;
+}
+// END
+
 // |ServiceProtocol::Handler|
 fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(
     std::string_view method) const {

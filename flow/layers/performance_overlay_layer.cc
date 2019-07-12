@@ -55,12 +55,19 @@ sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
 
   double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
   double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
+  // BD ADD:
+  double fps = stopwatch.GetFps()[0];
   std::stringstream stream;
   stream.setf(std::ios::fixed | std::ios::showpoint);
   stream << std::setprecision(1);
-  stream << label_prefix << "  "
-         << "max " << max_ms_per_frame << " ms/frame, "
-         << "avg " << average_ms_per_frame << " ms/frame";
+  stream << label_prefix
+         << "  "
+         // BD MOD: START
+         // << "max " << max_ms_per_frame << " ms/frame, "
+         // << "avg " << average_ms_per_frame << " ms/frame";
+         << "max=" << max_ms_per_frame << " avg=" << average_ms_per_frame
+         << " fps=" << fps;
+  // END
   auto text = stream.str();
   return SkTextBlob::MakeFromText(text.c_str(), text.size(), font,
                                   SkTextEncoding::kUTF8);
