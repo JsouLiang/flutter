@@ -466,6 +466,7 @@ class PlatformConfiguration final {
   void CompleteKeyDataResponse(uint64_t response_id, bool handled);
 
   // BD ADD: START
+  void NotifyIdle(int64_t microseconds);
   void ExitApp();
   // END
 
@@ -484,6 +485,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue report_timings_;
 
   // BD ADD START:
+  tonic::DartPersistentValue notifyIdle_;
   tonic::DartPersistentValue exitApp_;
   // END
 

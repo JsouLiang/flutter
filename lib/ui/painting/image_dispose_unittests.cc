@@ -15,6 +15,9 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
+
 namespace flutter {
 namespace testing {
 
