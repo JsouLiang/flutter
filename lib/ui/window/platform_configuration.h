@@ -435,6 +435,7 @@ class PlatformConfiguration final {
   void CompletePlatformMessageEmptyResponse(int response_id);
 
   // BD ADD: START
+  void NotifyIdle(int64_t microseconds);
   void ExitApp();
   // END
 

@@ -546,7 +546,9 @@ class Engine final : public RuntimeDelegate,
   ///                       against the system monotonic clock. Use
   ///                       `Dart_TimelineGetMicros()`, for consistency.
   ///
-  void NotifyIdle(int64_t deadline);
+// BD MOD:
+//  void NotifyIdle(int64_t deadline);
+  void NotifyIdle(int64_t deadline, int type);
 
   //----------------------------------------------------------------------------
   /// @brief      Dart code cannot fully measure the time it takes for a

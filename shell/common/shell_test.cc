@@ -143,12 +143,16 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
   latch.Wait();
 }
 
-void ShellTest::NotifyIdle(Shell* shell, int64_t deadline) {
+// BD: MOD
+// void ShellTest::NotifyIdle(Shell* shell, int64_t deadline) {
+void ShellTest::NotifyIdle(Shell* shell, int64_t deadline, int type) {
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, engine = shell->weak_engine_, deadline]() {
+      [&latch, engine = shell->weak_engine_, deadline, type]() {
         if (engine) {
-          engine->NotifyIdle(deadline);
+          // BD: MOD
+          // engine->NotifyIdle(deadline);
+          engine->NotifyIdle(deadline, type);
         }
         latch.Signal();
       });

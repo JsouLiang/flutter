@@ -568,7 +568,9 @@ class Shell final : public PlatformView::Delegate,
   void OnAnimatorBeginFrame(fml::TimePoint frame_target_time) override;
 
   // |Animator::Delegate|
-  void OnAnimatorNotifyIdle(int64_t deadline) override;
+  // BD: MOD
+  // void OnAnimatorNotifyIdle(int64_t deadline) override;
+  void OnAnimatorNotifyIdle(int64_t deadline, int type) override;
 
   // |Animator::Delegate|
   void OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,

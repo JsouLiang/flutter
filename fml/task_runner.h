@@ -40,6 +40,13 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
   static void RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
                                const fml::closure& task);
 
+  // BD ADD: START
+  virtual void PostTaskAtHead(fml::closure task);
+
+  static void RunNowOrPostTaskAtHead(fml::RefPtr<fml::TaskRunner> runner,
+                                     fml::closure task);
+  // END
+
  protected:
   TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
 

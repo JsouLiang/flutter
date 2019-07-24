@@ -5,6 +5,8 @@
 bd_flutter_lib_ui_sources = [
   "//flutter/bdflutter/lib/ui/performance/performance.cc",
   "//flutter/bdflutter/lib/ui/performance/performance.h",
+  "//flutter/bdflutter/lib/ui/performance/boost.cc",
+  "//flutter/bdflutter/lib/ui/performance/boost.h",
 ]
 
 image_loader_sources = [

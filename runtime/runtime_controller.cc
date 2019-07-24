@@ -15,6 +15,9 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
+
 namespace flutter {
 
 RuntimeController::RuntimeController(RuntimeDelegate& client,
@@ -217,7 +220,9 @@ bool RuntimeController::ReportTimings(std::vector<int64_t> timings) {
   return false;
 }
 
-bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
+// BD MOD：
+// bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
+bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint, int type) {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (!root_isolate) {
     return false;
@@ -228,7 +233,33 @@ bool RuntimeController::NotifyIdle(int64_t deadline, size_t freed_hint) {
   // Dart will use the freed hint at the next idle notification. Make sure to
   // Update it with our latest value before calling NotifyIdle.
   Dart_HintFreed(freed_hint);
-  Dart_NotifyIdle(deadline);
+
+  // BD MOD: START
+  // Dart_NotifyIdle(deadline);
+  if (type & Boost::kPageQuiet) {
+    if (Boost::Current()->IsGCDisabled()) {
+      Boost::Current()->Finish(Boost::kDisableGC);
+    }
+    Dart_NotifyIdle(deadline);
+    
+    if (Boost::Current()->CanNotifyIdle()) {
+      if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+        platform_configuration->NotifyIdle(500000);
+      }
+    }
+  } else if (type & Boost::kVsyncIdle) {
+    if (!Boost::Current()->IsGCDisabled()) {
+      Dart_NotifyIdle(deadline);
+    }
+    if (Boost::Current()->CanNotifyIdle()) {
+      int64_t micros = deadline - Dart_TimelineGetMicros();
+        auto* platform_configuration = GetPlatformConfigurationIfAvailable();
+        if (platform_configuration && micros > 2999) {
+          platform_configuration->NotifyIdle(micros);
+        }
+    }
+  }
+  // END
 
   // Idle notifications being in isolate scope are part of the contract.
   if (idle_notification_callback_) {
@@ -492,13 +523,11 @@ int64_t RuntimeController::GetEngineMainEnterMicros() {
 }
 
 void RuntimeController::ExitApp() {
-  if (auto* window = GetWindowIfAvailable()) {
-    window->ExitApp();
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->ExitApp();
   }
 }
-// END
 
-// BD ADD: START
 std::vector<double> RuntimeController::GetFps(int thread_type, int fps_type, bool do_clear) {
   return client_.GetFps(thread_type, fps_type, do_clear);
 }

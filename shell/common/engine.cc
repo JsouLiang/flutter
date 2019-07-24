@@ -229,11 +229,15 @@ void Engine::HintFreed(size_t size) {
   hint_freed_bytes_since_last_idle_ += size;
 }
 
-void Engine::NotifyIdle(int64_t deadline) {
+// BD MOD：
+// void Engine::NotifyIdle(int64_t deadline) {
+void Engine::NotifyIdle(int64_t deadline, int type) {
   auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                trace_event.c_str());
-  runtime_controller_->NotifyIdle(deadline, hint_freed_bytes_since_last_idle_);
+  // BD MOD:
+  // runtime_controller_->NotifyIdle(deadline, hint_freed_bytes_since_last_idle_, type);
+  runtime_controller_->NotifyIdle(deadline, hint_freed_bytes_since_last_idle_, type);
   hint_freed_bytes_since_last_idle_ = 0;
 }
 

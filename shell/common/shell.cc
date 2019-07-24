@@ -1115,12 +1115,16 @@ void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_target_time) {
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
+// BD: MOD
+// void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
+void Shell::OnAnimatorNotifyIdle(int64_t deadline, int type) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   if (engine_) {
-    engine_->NotifyIdle(deadline);
+    // BD: MOD
+    // engine_->NotifyIdle(deadline);
+    engine_->NotifyIdle(deadline, type);
     volatile_path_tracker_->OnFrame();
   }
 }

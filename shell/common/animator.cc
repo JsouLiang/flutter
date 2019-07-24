@@ -7,6 +7,9 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
+
 namespace flutter {
 
 namespace {
@@ -164,8 +167,12 @@ void Animator::BeginFrame(fml::TimePoint vsync_start_time,
           if (notify_idle_task_id == self->notify_idle_task_id_ &&
               !self->frame_scheduled_) {
             TRACE_EVENT0("flutter", "BeginFrame idle callback");
+            // BD MOD: START
+            // self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
+            //                                     100000);
             self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
-                                                 100000);
+                                                 100000, Boost::kPageQuiet);
+            // END
           }
         },
         kNotifyIdleTaskWaitTime);
@@ -246,7 +253,18 @@ void Animator::AwaitVSync() {
         }
       });
 
-  delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+  // BD: MOD START
+  // delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+  task_runners_.GetUITaskRunner()->PostTask(
+      [self = weak_factory_.GetWeakPtr(),
+       dart_frame_deadline = dart_frame_deadline_]() {
+        if (!self.get()) {
+          return;
+        }
+        self->delegate_.OnAnimatorNotifyIdle(dart_frame_deadline,
+                                             Boost::kVsyncIdle);
+      });
+  // END
 }
 
 void Animator::ScheduleSecondaryVsyncCallback(const fml::closure& callback) {
@@ -282,8 +300,9 @@ void Animator::AwaitVSyncForBackground() {
           self->BeginFrame(frame_start_time, frame_target_time);
         }
       });
-
-  delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+  // BD MOD:
+  // delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+  delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_, Boost::kVsyncIdle);
 }
 // END
 

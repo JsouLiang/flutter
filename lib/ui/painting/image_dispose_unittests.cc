@@ -13,6 +13,9 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
+
 namespace flutter {
 namespace testing {
 
@@ -101,7 +104,9 @@ TEST_F(ImageDisposeTest, ImageReleasedAfterFrame) {
   // when it has no frames left.
   // On slower machines, this is especially important - we capture that
   // this happens normally in devicelab bnechmarks like large_image_changer.
-  NotifyIdle(shell.get(), Dart_TimelineGetMicros() + 100000);
+  // BD: MOD  @sangyaohui.plus@bytedance.com，the default type is Boost::kVsyncIdle when image dispose
+  //NotifyIdle(shell.get(), Dart_TimelineGetMicros() + 100000);
+  NotifyIdle(shell.get(), Dart_TimelineGetMicros() + 100000, Boost::kVsyncIdle);
 
   picture_finalizer_latch_.Wait();
 

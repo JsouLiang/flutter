@@ -62,4 +62,21 @@ void TaskRunner::RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
   }
 }
 
+// BD ADD: START
+void TaskRunner::PostTaskAtHead(fml::closure task) {
+  loop_->PostTask(std::move(task), fml::TimePoint::FromEpochDelta(
+                                       TimeDelta::FromNanoseconds(1)));
+}
+
+void TaskRunner::RunNowOrPostTaskAtHead(fml::RefPtr<fml::TaskRunner> runner,
+                                        fml::closure task){
+  FML_DCHECK(runner);
+  if (runner->RunsTasksOnCurrentThread()) {
+    task();
+  } else {
+    runner->PostTaskAtHead(std::move(task));
+  }
+}
+// END
+
 }  // namespace fml
