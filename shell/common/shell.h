@@ -586,7 +586,9 @@ class Shell final : public PlatformView::Delegate,
                             uint64_t frame_number) override;
 
   // |Animator::Delegate|
-  void OnAnimatorNotifyIdle(int64_t deadline) override;
+  // BD: MOD
+  // void OnAnimatorNotifyIdle(int64_t deadline) override;
+  void OnAnimatorNotifyIdle(int64_t deadline, int type) override;
 
   // |Animator::Delegate|
   void OnAnimatorDraw(

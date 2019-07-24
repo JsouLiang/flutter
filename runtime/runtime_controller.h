@@ -356,7 +356,9 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   /// @return     If the idle notification was forwarded to the running isolate.
   ///
-  virtual bool NotifyIdle(int64_t deadline);
+  /// BD MOD:
+  /// bool NotifyIdle(int64_t deadline);
+  bool NotifyIdle(int64_t deadline, int type);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns if the root isolate is running. The isolate must be

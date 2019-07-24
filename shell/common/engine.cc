@@ -252,11 +252,15 @@ void Engine::ReportTimings(std::vector<int64_t> timings) {
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
-void Engine::NotifyIdle(int64_t deadline) {
+// BD MOD：
+// void Engine::NotifyIdle(int64_t deadline) {
+void Engine::NotifyIdle(int64_t deadline, int type) {
   auto trace_event = std::to_string(deadline - Dart_TimelineGetMicros());
   TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                trace_event.c_str());
-  runtime_controller_->NotifyIdle(deadline);
+  // BD MOD:
+  // runtime_controller_->NotifyIdle(deadline);
+  runtime_controller_->NotifyIdle(deadline, type);
 }
 
 std::optional<uint32_t> Engine::GetUIIsolateReturnCode() {

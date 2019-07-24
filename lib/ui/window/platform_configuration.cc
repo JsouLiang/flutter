@@ -17,6 +17,8 @@
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
 
 namespace flutter {
 namespace {
@@ -227,6 +229,8 @@ void PlatformConfiguration::DidCreateIsolate() {
       std::make_pair(0, std::unique_ptr<Window>(new Window{
                             0, ViewportMetrics{1.0, 0.0, 0.0, -1}})));
   // BD ADD: START
+  notifyIdle_.Set(tonic::DartState::Current(),
+                  Dart_GetField(library, tonic::ToDart("_notifyIdle")));
   exitApp_.Set(tonic::DartState::Current(),
                Dart_GetField(library, tonic::ToDart("_exitApp")));
 }
@@ -363,6 +367,9 @@ void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,
   }
   tonic::DartState::Scope scope(dart_state);
 
+  // BD ADD:
+  Boost::Current()->CheckFinished();
+
   int64_t microseconds = (frameTime - fml::TimePoint()).ToMicroseconds();
 
   tonic::LogIfError(
@@ -477,13 +484,27 @@ void PlatformConfiguration::RegisterNatives(
 }
 
 // BD ADD: START
+void PlatformConfiguration::NotifyIdle(int64_t microseconds) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      notifyIdle_.dart_state().lock();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  tonic::LogIfError(
+      tonic::DartInvoke(notifyIdle_.Get(), {
+                                               Dart_NewInteger(microseconds),
+                                           }));
+}
+
 void PlatformConfiguration::ExitApp() {
   std::shared_ptr<tonic::DartState> dart_state = exitApp_.dart_state().lock();
   if (!dart_state) {
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  tonic::LogIfError(tonic::DartInvokeField(exitApp_.Get(), "_exitApp", {}));
+
+  tonic::LogIfError(tonic::DartInvoke(exitApp_.Get(), {}));
 }
 // END
 

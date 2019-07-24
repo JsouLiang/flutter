@@ -2,6 +2,7 @@
 
 #include "performance.h"
 #include "bdflutter/common/fps_recorder.h"
+#include "boost.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
@@ -130,6 +131,24 @@ void performance_getFps(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, data_handle);
 }
 
+void Performance_startBoost(Dart_NativeArguments args) {
+  uint16_t flags = static_cast<uint16_t>(
+      tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 1)));
+  int millis =
+      tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 2));
+  Boost::Current()->StartUp(flags, millis);
+}
+
+void Performance_finishBoost(Dart_NativeArguments args) {
+  uint16_t flags = static_cast<uint16_t>(
+      tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 1)));
+  Boost::Current()->Finish(flags);
+}
+
+void Performance_forceGC(Dart_NativeArguments args) {
+  Boost::Current()->ForceGC();
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -141,6 +160,9 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_obtainFps", Performance_obtainFps, 3, true},
       {"Performance_getMaxSamples", Performance_getMaxSamples, 1, true},
       {"performance_getFps", performance_getFps, 4, true},
+      {"Performance_startBoost", Performance_startBoost, 3, true},
+      {"Performance_finishBoost", Performance_finishBoost, 2, true},
+      {"Performance_forceGC", Performance_forceGC, 1, true},
   });
 }
 
