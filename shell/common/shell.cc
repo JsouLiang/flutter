@@ -1886,21 +1886,22 @@ void Shell::ExitApp(fml::closure closure) {
   // 1：notify flutter to exit app
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
-      [this, ui_task_runner = task_runners_.GetUITaskRunner(),
-       platform_task_runner = task_runners_.GetPlatformTaskRunner(),
-       closure = std::move(closure)]() {
-        auto engine = GetEngine();
-        if (engine) {
-          engine->ExitApp();
-        }
-        // 2：finish the other tasks of the ui thread
-        ui_task_runner->PostTask(
-            [platform_task_runner, closure = std::move(closure)] {
-              // 3：finish the other tasks of the platform thread
-              platform_task_runner->PostTask(
-                  [closure = std::move(closure)] { closure(); });
-            });
-      });
+      fml::MakeCopyable(
+          [this, ui_task_runner = task_runners_.GetUITaskRunner(),
+           platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+           closure = std::move(closure)]() {
+            auto engine = GetEngine();
+            if (engine) {
+              engine->ExitApp();
+            }
+            // 步骤2：完成UI线程剩余任务
+            ui_task_runner->PostTask(fml::MakeCopyable(
+                [platform_task_runner, closure = std::move(closure)] {
+                  // 步骤3：完成Platform线程剩余任务
+                  platform_task_runner->PostTask(fml::MakeCopyable(
+                      [closure = std::move(closure)] { closure(); }));
+                }));
+          }));
 }
 // END
 }  // namespace flutter
