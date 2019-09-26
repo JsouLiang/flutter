@@ -30,6 +30,8 @@
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "MinikinInternal.h"
+// BD ADD:
+#include "flutter/fml/trace_event.h"
 
 using std::vector;
 
@@ -44,6 +46,10 @@ const uint32_t EMOJI_STYLE_VS = 0xFE0F;
 const uint32_t TEXT_STYLE_VS = 0xFE0E;
 
 uint32_t FontCollection::sNextId = 0;
+// BD ADD: START
+const uint32_t kMinFallbackScore = 0x20000000;
+std::vector<std::shared_ptr<FontFamily>> sFallbackFamilies;
+// END
 
 // libtxt: return a locale string for a language list ID
 std::string GetFontLocale(uint32_t langListId) {
@@ -304,12 +310,24 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     uint32_t vs,
     uint32_t langListId,
     int variant) const {
+  // BD ADD:
+  TRACE_EVENT0("flutter", "FontCollection::getFamilyForChar");
   if (ch >= mMaxChar) {
     // libtxt: check if the fallback font provider can match this character
+    // BD ADD: START
+    for (size_t i = 0; i < sFallbackFamilies.size(); i++) {
+      const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, sFallbackFamilies[i]);
+      if (score >= kMinFallbackScore) {
+        return sFallbackFamilies[i];
+      }
+    }
+    // END
     if (mFallbackFontProvider) {
       const std::shared_ptr<FontFamily>& fallback =
           findFallbackFont(ch, vs, langListId);
       if (fallback) {
+        // BD ADD:
+        sFallbackFamilies.push_back(fallback);
         return fallback;
       }
     }
@@ -343,10 +361,20 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
   }
   if (bestFamilyIndex == -1) {
     // libtxt: check if the fallback font provider can match this character
+    // BD ADD: START
+    for (size_t i = 0; i < sFallbackFamilies.size(); i++) {
+      const uint32_t score = calcFamilyScore(ch, vs, variant, langListId, sFallbackFamilies[i]);
+      if (score >= kMinFallbackScore) {
+        return sFallbackFamilies[i];
+      }
+    }
+    // END
     if (mFallbackFontProvider) {
       const std::shared_ptr<FontFamily>& fallback =
           findFallbackFont(ch, vs, langListId);
       if (fallback) {
+        // BD ADD:
+        sFallbackFamilies.push_back(fallback);
         return fallback;
       }
     }

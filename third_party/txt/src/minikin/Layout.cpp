@@ -40,6 +40,8 @@
 #include "HbFontCache.h"
 #include "LayoutUtils.h"
 #include "MinikinInternal.h"
+// BD ADD:
+#include "flutter/fml/trace_event.h"
 
 namespace minikin {
 
@@ -613,6 +615,8 @@ float Layout::measureText(const uint16_t* buf,
                           const std::shared_ptr<FontCollection>& collection,
                           float* advances) {
   std::scoped_lock _l(gMinikinLock);
+  // BD ADD:
+  TRACE_EVENT1("flutter", "Layout::measureText", "text count", std::to_string(count).c_str());
 
   LayoutContext ctx;
   ctx.style = style;
