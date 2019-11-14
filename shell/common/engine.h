@@ -288,6 +288,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             This method is primarily provided to allow tests to control
     ///             Any methods that rely on advancing the clock.
     virtual fml::TimePoint GetCurrentTimePoint() = 0;
+
+    // BD ADD:
+    virtual int64_t GetEngineMainEnterMicros() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -980,6 +983,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   friend class testing::ShellTest;
+
+  // BD ADD:
+  int64_t GetEngineMainEnterMicros() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
