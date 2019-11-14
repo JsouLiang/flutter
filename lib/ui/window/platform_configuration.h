@@ -176,6 +176,10 @@ class PlatformConfigurationClient {
   ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) = 0;
 
+  // BD ADD: START
+  virtual int64_t GetEngineMainEnterMicros() = 0;
+  // END
+
   //--------------------------------------------------------------------------
   /// @brief      Invoked when the Dart VM requests that a deferred library
   ///             be loaded. Notifies the engine that the deferred library

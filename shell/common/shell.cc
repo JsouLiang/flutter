@@ -122,6 +122,12 @@ void PerformInitializationTasks(Settings& settings) {
 
 }  // namespace
 
+// BD ADD:
+int64_t Shell::GetEngineMainEnterMicros() {
+  return settings_.engine_start_timestamp.count();
+}
+// END
+
 std::unique_ptr<Shell> Shell::Create(
     const PlatformData& platform_data,
     TaskRunners task_runners,

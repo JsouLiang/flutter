@@ -36,6 +36,9 @@ class MockDelegate : public Engine::Delegate {
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
   MOCK_METHOD0(GetCurrentTimePoint, fml::TimePoint());
+  // BD: ADD START
+  MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  // END
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -60,6 +63,9 @@ class MockRuntimeDelegate : public RuntimeDelegate {
                std::unique_ptr<std::vector<std::string>>(
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
+  // BD: ADD START
+  MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  // END
 };
 
 class MockRuntimeController : public RuntimeController {

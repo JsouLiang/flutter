@@ -612,6 +612,10 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
+  // BD ADD: START
+  // |Engine::Delegate|
+  int64_t GetEngineMainEnterMicros() override;
+  // END
 
   // |Engine::Delegate|
   fml::TimePoint GetCurrentTimePoint() override;

@@ -288,6 +288,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     ///             This method is primarily provided to allow tests to control
     ///             Any methods that rely on advancing the clock.
     virtual fml::TimePoint GetCurrentTimePoint() = 0;
+
+    // BD ADD:
+    virtual int64_t GetEngineMainEnterMicros() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -975,6 +978,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
   fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
+
+  // BD ADD:
+  int64_t GetEngineMainEnterMicros() override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
