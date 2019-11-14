@@ -574,4 +574,10 @@ void Engine::LoadDartDeferredLibraryError(intptr_t loading_unit_id,
   }
 }
 
+// BD ADD: START
+int64_t Engine::GetEngineMainEnterMicros() {
+  return delegate_.GetEngineMainEnterMicros();
+}
+// END
+
 }  // namespace flutter

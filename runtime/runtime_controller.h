@@ -660,6 +660,9 @@ class RuntimeController : public PlatformConfigurationClient {
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override;
 
+  // BD ADD:
+  int64_t GetEngineMainEnterMicros() override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };
 

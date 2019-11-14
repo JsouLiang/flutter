@@ -482,4 +482,10 @@ RuntimeController::Locale::Locale(std::string language_code_,
 
 RuntimeController::Locale::~Locale() = default;
 
+// BD ADD: START
+int64_t RuntimeController::GetEngineMainEnterMicros() {
+  return client_.GetEngineMainEnterMicros();
+}
+// END
+
 }  // namespace flutter

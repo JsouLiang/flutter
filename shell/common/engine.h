@@ -283,6 +283,8 @@ class Engine final : public RuntimeDelegate,
     ///                              library to load.
     ///
     virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
+    // BD ADD:
+    virtual int64_t GetEngineMainEnterMicros() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -950,6 +952,9 @@ class Engine final : public RuntimeDelegate,
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   friend class testing::ShellTest;
+  
+  // BD ADD: 
+  int64_t GetEngineMainEnterMicros() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
