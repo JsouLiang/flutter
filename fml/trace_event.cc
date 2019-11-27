@@ -375,5 +375,44 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
 
 #endif  // FLUTTER_TIMELINE_ENABLED
 
+// BD ADD: START
+#if defined(SUPPORT_SYSTRACE)
+
+void (*fBeginSection)(const char *);
+void (*fEndSection)(void);
+bool (*fIsEnabled)(void);
+
+void InitTraceSymbol() {
+  if (void *lib = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL)) {
+    fBeginSection = (decltype(fBeginSection)) dlsym(lib, "ATrace_beginSection");
+    fEndSection = (decltype(fEndSection)) dlsym(lib, "ATrace_endSection");
+    fIsEnabled = (decltype(fIsEnabled)) dlsym(lib, "ATrace_isEnabled");
+  }
+
+  if (!fIsEnabled) {
+    fIsEnabled = [] { return false; };
+  }
+}
+#endif
+
+ScopedInstantEnd::ScopedInstantEnd(const char* str) : label_(str) {
+  #if defined(SUPPORT_SYSTRACE)
+    if (fIsEnabled()) {
+      fBeginSection(str);
+    }
+  #endif
+}
+
+ScopedInstantEnd::~ScopedInstantEnd() {
+  TraceEventEnd(label_);
+  #if defined(SUPPORT_SYSTRACE)
+    if (fIsEnabled()) {
+      fEndSection();
+    }
+  #endif
+}
+
+// END
+
 }  // namespace tracing
 }  // namespace fml

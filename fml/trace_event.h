@@ -373,12 +373,27 @@ void TraceEventFlowStep0(TraceArg category_group, TraceArg name, TraceIDArg id);
 
 void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id);
 
+// BD ADD: START
+#if defined(SUPPORT_TIMELINE) && defined(OS_ANDROID)
+#define SUPPORT_SYSTRACE 1
+#endif
+
+#if defined(SUPPORT_SYSTRACE)
+#include <dlfcn.h>
+extern void InitTraceSymbol();
+#endif
+// END
+
 class ScopedInstantEnd {
  public:
-  ScopedInstantEnd(const char* str) : label_(str) {}
+// BD MOD: START
+// ScopedInstantEnd(const char* str) : label_(str) {}
+//
+// ~ScopedInstantEnd() { TraceEventEnd(label_); }
+  ScopedInstantEnd(const char* str);
 
-  ~ScopedInstantEnd() { TraceEventEnd(label_); }
-
+  ~ScopedInstantEnd();
+// END
  private:
   const char* label_;
 

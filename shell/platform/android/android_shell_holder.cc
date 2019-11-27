@@ -42,6 +42,11 @@ AndroidShellHolder::AndroidShellHolder(
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 
+// BD ADD: START
+#if defined(SUPPORT_SYSTRACE)
+  fml::tracing::InitTraceSymbol();
+#endif
+// END
   thread_host_ = std::make_shared<ThreadHost>();
   if (is_background_view) {
     *thread_host_ = {thread_label, ThreadHost::Type::UI};
