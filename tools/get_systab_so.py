@@ -1,0 +1,1 @@
+../bdflutter/tt_build_tools/get_systab_so.py
