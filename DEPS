@@ -370,7 +370,9 @@ deps = {
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
 
   'src/third_party/wuffs':
-   Var('skia_git') + '/external/github.com/google/wuffs.git' + '@' +  'c86add25f790360f0aca026c4f1c2c4e2d12408d',
+  # BD  MOD
+  #Var('skia_git') + '/external/github.com/google/wuffs.git' + '@' +  'c86add25f790360f0aca026c4f1c2c4e2d12408d',
+  'https://skia.googlesource.com' + '/external/github.com/google/wuffs.git' + '@' +  'c86add25f790360f0aca026c4f1c2c4e2d12408d',
 
   'src/third_party/fontconfig/src':
    Var('chromium_git') + '/external/fontconfig.git' + '@' + 'c336b8471877371f0190ba06f7547c54e2b890ba',
