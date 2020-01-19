@@ -20,9 +20,10 @@ import 'package:frontend_server/frontend_server.dart' as frontend
         ToStringTransformer;
 import 'package:path/path.dart' as path;
 import 'package:vm/incremental_compiler.dart';
-// BD ADD:
-/// @sunkun will fix later
-//part '../../bdflutter/flutter_frontend_server/lib/track_route_constructor_locations.dart';
+// BD ADD: START
+import 'package:kernel/ast.dart';
+part '../../bdflutter/flutter_frontend_server/lib/track_route_constructor_locations.dart';
+// END
 
 /// Wrapper around [FrontendCompiler] that adds [widgetCreatorTracker] kernel
 /// transformation to the compilation.
@@ -36,10 +37,8 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
       frontend.ProgramTransformer transformer})
       : _compiler = frontend.FrontendCompiler(output,
             // BD MOD:
-            transformer: transformer,
-            /// TODO @sunkun
-            // transformer: RouteCreatorTracker(nextTransformer: transformer),
-            //routeCreatorTracker: RouteCreatorTracker(nextTransformer: transformer),
+            // transformer: transformer,
+            transformer: RouteCreatorTracker(nextTransformer: transformer),
             useDebuggerModuleNames: useDebuggerModuleNames,
             emitDebugMetadata: emitDebugMetadata,
             unsafePackageSerialization: unsafePackageSerialization);
