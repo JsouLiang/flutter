@@ -4170,6 +4170,11 @@ class Canvas extends NativeFieldWrapperClass2 {
                  List<dynamic>? paintObjects,
                  ByteData paintData) native 'Canvas_drawRect';
 
+  // BD ADD:
+  /// Return whether the current matrix contains rotation or skew operations
+  bool isSkewOrRotate() native 'Canvas_isSkewOrRotate';
+  // END
+
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
   void drawRRect(RRect rrect, Paint paint) {

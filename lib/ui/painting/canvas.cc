@@ -62,7 +62,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawPoints)             \
   V(Canvas, drawVertices)           \
   V(Canvas, drawAtlas)              \
-  V(Canvas, drawShadow)
+  V(Canvas, drawShadow)             \
+  V(Canvas, isSkewOrRotate)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -481,5 +482,11 @@ void Canvas::Invalidate() {
     ClearDartWrapper();
   }
 }
+
+// BD ADD: START
+bool Canvas::isSkewOrRotate() {
+  return canvas_ ? canvas_->isSkewOrRotate() : false;
+}
+// END
 
 }  // namespace flutter

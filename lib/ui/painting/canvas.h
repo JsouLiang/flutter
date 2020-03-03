@@ -166,6 +166,8 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
 
   SkCanvas* canvas() const { return canvas_; }
   void Invalidate();
+  // BD ADD:
+  bool isSkewOrRotate();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
