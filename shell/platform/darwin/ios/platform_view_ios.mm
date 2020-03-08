@@ -61,7 +61,13 @@ PlatformViewIOS::PlatformViewIOS(
                       platform_views_controller,
                       task_runners) {}
 
-PlatformViewIOS::~PlatformViewIOS() = default;
+PlatformViewIOS::~PlatformViewIOS() {
+  // BD ADD: START
+  if (ios_context_) {
+    ios_context_->MakeCurrent();
+  }
+  // END
+}
 
 PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
   return platform_message_router_;
