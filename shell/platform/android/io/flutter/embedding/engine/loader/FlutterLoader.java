@@ -23,6 +23,8 @@ import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
+// BD ADD:
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.util.PathUtils;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
@@ -298,6 +300,13 @@ public class FlutterLoader {
       if (metaData != null && metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY)) {
         shellArgs.add("--enable-skparagraph");
       }
+
+      // BD ADD: START
+      if (ResourceExtractor.isX86Device() &&
+              !shellArgs.contains(FlutterShellArgs.ARG_ENABLE_SOFTWARE_RENDERING)) {
+        shellArgs.add(FlutterShellArgs.ARG_ENABLE_SOFTWARE_RENDERING);
+      }
+      // END
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
