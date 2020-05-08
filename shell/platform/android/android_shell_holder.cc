@@ -297,4 +297,13 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
   }
   return config;
 }
+
+// BD ADD: START
+void AndroidShellHolder::ScheduleBackgroundFrame() {
+  if (!IsValid()) {
+    return;
+  }
+  shell_->ScheduleBackgroundFrame();
+}
+// END
 }  // namespace flutter

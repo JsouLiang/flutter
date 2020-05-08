@@ -1776,4 +1776,17 @@ void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
   display_manager_->HandleDisplayUpdates(update_type, displays);
 }
 
+// BD ADD: START
+void Shell::ScheduleBackgroundFrame() {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetUITaskRunner()->PostTask([this] {
+    auto engine = GetEngine();
+    if (engine) {
+      engine->ScheduleBackgroundFrame();
+    }
+  });
+}
+// END
 }  // namespace flutter

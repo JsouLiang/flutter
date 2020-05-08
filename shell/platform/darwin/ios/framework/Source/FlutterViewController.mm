@@ -14,6 +14,7 @@
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/runtime/ptrace_check.h"
+#include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -731,6 +732,14 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
+
+// BD ADD: START
+#pragma mark - Frame
+
+- (void)scheduleBackgroundFrame {
+  [_engine.get() shell].GetEngine()->ScheduleBackgroundFrame();
+}
+// END
 
 #pragma mark - Application lifecycle notifications
 

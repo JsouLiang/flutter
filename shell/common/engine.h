@@ -783,6 +783,8 @@ class Engine final : public RuntimeDelegate,
 
   // Return the asset manager associated with the current engine, or nullptr.
   std::shared_ptr<AssetManager> GetAssetManager();
+  // BD ADD
+  void ScheduleBackgroundFrame();
 
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,

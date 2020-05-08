@@ -374,6 +374,12 @@ class Shell final : public PlatformView::Delegate,
   ///
   bool EngineHasLivePorts() const;
 
+  /**
+   * BD ADD:
+   * 增加后台渲染能力，防止一些情况dispose没执行
+   */
+  void ScheduleBackgroundFrame();
+
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
   std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override;
