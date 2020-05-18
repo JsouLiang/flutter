@@ -10,6 +10,9 @@
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
+
 namespace flutter {
 
 MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator)
@@ -138,7 +141,10 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
               SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                               bitmap.pixelRef()->rowBytes());
               result = SkImage::MakeCrossContextFromPixmap(
-                  resourceContext.get(), pixmap, true);
+                  resourceContext.get(), pixmap,
+                  // BD MOD:
+                  // true
+                  !Performance::GetInstance()->IsDisableMips());
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
@@ -162,6 +168,8 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
       GetNextFrameImage(resourceContext, gpu_disable_sync_switch);
   if (skImage) {
     image = CanvasImage::Create();
+    // BD ADD:
+    image->setMips(!Performance::GetInstance()->IsDisableMips());
     image->set_image({skImage, std::move(unref_queue)});
     ImageGenerator::FrameInfo frameInfo =
         generator_->GetFrameInfo(nextFrameIndex_);

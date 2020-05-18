@@ -57,6 +57,8 @@ class Performance {
   void finishBoost(int flags) native 'Performance_finishBoost';
   void forceGC() native 'Performance_forceGC';
 
+  void disableMips(bool disable) native 'Performance_disableMips';
+
   NotifyIdleCallback? get onNotifyIdle => _onNotifyIdle;
   NotifyIdleCallback? _onNotifyIdle;
   Zone? _onNotifyIdleZone;
