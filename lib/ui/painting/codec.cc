@@ -122,6 +122,7 @@ void GetNativeImage(Dart_NativeArguments args) {
               fml::RefPtr<CanvasImage> image;
               if (skimage) {
                 image = CanvasImage::Create();
+                image->setMips(false);
                 image->set_image({skimage, queue});
               } else {
                 image = nullptr;

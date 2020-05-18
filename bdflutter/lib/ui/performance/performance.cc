@@ -32,6 +32,14 @@ void Performance::AddImageMemoryUsage(int64_t sizeInKB) {
   dart_image_memory_usage.fetch_add(sizeInKB, std::memory_order_relaxed);
 }
 
+void Performance::DisableMips(bool disable) {
+  disable_mipmaps_ = disable;
+}
+
+bool Performance::IsDisableMips(){
+  return disable_mipmaps_ ;
+}
+
 void Performance_imageMemoryUsage(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, tonic::DartConverter<int64_t>::ToDart(
       Performance::GetInstance()->GetImageMemoryUsageKB()));
@@ -140,6 +148,11 @@ void Performance_forceGC(Dart_NativeArguments args) {
   Boost::Current()->ForceGC();
 }
 
+void Performance_disableMips(Dart_NativeArguments args) {
+  bool disable = DartConverter<bool>::FromDart(Dart_GetNativeArgument(args, 1));
+  Performance::GetInstance()->DisableMips(disable);
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -152,6 +165,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_startBoost", Performance_startBoost, 3, true},
       {"Performance_finishBoost", Performance_finishBoost, 2, true},
       {"Performance_forceGC", Performance_forceGC, 1, true},
+      {"Performance_disableMips", Performance_disableMips, 2, true},
   });
 }
 

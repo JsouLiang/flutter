@@ -63,7 +63,9 @@ size_t CanvasImage::ComputeByteSize() const {
   // END
   if (auto image = image_.get()) {
     const auto& info = image->imageInfo();
-    const auto kMipmapOverhead = 4.0 / 3.0;
+    // BD MOD:
+    // const auto kMipmapOverhead = 4.0 / 3.0;
+    const auto kMipmapOverhead = isMips_ ? 4.0 / 3.0 : 1.0;
     const size_t image_byte_size = info.computeMinByteSize() * kMipmapOverhead;
     return image_byte_size + sizeof(this);
   } else {

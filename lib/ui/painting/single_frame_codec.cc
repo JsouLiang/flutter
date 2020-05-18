@@ -7,6 +7,9 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
+
 namespace flutter {
 
 SingleFrameCodec::SingleFrameCodec(fml::RefPtr<ImageDescriptor> descriptor,
@@ -80,6 +83,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
         if (image.get()) {
           auto canvas_image = fml::MakeRefCounted<CanvasImage>();
+          // BD ADD:
+          canvas_image->setMips(!flutter::Performance::GetInstance()->IsDisableMips());
           canvas_image->set_image(std::move(image));
 
           codec->cached_image_ = std::move(canvas_image);
