@@ -45,6 +45,8 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   size_t ComputeByteSize() const;
   void RetainDartWrappableReference() const override;
   void ReleaseDartWrappableReference() const override;
+
+  void setMips(bool isMips) { isMips_ = isMips; }
   // END
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
@@ -53,6 +55,9 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   CanvasImage();
 
   flutter::SkiaGPUObject<SkImage> image_;
+
+  // BD ADD:
+  bool isMips_ = true;
 };
 
 }  // namespace flutter

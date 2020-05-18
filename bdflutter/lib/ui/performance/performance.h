@@ -22,12 +22,17 @@ class Performance {
 
   int64_t GetImageMemoryUsageKB();  // KB
 
+  void DisableMips(bool disable);
+  bool IsDisableMips();
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
   Performance();
 
   std::atomic_int64_t dart_image_memory_usage;  // KB
+
+  std::atomic_bool disable_mipmaps_;
 };
 
 }  // namespace flutter
