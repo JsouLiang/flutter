@@ -1175,6 +1175,8 @@ void ParagraphTxt::Layout(double width) {
             });
 
   longest_line_ = max_right_ - min_left_;
+  // BD ADD:
+  AdjustDecorationValues();
 }
 
 void ParagraphTxt::UpdateLineMetrics(const SkFontMetrics& metrics,
@@ -1429,16 +1431,21 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
 
   double width = record.GetRunWidth();
 
-  SkScalar underline_thickness;
-  if ((metrics.fFlags &
-       SkFontMetrics::FontMetricsFlags::kUnderlineThicknessIsValid_Flag) &&
-      metrics.fUnderlineThickness > 0) {
-    underline_thickness = metrics.fUnderlineThickness;
-  } else {
-    // Backup value if the fUnderlineThickness metric is not available:
-    // Divide by 14pt as it is the default size.
-    underline_thickness = record.style().font_size / 14.0f;
-  }
+  // BD DEL: START
+  //  SkScalar underline_thickness;
+  //  if ((metrics.fFlags &
+  //       SkFontMetrics::FontMetricsFlags::kUnderlineThicknessIsValid_Flag) &&
+  //      metrics.fUnderlineThickness > 0) {
+  //    underline_thickness = metrics.fUnderlineThickness;
+  //  } else {
+  //    // Backup value if the fUnderlineThickness metric is not available:
+  //    // Divide by 14pt as it is the default size.
+  //    underline_thickness = record.style().font_size / 14.0f;
+  //  }
+  // END
+
+  // BD ADD:
+  SkScalar underline_thickness = underline_thickness_;
   paint.setStrokeWidth(underline_thickness *
                        record.style().decoration_thickness_multiplier);
 
@@ -1498,11 +1505,14 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
     double y_offset_original = y_offset;
     // Underline
     if (record.style().decoration & TextDecoration::kUnderline) {
-      y_offset +=
-          (metrics.fFlags &
-           SkFontMetrics::FontMetricsFlags::kUnderlinePositionIsValid_Flag)
-              ? metrics.fUnderlinePosition
-              : underline_thickness;
+      // BD MOD: START
+      // y_offset +=
+      //   (metrics.fFlags &
+      //    SkFontMetrics::FontMetricsFlags::kUnderlinePositionIsValid_Flag)
+      //   ? metrics.fUnderlinePosition
+      //   : underline_thickness;
+      y_offset += underline_y_offset_;
+      // END
       if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
       } else {
@@ -1516,7 +1526,9 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
     if (record.style().decoration & TextDecoration::kOverline) {
       // We subtract fAscent here because for double overlines, we want the
       // second line to be above, not below the first.
-      y_offset -= metrics.fAscent;
+      // BD MOD:
+      // y_offset -= metrics.fAscent;
+      y_offset += overline_y_offset_;
       if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y - y_offset, x + width, y - y_offset, paint);
       } else {
@@ -1530,19 +1542,24 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
     if (record.style().decoration & TextDecoration::kLineThrough) {
       if (metrics.fFlags &
           SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
-        paint.setStrokeWidth(metrics.fStrikeoutThickness *
+        // BD MOD:
+        // paint.setStrokeWidth(metrics.fStrikeoutThickness *
+        paint.setStrokeWidth(strikeout_thickness_ *
                              record.style().decoration_thickness_multiplier);
       // Make sure the double line is "centered" vertically.
       y_offset += (decoration_count - 1.0) * underline_thickness *
                   kDoubleDecorationSpacing / -2.0;
-      y_offset +=
-          (metrics.fFlags &
-           SkFontMetrics::FontMetricsFlags::kStrikeoutPositionIsValid_Flag)
-              ? metrics.fStrikeoutPosition
-              // Backup value if the strikeoutposition metric is not
-              // available:
-              : metrics.fXHeight / -2.0;
-      if (record.style().decoration_style != TextDecorationStyle::kWavy) {
+      // BD MOD: START
+      // y_offset +=
+      //   (metrics.fFlags &
+      //    SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
+      //   ? metrics.fStrikeoutPosition
+      //   // Backup value if the strikeoutposition metric is not
+      //   // available:
+      //   : metrics.fXHeight / -2.0;
+      y_offset += line_through_y_offset_;
+      // END
+     if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
       } else {
         SkPath offsetPath = path;
@@ -1553,6 +1570,71 @@ void ParagraphTxt::PaintDecorations(SkCanvas* canvas,
     }
   }
 }
+
+// BD ADD: START
+void ParagraphTxt::AdjustDecorationValues() {
+  underline_y_offset_ = 0;
+  overline_y_offset_ = 0;
+  line_through_y_offset_ = 0;
+  strikeout_thickness_ = 0;
+  underline_thickness_ = 0;
+  for (const PaintRecord& record : records_) {
+    const SkFontMetrics& metrics = record.metrics();
+    SkScalar underline_thickness;
+    if ((metrics.fFlags &
+         SkFontMetrics::FontMetricsFlags::kUnderlineThicknessIsValid_Flag) &&
+        metrics.fUnderlineThickness > 0) {
+      underline_thickness = metrics.fUnderlineThickness;
+    } else {
+      // Backup value if the fUnderlineThickness metric is not available:
+      // Divide by 14pt as it is the default size.
+      underline_thickness = record.style().font_size / 14.0f;
+    }
+    // Get the max value
+    underline_thickness_ = underline_thickness_ < underline_thickness
+                               ? underline_thickness
+                               : underline_thickness_;
+
+    // Underline
+    if (record.style().decoration & TextDecoration::kUnderline) {
+      SkScalar underline_y_offset =
+          (metrics.fFlags &
+           SkFontMetrics::FontMetricsFlags::kUnderlinePositionIsValid_Flag)
+              ? metrics.fUnderlinePosition
+              : underline_thickness;
+      underline_y_offset_ = underline_y_offset_ < underline_y_offset
+                                ? underline_y_offset
+                                : underline_y_offset_;
+    }
+    // Overline
+    if (record.style().decoration & TextDecoration::kOverline) {
+      SkScalar overline_y_offset = -metrics.fAscent;
+      overline_y_offset_ = overline_y_offset_ < overline_y_offset
+                               ? overline_y_offset
+                               : overline_y_offset_;
+    }
+
+    // Strikethrough
+    if (record.style().decoration & TextDecoration::kLineThrough) {
+      if (metrics.fFlags &
+          SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
+        strikeout_thickness_ =
+            strikeout_thickness_ < metrics.fStrikeoutThickness
+                ? metrics.fStrikeoutThickness
+                : strikeout_thickness_;
+
+      SkScalar line_through_y_offset =
+          (metrics.fFlags &
+           SkFontMetrics::FontMetricsFlags::kStrikeoutThicknessIsValid_Flag)
+              ? metrics.fStrikeoutPosition
+              : metrics.fXHeight / -2.0;
+      line_through_y_offset_ = line_through_y_offset_ > line_through_y_offset
+                                   ? line_through_y_offset
+                                   : line_through_y_offset_;
+    }
+  }
+}
+// END
 
 void ParagraphTxt::ComputeWavyDecoration(SkPath& path,
                                          double x,
