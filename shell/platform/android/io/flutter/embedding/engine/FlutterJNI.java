@@ -682,8 +682,16 @@ public class FlutterJNI {
    */
   @UiThread
   public void setSemanticsEnabled(boolean enabled) {
+    // BD ADD: START
+    if (!isAttached()) {
+      Log.e(TAG, "Cannot execute setSemanticsEnabled because FlutterJNI is not attached to native.");
+      return;
+    }
+    // END
     ensureRunningOnMainThread();
-    ensureAttachedToNative();
+
+    // BD DEL:
+    // ensureAttachedToNative();
     nativeSetSemanticsEnabled(nativeShellHolderId, enabled);
   }
 
