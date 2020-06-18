@@ -125,6 +125,17 @@ void FlutterMain::Init(JNIEnv* env,
   g_flutter_main.reset(new FlutterMain(std::move(settings)));
 
   g_flutter_main->SetupObservatoryUriCallback(env);
+
+  // BD ADD:
+  if (FlutterMain::Get().GetSettings().disable_preload) {
+    return;
+  }
+  std::thread t([]() {
+    auto vm = DartVMRef::Create(FlutterMain::Get().GetSettings());
+    SkFontMgr::RefDefault();
+  });
+  t.detach();
+  // END
 }
 
 void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {

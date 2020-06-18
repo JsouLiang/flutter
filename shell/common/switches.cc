@@ -355,6 +355,12 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);
 
+  // BD ADD:START
+  settings.limit_skia_worker =
+      command_line.HasOption(FlagForSwitch(Switch::LimitSkiaWorker));
+  settings.disable_preload =
+      command_line.HasOption(FlagForSwitch(Switch::DisablePreload));
+  // END
   if (settings.icu_initialization_required) {
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
                                 &settings.icu_data_path);
