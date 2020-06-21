@@ -107,7 +107,9 @@ void Animator::BeginFrame(
   TRACE_EVENT_WITH_FRAME_NUMBER(frame_timings_recorder_, "flutter",
                                 "Animator::BeginFrame");
   while (!trace_flow_ids_.empty()) {
-    uint64_t trace_flow_id = trace_flow_ids_.front();
+    // BD MOD
+    // uint64_t trace_flow_id = trace_flow_ids_.front();
+    uint64_t trace_flow_id FML_ALLOW_UNUSED_TYPE = trace_flow_ids_.front();
     TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
     trace_flow_ids_.pop_front();
   }

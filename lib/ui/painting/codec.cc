@@ -20,7 +20,8 @@ using tonic::ToDart;
 namespace flutter {
 
 // BD ADD:
-static constexpr const char* kGetNativeImageTraceTag = "GetNativeImage";
+static constexpr const char* kGetNativeImageTraceTag FML_ALLOW_UNUSED_TYPE =
+    "GetNativeImage";
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Codec);
 
