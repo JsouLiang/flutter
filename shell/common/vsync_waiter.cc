@@ -6,13 +6,14 @@
 
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
-// BD ADD:
+// BD ADD: START
 #include "flutter/bdflutter/common/fps_recorder.h"
-
+#include "flutter/bdflutter/lib/ui/performance/boost.h"
+// END
 namespace flutter {
-
-static constexpr const char* kVsyncFlowName = "VsyncFlow";
-
+// BD MOD
+//static constexpr const char* kVsyncFlowName = "VsyncFlow";
+static constexpr const char* kVsyncFlowName FML_ALLOW_UNUSED_TYPE = "VsyncFlow";
 #if defined(OS_FUCHSIA)
 //  ________  _________  ________  ________
 // |\   ____\|\___   ___\\   __  \|\   __  \
@@ -28,9 +29,10 @@ static constexpr const char* kVsyncFlowName = "VsyncFlow";
 // first!
 static constexpr const char* kVsyncTraceName = "vsync callback";
 #else
-static constexpr const char* kVsyncTraceName = "VsyncProcessCallback";
+// BD  MOD
+//static constexpr const char* kVsyncTraceName = "VsyncProcessCallback";
+static constexpr const char* kVsyncTraceName FML_ALLOW_UNUSED_TYPE = "VsyncProcessCallback";
 #endif
-
 VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
     : task_runners_(std::move(task_runners)) {}
 

@@ -54,6 +54,12 @@
 #if !defined(OS_FUCHSIA)
 #ifndef TRACE_EVENT_HIDE_MACROS
 
+// BD ADD: START
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
+#define SUPPORT_TIME 1
+#endif
+// END
+
 #define __FML__TOKEN_CAT__(x, y) x##y
 #define __FML__TOKEN_CAT__2(x, y) __FML__TOKEN_CAT__(x, y)
 #define __FML__AUTO_TRACE_END(name)                                  \
@@ -64,6 +70,8 @@
 // from lib/trace/event.h on Fuchsia.
 //
 // TODO(chinmaygarde): All macros here should have the FML prefix.
+// BD ADD:
+#ifdef SUPPORT_TIME
 #define FML_TRACE_COUNTER(category_group, name, counter_id, arg1, ...)         \
   ::fml::tracing::TraceCounter((category_group), (name), (counter_id), (arg1), \
                                __VA_ARGS__);
@@ -134,6 +142,42 @@
 #define TRACE_FLOW_END(category, name, id) \
   ::fml::tracing::TraceEventFlowEnd0(category, name, id);
 
+// BD ADD: START
+#else  // !SUPPORT_TIME
+#define FML_TRACE_COUNTER(category_group, name, counter_id, arg1, ...)
+
+#define FML_TRACE_EVENT(category_group, name, ...)
+
+#define TRACE_EVENT0(category_group, name)
+
+#define TRACE_EVENT1(category_group, name, arg1_name, arg1_val)
+
+#define TRACE_EVENT2(category_group, name, arg1_name, arg1_val, arg2_name, \
+                     arg2_val)
+
+#define TRACE_EVENT_ASYNC_BEGIN0(category_group, name, id)
+
+#define TRACE_EVENT_ASYNC_END0(category_group, name, id)
+
+#define TRACE_EVENT_ASYNC_BEGIN1(category_group, name, id, arg1_name,        \
+                                 arg1_val)
+
+#define TRACE_EVENT_ASYNC_END1(category_group, name, id, arg1_name, arg1_val)
+
+#define TRACE_EVENT_INSTANT0(category_group, name)
+
+#define TRACE_EVENT_INSTANT1(category_group, name, arg1_name, arg1_val)
+
+#define TRACE_EVENT_INSTANT2(category_group, name, arg1_name, arg1_val, \
+                             arg2_name, arg2_val)
+
+#define TRACE_FLOW_BEGIN(category, name, id)
+
+#define TRACE_FLOW_STEP(category, name, id)
+
+#define TRACE_FLOW_END(category, name, id)
+#endif  // SUPPORT_TIME
+// END
 #endif  // TRACE_EVENT_HIDE_MACROS
 #endif  // !defined(OS_FUCHSIA)
 

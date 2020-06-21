@@ -15,11 +15,15 @@ declare_args() {
 
 config("config") {
   include_dirs = [ ".." ]
+  # BD ADD
+  cflags = []
   if (is_win) {
     if (current_cpu != "x86") {
       cflags = [ "/WX" ]  # Treat warnings as errors.
     }
   }
+  # BD ADD
+  cflags += ["-Wno-unused-lambda-capture"]
 
   # This define is transitional and will be removed after the embedder API
   # transition is complete.
