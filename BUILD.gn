@@ -17,10 +17,22 @@ declare_args() {
 
 config("config") {
   include_dirs = [ ".." ]
+
+  # BD ADD
+  cflags = []
   if (is_win) {
     if (current_cpu != "x86") {
       cflags = [ "/WX" ]  # Treat warnings as errors.
     }
+  }
+
+  # BD ADD
+  cflags += [ "-Wno-unused-lambda-capture" ]
+
+  defines = []
+
+  if (is_debug) {
+    defines += [ "FLUTTER_ENABLE_DIFF_CONTEXT" ]
   }
 }
 
