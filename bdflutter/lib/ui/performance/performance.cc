@@ -4,6 +4,7 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -153,6 +154,27 @@ void Performance_disableMips(Dart_NativeArguments args) {
   Performance::GetInstance()->DisableMips(disable);
 }
 
+void Performance_startStackTraceSamples(Dart_NativeArguments args) {
+    Dart_StartProfiling2();
+}
+
+void Performance_stopStackTraceSamples(Dart_NativeArguments args) {
+   Dart_StopProfiling2();
+}
+
+void Performance_getStackTraceSamples(Dart_NativeArguments args) {
+    int64_t microseconds = (int64_t)DartConverter<int64_t>::FromDart(Dart_GetNativeArgument(args, 0));
+    Dart_Handle res = Dart_GetStackSamples(microseconds);
+    Dart_SetReturnValue(args, res);
+}
+
+void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
+    const char* filePath = nullptr;
+    Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
+    Dart_Handle res = Dart_RequestSnapshot(filePath);
+    Dart_SetReturnValue(args, res);
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -166,6 +188,10 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_finishBoost", Performance_finishBoost, 2, true},
       {"Performance_forceGC", Performance_forceGC, 1, true},
       {"Performance_disableMips", Performance_disableMips, 2, true},
+      {"Performance_startStackTraceSamples", Performance_startStackTraceSamples, 1, true},
+      {"Performance_stopStackTraceSamples", Performance_stopStackTraceSamples, 1, true},
+      {"Performance_getStackTraceSamples", Performance_getStackTraceSamples, 2, true},
+      {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
   });
 }
 

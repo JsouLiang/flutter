@@ -59,6 +59,14 @@ class Performance {
 
   void disableMips(bool disable) native 'Performance_disableMips';
 
+  void startStackTraceSamples() native 'Performance_startStackTraceSamples';
+
+  void stopStackTraceSamples() native 'Performance_stopStackTraceSamples';
+
+  String getStackTraceSamples(int microseconds) native 'Performance_getStackTraceSamples';
+
+  bool requestHeapSnapshot(String outFilePath) native 'Performance_requestHeapSnapshot';
+
   NotifyIdleCallback? get onNotifyIdle => _onNotifyIdle;
   NotifyIdleCallback? _onNotifyIdle;
   Zone? _onNotifyIdleZone;
