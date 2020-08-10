@@ -9,5 +9,9 @@ function bd_upload() {
 
 	node ${BUILD_TOOLS_DIR}/upload/upload.js $1 $2 > ${upload_log}
 
+	if [ $? -ne 0 ]; then
+      /usr/local/bin/node ${BUILD_TOOLS_DIR}/upload/upload.js $1 $2 > ${upload_log}
+	fi
+
 	cat ${upload_log}
 }

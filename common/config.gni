@@ -22,6 +22,13 @@ declare_args() {
 
   # Whether to use the legacy embedder when building for Fuchsia.
   flutter_enable_legacy_fuchsia_embedder = true
+
+  # BD ADD: START
+  # Whether to use a cropped icudtl.dat
+  icu_use_lite_data_file = false
+  lite_suffix = ""
+  mac_10_15 = false
+  # END
 }
 
 # feature_defines_list ---------------------------------------------------------

@@ -11,6 +11,8 @@ import argparse
 import subprocess
 import sys
 import os
+# BD ADD:
+import platform
 
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -324,6 +326,12 @@ def to_gn_args(args):
         print('Vulkan validation layers are currently only supported on Fuchsia targets.')
         sys.exit(1)
       gn_args['enable_vulkan_validation_layers'] = True
+    # BD ADD: START
+    if platform.system() == 'Darwin':
+        v, _, _ = platform.mac_ver()
+        if v > '10.15':
+            gn_args['mac_10_15'] = True
+    # END
 
     gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
 

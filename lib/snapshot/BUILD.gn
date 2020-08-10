@@ -18,7 +18,9 @@ copy("generate_dart_ui") {
 }
 
 compiled_action("generate_snapshot_bin") {
-  if (target_cpu == "x86" && host_os == "linux") {
+  # BD MOD:
+  #  if (target_cpu == "x86" && host_os == "linux") {
+  if (target_cpu == "x86" && ( host_os == "linux" || ( host_os == "mac" && mac_10_15))) {
     # By default Dart will create a 32-bit gen_snapshot host binary if the target
     # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
     # targets because some host platforms may not support 32-bit binaries.
@@ -26,6 +28,11 @@ compiled_action("generate_snapshot_bin") {
     toolchain = "//build/toolchain/$host_os:clang_x64"
   } else {
     tool = "//third_party/dart/runtime/bin:gen_snapshot"
+    # BD ADD:
+    if (host_os == "mac" && mac_10_15) {
+      toolchain = "//build/toolchain/$host_os:clang_x64"
+    }
+    # END
   }
 
   platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
