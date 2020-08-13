@@ -9,6 +9,9 @@
 
 #include "flutter/fml/platform/linux/timerfd.h"
 
+// BD ADD:
+#include <flutter/shell/platform/android/vsync_waiter_android.h>
+
 namespace fml {
 
 static constexpr int kClockType = CLOCK_MONOTONIC;
@@ -78,6 +81,11 @@ void MessageLoopAndroid::Run() {
 }
 
 void MessageLoopAndroid::Terminate() {
+  // BD ADD: START
+  if (!running_) {
+    flutter::VsyncWaiterAndroid::LoopForVsync(true);
+  }
+  // END
   running_ = false;
   ALooper_wake(looper_.get());
 }

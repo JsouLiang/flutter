@@ -4,6 +4,8 @@
 
 #ifndef FLUTTER_FML_THREAD_H_
 #define FLUTTER_FML_THREAD_H_
+// BD ADD:
+#include "flutter/fml/build_config.h"
 
 #include <atomic>
 #include <memory>
@@ -16,7 +18,14 @@ namespace fml {
 
 class Thread {
  public:
+// BD ADD: START
+#if OS_ANDROID
+  explicit Thread(const std::string& name = "", bool createAndroidLoop = false);
+#else
+  // END
   explicit Thread(const std::string& name = "");
+// BD ADD:
+#endif
 
   ~Thread();
 

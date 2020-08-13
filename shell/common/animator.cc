@@ -231,14 +231,24 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
-                                             frame_number = frame_number_]() {
-    if (!self) {
-      return;
-    }
-    TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
-    self->AwaitVSync();
-  });
+  // BD MOD: START
+  // task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
+  //                                            frame_number = frame_number_]() {
+  //   if (!self) {
+  //     return;
+  //   }
+  //   TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+  //   self->AwaitVSync();
+  // });
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [self = weak_factory_.GetWeakPtr(),frame_number = frame_number_]() {
+        if (!self) {
+          return;
+        }
+        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+        self->AwaitVSync();
+      });
   frame_scheduled_ = true;
 }
 

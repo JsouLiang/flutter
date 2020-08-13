@@ -22,6 +22,9 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
 
   ~VsyncWaiterAndroid() override;
 
+  // BD ADD:
+  static void LoopForVsync(jboolean initLooper);
+
  private:
   // |VsyncWaiter|
   void AwaitVSync() override;

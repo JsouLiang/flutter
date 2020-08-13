@@ -122,14 +122,24 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
     TRACE_FLOW_BEGIN("flutter", kVsyncFlowName, flow_identifier);
 
-    task_runners_.GetUITaskRunner()->PostTaskForTime(
+    // BD MOD: START
+    // task_runners_.GetUITaskRunner()->PostTaskForTime(
+    //     [callback, flow_identifier, frame_start_time, frame_target_time]() {
+    //       FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
+    //                       frame_start_time, "TargetTime", frame_target_time);
+    //       callback(frame_start_time, frame_target_time);
+    //       TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
+    //     },
+    //     frame_start_time);
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetUITaskRunner(),
         [callback, flow_identifier, frame_start_time, frame_target_time]() {
           FML_TRACE_EVENT("flutter", kVsyncTraceName, "StartTime",
                           frame_start_time, "TargetTime", frame_target_time);
           callback(frame_start_time, frame_target_time);
           TRACE_FLOW_END("flutter", kVsyncFlowName, flow_identifier);
-        },
-        frame_start_time);
+        });
+    // END
   }
 
   if (secondary_callback) {
