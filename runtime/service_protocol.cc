@@ -34,6 +34,9 @@ const std::string_view ServiceProtocol::kGetDisplayRefreshRateExtensionName =
     "_flutter.getDisplayRefreshRate";
 const std::string_view ServiceProtocol::kGetSkSLsExtensionName =
     "_flutter.getSkSLs";
+const std::string_view
+    ServiceProtocol::kEstimateRasterCacheMemoryExtensionName =
+        "_flutter.estimateRasterCacheMemory";
 
 static constexpr std::string_view kViewIdPrefx = "_flutterView/";
 static constexpr std::string_view kListViewsExtensionName =
@@ -52,6 +55,7 @@ ServiceProtocol::ServiceProtocol()
           kSetAssetBundlePathExtensionName,
           kGetDisplayRefreshRateExtensionName,
           kGetSkSLsExtensionName,
+          kEstimateRasterCacheMemoryExtensionName,
       }),
       handlers_mutex_(fml::SharedMutex::Create()) {}
 

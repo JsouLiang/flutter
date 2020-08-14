@@ -71,6 +71,13 @@ class ShellTest : public ThreadTest {
   static bool GetNeedsReportTimings(Shell* shell);
   static void SetNeedsReportTimings(Shell* shell, bool value);
 
+  enum ServiceProtocolEnum {
+    kGetSkSLs,
+    kEstimateRasterCacheMemory,
+    kSetAssetBundlePath,
+    kRunInView,
+  };
+
   // Helper method to test private method Shell::OnServiceProtocolGetSkSLs.
   // (ShellTest is a friend class of Shell.) We'll also make sure that it is
   // running on the UI thread.
