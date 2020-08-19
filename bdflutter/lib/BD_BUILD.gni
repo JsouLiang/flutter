@@ -1,0 +1,4 @@
+bd_flutter_lib_ui_sources = [
+  "//flutter/bdflutter/lib/ui/performance/performance.cc",
+  "//flutter/bdflutter/lib/ui/performance/performance.h",
+]
