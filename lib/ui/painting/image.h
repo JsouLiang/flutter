@@ -41,6 +41,12 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
 
   size_t GetAllocationSize() const override;
 
+  // BD ADD: START
+  size_t ComputeByteSize() const;
+  void RetainDartWrappableReference() const override;
+  void ReleaseDartWrappableReference() const override;
+  // END
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:

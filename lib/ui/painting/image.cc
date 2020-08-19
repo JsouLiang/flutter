@@ -9,6 +9,8 @@
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
 
 namespace flutter {
 
@@ -53,6 +55,12 @@ void CanvasImage::dispose() {
 }
 
 size_t CanvasImage::GetAllocationSize() const {
+  // BD ADD: START
+  return ComputeByteSize();
+}
+
+size_t CanvasImage::ComputeByteSize() const {
+  // END
   if (auto image = image_.get()) {
     const auto& info = image->imageInfo();
     const auto kMipmapOverhead = 4.0 / 3.0;
@@ -62,5 +70,17 @@ size_t CanvasImage::GetAllocationSize() const {
     return sizeof(CanvasImage);
   }
 }
+
+// BD ADD: START
+void CanvasImage::RetainDartWrappableReference() const {
+  RefCountedDartWrappable::RetainDartWrappableReference();
+  Performance::GetInstance()->AddImageMemoryUsage(ComputeByteSize());
+}
+
+void CanvasImage::ReleaseDartWrappableReference() const {
+  Performance::GetInstance()->SubImageMemoryUsage(ComputeByteSize());
+  RefCountedDartWrappable::ReleaseDartWrappableReference();
+}
+// END
 
 }  // namespace flutter
