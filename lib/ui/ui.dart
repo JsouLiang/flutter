@@ -40,3 +40,6 @@ part 'pointer.dart';
 part 'semantics.dart';
 part 'text.dart';
 part 'window.dart';
+
+// BD ADD:
+part '../../bdflutter/lib/ui/performance.dart';
