@@ -433,6 +433,10 @@ class PlatformConfiguration final {
   ///
   void CompletePlatformMessageEmptyResponse(int response_id);
 
+  // BD ADD: START
+  void ExitApp();
+  // END
+
  private:
   PlatformConfigurationClient* client_;
   tonic::DartPersistentValue update_locales_;

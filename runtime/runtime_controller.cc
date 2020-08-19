@@ -490,6 +490,12 @@ void RuntimeController::AddNextFrameCallback(fml::closure callback) {
 int64_t RuntimeController::GetEngineMainEnterMicros() {
   return client_.GetEngineMainEnterMicros();
 }
+
+void RuntimeController::ExitApp() {
+  if (auto* window = GetWindowIfAvailable()) {
+    window->ExitApp();
+  }
+}
 // END
 
 }  // namespace flutter

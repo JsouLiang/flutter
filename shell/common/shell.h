@@ -380,6 +380,13 @@ class Shell final : public PlatformView::Delegate,
    */
   void ScheduleBackgroundFrame();
 
+  /**
+   * BD ADD:
+   * notify flutter to exit app when native container destory
+   * @param closure callback
+   */
+  void ExitApp(fml::closure closure);
+
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
   std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override;

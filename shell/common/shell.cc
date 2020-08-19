@@ -1823,5 +1823,26 @@ void Shell::ScheduleBackgroundFrame() {
     }
   });
 }
+
+void Shell::ExitApp(fml::closure closure) {
+  // 1：notify flutter to exit app
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      [this, ui_task_runner = task_runners_.GetUITaskRunner(),
+       platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+       closure = std::move(closure)]() {
+        auto engine = GetEngine();
+        if (engine) {
+          engine->ExitApp();
+        }
+        // 2：finish the other tasks of the ui thread
+        ui_task_runner->PostTask(
+            [platform_task_runner, closure = std::move(closure)] {
+              // 3：finish the other tasks of the platform thread
+              platform_task_runner->PostTask(
+                  [closure = std::move(closure)] { closure(); });
+            });
+      });
+}
 // END
 }  // namespace flutter

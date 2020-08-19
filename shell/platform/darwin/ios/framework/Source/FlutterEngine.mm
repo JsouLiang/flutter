@@ -321,12 +321,22 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)destroyContext {
-  [self resetChannels];
-  self.isolateId = nil;
-  _shell.reset();
-  _profiler.reset();
-  _threadHost.reset();
-  _platformViewsController.reset();
+  // BD MOD: START
+  // [self resetChannels];
+  // self.isolateId = nil;
+  // _shell.reset();
+  // _profiler.reset();
+  // _threadHost.Reset();
+  // _platformViewsController.reset();
+  _shell->ExitApp([scoped_engine = fml::scoped_nsobject<FlutterEngine>([self retain])] {
+    [scoped_engine.get() resetChannels];
+    scoped_engine.get().isolateId = nil;
+    scoped_engine.get()->_shell.reset();
+    scoped_engine.get()->_profiler.reset();
+    scoped_engine.get()->_threadHost.Reset();
+    scoped_engine.get()->_platformViewsController.reset();
+  });
+  // END
 }
 
 - (FlutterViewController*)viewController {
