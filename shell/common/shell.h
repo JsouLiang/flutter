@@ -357,6 +357,13 @@ class Shell final : public PlatformView::Delegate,
   std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch()
       const override;
 
+  /**
+   * BD ADD:
+   * notify flutter to exit app when native container destory
+   * @param closure callback
+   */
+  void ExitApp(fml::closure closure);
+
   //----------------------------------------------------------------------------
   /// @brief     Marks the GPU as available or unavailable.
   void SetGpuAvailability(GpuAvailability availability);

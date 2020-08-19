@@ -17,6 +17,14 @@ class Performance {
   int timeToFirstFrameMicros = 0;
 
   void addNextFrameCallback(VoidCallback callback) native 'Performance_addNextFrameCallback';
+
+  VoidCallback? get exitApp => _exitApp;
+  VoidCallback? _exitApp;
+  Zone _exitAppZone = Zone.root;
+  set exitApp(VoidCallback? callback) {
+    _exitApp = callback;
+    _exitAppZone = Zone.current;
+  }
 }
 
 /// The [Performance] singleton.
