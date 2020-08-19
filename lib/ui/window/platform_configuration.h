@@ -427,6 +427,25 @@ class PlatformConfiguration final {
   ///
   void CompletePlatformMessageEmptyResponse(int response_id);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Responds to a previously registered key data message from the
+  ///             framework to the engine.
+  ///
+  ///             For each response_id, this method should be called exactly
+  ///             once. Responding to a response_id that has not been registered
+  ///             or has been invoked will lead to a fatal error.
+  ///
+  /// @param[in] response_id The unique id that identifies the original platform
+  ///                        message to respond to, created by
+  ///                        RegisterKeyDataResponse.
+  /// @param[in] handled     Whether the key data is handled.
+  ///
+  void CompleteKeyDataResponse(uint64_t response_id, bool handled);
+
+  // BD ADD: START
+  void ExitApp();
+  // END
+
  private:
   PlatformConfigurationClient* client_;
   tonic::DartPersistentValue update_locales_;
@@ -439,6 +458,10 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
+
+  // BD ADD START:
+  tonic::DartPersistentValue exitApp_;
+  // END
 
   std::unordered_map<int64_t, std::unique_ptr<Window>> windows_;
 

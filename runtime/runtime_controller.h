@@ -552,6 +552,9 @@ class RuntimeController : public PlatformConfigurationClient {
     return context_.snapshot_delegate;
   }
 
+  // BD ADD:
+  void ExitApp();
+
  protected:
   /// Constructor for Mocks.
   RuntimeController(RuntimeDelegate& p_client, TaskRunners task_runners);

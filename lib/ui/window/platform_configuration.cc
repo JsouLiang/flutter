@@ -226,6 +226,9 @@ void PlatformConfiguration::DidCreateIsolate() {
   windows_.insert(
       std::make_pair(0, std::unique_ptr<Window>(new Window{
                             0, ViewportMetrics{1.0, 0.0, 0.0, -1}})));
+  // BD ADD: START
+  exitApp_.Set(tonic::DartState::Current(),
+               Dart_GetField(library, tonic::ToDart("_exitApp")));
 }
 
 void PlatformConfiguration::UpdateLocales(
@@ -472,5 +475,16 @@ void PlatformConfiguration::RegisterNatives(
        _ComputePlatformResolvedLocale, 2, true},
   });
 }
+
+// BD ADD: START
+void PlatformConfiguration::ExitApp() {
+  std::shared_ptr<tonic::DartState> dart_state = exitApp_.dart_state().lock();
+  if (!dart_state) {
+    return;
+  }
+  tonic::DartState::Scope scope(dart_state);
+  tonic::LogIfError(tonic::DartInvokeField(exitApp_.Get(), "_exitApp", {}));
+}
+// END
 
 }  // namespace flutter

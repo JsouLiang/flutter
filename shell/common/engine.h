@@ -806,6 +806,10 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry();
 
+  // BD ADD: START
+  void ExitApp();
+  // END
+
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
                         uint64_t trace_flow_id) override;
