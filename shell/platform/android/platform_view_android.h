@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
@@ -108,6 +109,11 @@ class PlatformViewAndroid final : public PlatformView {
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;
   }
+  /**
+   * BD ADD: register android image loader
+   */
+  void RegisterExternalImageLoader(
+      const fml::jni::JavaObjectWeakGlobalRef& android_image_loader);
 
   std::shared_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const override {

@@ -11,6 +11,11 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.TextureRegistry;
+// BD ADD: START
+import io.flutter.view.ImageLoaderRegistry;
+import io.flutter.view.ImageLoaderRegistryImpl;
+import io.flutter.embedding.engine.FlutterJNI;
+// END
 
 /**
  * Interface to be implemented by all Flutter plugins.
@@ -107,6 +112,8 @@ public interface FlutterPlugin {
     private final TextureRegistry textureRegistry;
     private final PlatformViewRegistry platformViewRegistry;
     private final FlutterAssets flutterAssets;
+    // BD ADD:
+    private final ImageLoaderRegistry imageLoaderRegistry;
 
     public FlutterPluginBinding(
         @NonNull Context applicationContext,
@@ -114,13 +121,17 @@ public interface FlutterPlugin {
         @NonNull BinaryMessenger binaryMessenger,
         @NonNull TextureRegistry textureRegistry,
         @NonNull PlatformViewRegistry platformViewRegistry,
-        @NonNull FlutterAssets flutterAssets) {
+        @NonNull FlutterAssets flutterAssets,
+        // BD ADD:
+        @NonNull FlutterJNI flutterJNI) {
       this.applicationContext = applicationContext;
       this.flutterEngine = flutterEngine;
       this.binaryMessenger = binaryMessenger;
       this.textureRegistry = textureRegistry;
       this.platformViewRegistry = platformViewRegistry;
       this.flutterAssets = flutterAssets;
+      // BD ADD:
+      this.imageLoaderRegistry = new ImageLoaderRegistryImpl(flutterJNI);
     }
 
     @NonNull
@@ -156,6 +167,12 @@ public interface FlutterPlugin {
     @NonNull
     public FlutterAssets getFlutterAssets() {
       return flutterAssets;
+    }
+
+    // BD ADD:
+    @NonNull
+    public ImageLoaderRegistry getImageLoaderRegistry() {
+      return imageLoaderRegistry;
     }
   }
 

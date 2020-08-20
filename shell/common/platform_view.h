@@ -12,6 +12,11 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
+
+// BD ADD: START
+#include "flutter/bdflutter/lib/ui/painting/image_loader.h"
+// END
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/memory/weak_ptr.h"
@@ -303,6 +308,10 @@ class PlatformView {
     virtual void UpdateAssetResolverByType(
         std::unique_ptr<AssetResolver> updated_asset_resolver,
         AssetResolver::AssetResolverType type) = 0;
+
+    // BD ADD:
+    virtual void OnPlatformViewRegisterImageLoader(
+        std::shared_ptr<flutter::ImageLoader> imageLoader) = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -636,6 +645,9 @@ class PlatformView {
   ///                         updated.
   ///
   void MarkTextureFrameAvailable(int64_t texture_id);
+
+  // BD ADD:
+  void RegisterImageLoader(std::shared_ptr<flutter::ImageLoader> imageLoader);
 
   //--------------------------------------------------------------------------
   /// @brief      Directly invokes platform-specific APIs to compute the

@@ -90,6 +90,14 @@ class PlatformViewIOS final : public PlatformView {
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
 
+  void DispatchKeyDataPacket(std::unique_ptr<KeyDataPacket> packet,
+                             std::function<void(bool /* handled */)> callback);
+  /**
+   * BD ADD:
+   *
+   */
+  void RegisterExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader);
+
   // |PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 

@@ -20,7 +20,9 @@ import io.flutter.view.TextureRegistry;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+// BD ADD: START
+import io.flutter.view.ImageLoaderRegistry;
+// END
 /**
  * A {@link PluginRegistry.Registrar} that is shimmed let old plugins use the new Android embedding
  * and plugin API behind the scenes.
@@ -49,6 +51,8 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
 
   @Override
   public Activity activity() {
+
+
     return activityPluginBinding != null ? activityPluginBinding.getActivity() : null;
   }
 
@@ -75,6 +79,13 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   @Override
   public PlatformViewRegistry platformViewRegistry() {
     return pluginBinding != null ? pluginBinding.getPlatformViewRegistry() : null;
+  }
+  /**
+   * BD ADD:
+   */
+  @Override
+  public ImageLoaderRegistry imageLoaderRegistry() {
+    return pluginBinding != null ? pluginBinding.getImageLoaderRegistry() : null;
   }
 
   @Override

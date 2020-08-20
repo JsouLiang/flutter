@@ -12,6 +12,8 @@
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_context_gl.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/android/android_external_image_loader.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -239,6 +241,15 @@ void PlatformViewAndroid::RegisterExternalTexture(
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
   return std::make_unique<VsyncWaiterAndroid>(task_runners_);
+}
+
+/**
+ * BD ADD: register android image loader
+ */
+void PlatformViewAndroid::RegisterExternalImageLoader(
+    const fml::jni::JavaObjectWeakGlobalRef& android_image_loader) {
+  RegisterImageLoader(
+      std::make_shared<AndroidExternalImageLoader>(android_image_loader));
 }
 
 // |PlatformView|

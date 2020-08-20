@@ -169,7 +169,8 @@ public class FlutterNativeView implements BinaryMessenger {
   @Override
   public void disableBufferingIncomingMessages() {}
 
-  /*package*/ FlutterJNI getFlutterJNI() {
+  // BD MOD:
+  public FlutterJNI getFlutterJNI() {
     return mFlutterJNI;
   }
 

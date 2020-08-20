@@ -126,6 +126,15 @@ void PlatformView::MarkTextureFrameAvailable(int64_t texture_id) {
   delegate_.OnPlatformViewMarkTextureFrameAvailable(texture_id);
 }
 
+/**
+ * BD ADD:
+ *
+ */
+void PlatformView::RegisterImageLoader(
+    std::shared_ptr<flutter::ImageLoader> imageLoader) {
+  delegate_.OnPlatformViewRegisterImageLoader(std::move(imageLoader));
+}
+
 std::unique_ptr<Surface> PlatformView::CreateRenderingSurface() {
   // We have a default implementation because tests create a platform view but
   // never a rendering surface.

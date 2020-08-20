@@ -6,6 +6,7 @@ assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
 import("//build/toolchain/clang.gni")
+import("//flutter/bdflutter/shell/platform/darwin/ios/BD_BUILD.gni")
 import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
@@ -35,6 +36,11 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPlugin.h",
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
   "framework/Headers/FlutterViewController.h",
+
+  # BD ADD: START
+  "framework/Headers/FlutterImageLoader.h",
+
+  # END
 ]
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
@@ -116,6 +122,10 @@ source_set("flutter_framework_source") {
     "ios_external_texture_gl.mm",
     "ios_external_view_embedder.h",
     "ios_external_view_embedder.mm",
+
+    # BD ADD: START
+    "ios_native_export_codec.h",
+    "ios_native_export_codec.mm",
     "ios_render_target_gl.h",
     "ios_render_target_gl.mm",
     "ios_surface.h",
@@ -130,7 +140,14 @@ source_set("flutter_framework_source") {
     "platform_view_ios.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
+
+    # END
   ]
+
+  # BD ADD: START
+  sources += external_image_loader_sources
+
+  # END
 
   sources += _flutter_framework_headers
 

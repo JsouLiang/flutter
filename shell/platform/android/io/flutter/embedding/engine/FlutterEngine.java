@@ -346,8 +346,12 @@ public class FlutterEngine {
     this.platformViewsController = platformViewsController;
     this.platformViewsController.onAttachedToJNI();
 
+    // BD MOD: START
+    // this.pluginRegistry =
+    //    new FlutterEngineConnectionRegistry(context.getApplicationContext(), this, flutterLoader);
     this.pluginRegistry =
-        new FlutterEngineConnectionRegistry(context.getApplicationContext(), this, flutterLoader);
+        new FlutterEngineConnectionRegistry(
+            context.getApplicationContext(), this, flutterLoader, flutterJNI);
 
     // Only automatically register plugins if both constructor parameter and
     // loaded AndroidManifest config turn this feature on.

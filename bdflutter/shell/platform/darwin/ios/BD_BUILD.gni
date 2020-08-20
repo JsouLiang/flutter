@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+bd_flutter_ios_path = "//flutter/bdflutter/shell/platform/darwin/ios"
+
+external_image_loader_sources = [
+  "$bd_flutter_ios_path/ios_external_image_loader.h",
+  "$bd_flutter_ios_path/ios_external_image_loader.mm",
+  "$bd_flutter_ios_path/ios_external_image_loader_gl.h",
+  "$bd_flutter_ios_path/ios_external_image_loader_gl.mm",
+  "$bd_flutter_ios_path/ios_external_image_loader_metal.h",
+  "$bd_flutter_ios_path/ios_external_image_loader_metal.mm",
+  "$bd_flutter_ios_path/ios_image_loader_callback_context.h",
+]

@@ -1680,6 +1680,16 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return _engine;
 }
 
+/**
+ * BD ADD:
+ *
+ */
+#pragma mark - FlutterImageLoaderRegistry
+
+- (void)registerImageLoader:(NSObject<FlutterImageLoader>*)imageLoader {
+  [_engine.get() registerImageLoader:imageLoader];
+}
+
 #pragma mark - FlutterPluginRegistry
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {

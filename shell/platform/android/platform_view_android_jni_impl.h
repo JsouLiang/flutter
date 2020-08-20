@@ -7,6 +7,8 @@
 
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/android/android_external_image_loader.h"
 
 namespace flutter {
 
@@ -90,6 +92,33 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };
+
+/**
+ * BD ADD: call android to load image
+ */
+void CallJavaImageLoader(jobject android_image_loader,
+                         const std::string url,
+                         const int width,
+                         const int height,
+                         const float scale,
+                         ImageLoaderContext loaderContext,
+                         std::function<void(sk_sp<SkImage> image)> callback);
+
+void CallJavaImageLoaderForCodec(
+    jobject android_image_loader,
+    const std::string url,
+    const int width,
+    const int height,
+    const float scale,
+    ImageLoaderContext loaderContext,
+    std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback);
+
+void CallJavaImageLoaderGetNextFrame(
+    jobject android_image_loader,
+    ImageLoaderContext loaderContext,
+    const int currentFrame,
+    std::shared_ptr<NativeExportCodec> codec,
+    std::function<void(sk_sp<SkImage> image)> callback);
 
 }  // namespace flutter
 

@@ -108,6 +108,12 @@ class FlutterPlatformViewsTestMockPlatformViewDelegate : public PlatformView::De
                                std::unique_ptr<const fml::Mapping> snapshot_data,
                                std::unique_ptr<const fml::Mapping> snapshot_instructions) override {
   }
+
+  // BD ADD : START
+  void OnPlatformViewRegisterImageLoader(
+      std::shared_ptr<flutter::ImageLoader> imageLoader) override {}
+  // END
+
   void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                     const std::string error_message,
                                     bool transient) override {}
