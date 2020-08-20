@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/bdflutter/assets/BD_BUILD.gni")
+
 source_set("assets") {
   sources = [
     "asset_manager.cc",
@@ -10,6 +12,11 @@ source_set("assets") {
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
   ]
+
+  # BD ADD: START
+  sources += assets_store
+  public_deps = assets_deps
+  # END
 
   deps = [
     "//flutter/common",
