@@ -49,6 +49,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle = nil);
  **/
 - (void)setPersistentIsolateData:(NSData*)data;
 
+// BD ADD:
++ (NSString*)flutterAssetsPath;
+
 @end
 
 NS_ASSUME_NONNULL_END

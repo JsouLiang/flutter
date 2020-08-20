@@ -229,9 +229,12 @@ using namespace flutter;
                       object:nil
                     userInfo:@{@(kOverlayStyleUpdateNotificationKey) : @(statusBarStyle)}];
   } else {
-    // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
-    // in favor of delegating to the view controller
+// Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
+// in favor of delegating to the view controller
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     [[UIApplication sharedApplication] setStatusBarStyle:statusBarStyle];
+#pragma GCC diagnostic pop
   }
 }
 
