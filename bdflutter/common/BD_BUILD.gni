@@ -1,0 +1,27 @@
+bd_fps_recorder_sources = [
+  "//flutter/bdflutter/common/fps_recorder.cc",
+  "//flutter/bdflutter/common/fps_recorder.h",
+]
+
+# import("//flutter/testing/testing.gni")
+
+# test_fixtures("fps_recorder_fixtures") {
+#   fixtures = []
+# }
+
+# executable("fps_recorder_unittests") {
+#   testonly = true
+
+#   sources = [
+#     "fps_recorder_test.h",
+#     "fps_recorder_test.cc",
+#     "fps_recorder_unittests.cc",
+#   ]
+
+#   deps = [
+#     ":fps_recorder_fixtures",
+#     "//flutter/common",
+#     "//flutter/testing",
+#     "//third_party/dart/runtime:libdart_jit",
+#   ]
+# }
