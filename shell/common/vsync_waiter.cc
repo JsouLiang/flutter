@@ -11,6 +11,8 @@
 #include "fml/message_loop_task_queues.h"
 #include "fml/task_queue_id.h"
 #include "fml/time/time_point.h"
+// BD ADD:
+#include "flutter/bdflutter/common/fps_recorder.h"
 
 namespace flutter {
 
@@ -157,6 +159,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     task_runners_.GetUITaskRunner()->PostTaskForTime(
         std::move(secondary_callback), frame_start_time);
   }
+  // BD ADD:
+  FpsRecorder::Current()->AddFrameCount(1);
 }
 
 void VsyncWaiter::PauseDartMicroTasks() {

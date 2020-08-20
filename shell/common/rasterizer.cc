@@ -21,6 +21,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
+// BD ADD:
+#include "flutter/bdflutter/common/fps_recorder.h"
 
 namespace flutter {
 
@@ -513,6 +515,13 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
 
   compositor_context_->ui_time().SetLapTime(
       frame_timings_recorder.GetBuildDuration());
+
+  // BD ADD: START
+  fml::TimeDelta build_time = frame_timings_recorder.GetBuildDuration();
+  int miss_count =
+      (int)(build_time.ToMillisecondsF() / delegate_.GetFrameBudget().count());
+  FpsRecorder::Current()->AddFrameCount(miss_count, build_time);
+  // END
 
   SkCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
