@@ -25,6 +25,9 @@ class Performance {
     _exitApp = callback;
     _exitAppZone = Zone.current;
   }
+
+  void startRecordFps(String key) native 'Performance_startRecordFps';
+  List obtainFps(String key, bool stopRecord) native 'Performance_obtainFps';
 }
 
 /// The [Performance] singleton.

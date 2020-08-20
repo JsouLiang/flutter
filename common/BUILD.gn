@@ -3,6 +3,8 @@
 # found in the LICENSE file.
 
 import("config.gni")
+# BD ADD:
+import("//flutter/bdflutter/common/BD_BUILD.gni")
 
 config("flutter_config") {
   defines = feature_defines_list
@@ -17,6 +19,9 @@ source_set("common") {
   ]
 
   deps = [ "//flutter/fml" ]
+
+  # BD ADD:
+  sources += bd_fps_recorder_sources
 
   public_configs = [
     ":flutter_config",

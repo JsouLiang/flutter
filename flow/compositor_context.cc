@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// BD ADD:
+#include "flutter/bdflutter/common/fps_recorder.h"
 #include "flutter/flow/compositor_context.h"
 
 #include "flutter/flow/layers/layer_tree.h"
@@ -65,6 +67,8 @@ CompositorContext::ScopedFrame::ScopedFrame(
 
 CompositorContext::ScopedFrame::~ScopedFrame() {
   context_.EndFrame(*this, instrumentation_enabled_);
+  // BD ADD:
+  FpsRecorder::Current()->AddDrawCount(context_.raster_time().LastLap());
 }
 
 RasterStatus CompositorContext::ScopedFrame::Raster(

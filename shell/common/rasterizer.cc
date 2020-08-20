@@ -17,6 +17,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
+// BD ADD:
+#include "flutter/bdflutter/common/fps_recorder.h"
 
 // When screenshotting we want to ensure we call the base method for
 // CompositorContext::AcquireFrame instead of the platform-specific method.
@@ -422,6 +424,12 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
   compositor_context_->ui_time().SetLapTime(layer_tree.build_time());
+
+  // BD ADD: START
+  fml::TimeDelta build_time = layer_tree.build_time();
+  int miss_count = (int) (build_time.ToMillisecondsF() / delegate_.GetFrameBudget().count());
+  FpsRecorder::Current()->AddFrameCount(miss_count, build_time);
+  // END
 
   SkCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {

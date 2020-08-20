@@ -24,7 +24,6 @@ class Performance {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-
  private:
   Performance();
 
