@@ -38,6 +38,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+// BD ADD: START
+// END
+
 /**
  * This class is owned by the {@link io.flutter.embedding.engine.FlutterEngine} and its role is to
  * managed its connections with Android App Components and Flutter plugins.
@@ -97,7 +100,9 @@ import java.util.Set;
   FlutterEngineConnectionRegistry(
       @NonNull Context appContext,
       @NonNull FlutterEngine flutterEngine,
-      @NonNull FlutterLoader flutterLoader) {
+      @NonNull FlutterLoader flutterLoader,
+      // BD ADD:
+      @NonNull FlutterJNI flutterJNI) {
     this.flutterEngine = flutterEngine;
     pluginBinding =
         new FlutterPlugin.FlutterPluginBinding(
@@ -106,7 +111,9 @@ import java.util.Set;
             flutterEngine.getDartExecutor(),
             flutterEngine.getRenderer(),
             flutterEngine.getPlatformViewsController().getRegistry(),
-            new DefaultFlutterAssets(flutterLoader));
+            new DefaultFlutterAssets(flutterLoader),
+            // BD ADD:
+            flutterJNI);
   }
 
   public void destroy() {

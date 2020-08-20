@@ -159,7 +159,8 @@ public class FlutterNativeView implements BinaryMessenger {
     dartExecutor.getBinaryMessenger().setMessageHandler(channel, handler, taskQueue);
   }
 
-  /*package*/ FlutterJNI getFlutterJNI() {
+  // BD MOD:
+  public FlutterJNI getFlutterJNI() {
     return mFlutterJNI;
   }
 

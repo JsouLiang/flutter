@@ -13,6 +13,8 @@
 #import "FlutterMacros.h"
 #import "FlutterPlugin.h"
 #import "FlutterTexture.h"
+// BD ADD:
+#include "FlutterImageLoader.h"
 
 @class FlutterViewController;
 
@@ -55,8 +57,11 @@ extern NSString* const FlutterDefaultInitialRoute;
  * either `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI` is invoked.
  * One of these methods must be invoked before calling `-setViewController:`.
  */
+
 FLUTTER_DARWIN_EXPORT
-@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+// BD MOD: add FlutterImageLoaderRegistry
+@interface FlutterEngine
+    : NSObject <FlutterTextureRegistry, FlutterImageLoaderRegistry, FlutterPluginRegistry>
 
 /**
  * Default initializer for a FlutterEngine.
