@@ -13,6 +13,8 @@
 #include "flutter/shell/common/shell_io_manager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/darwin/ios/ios_external_image_loader.h"
 
 namespace flutter {
 
@@ -137,6 +139,15 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
                                               NSObject<FlutterTexture>* texture) {
   RegisterTexture(ios_context_->CreateExternalTexture(
       texture_id, fml::scoped_nsobject<NSObject<FlutterTexture>>{[texture retain]}));
+}
+  
+/**
+ * BD ADD:
+ *
+ */
+// |PlatformView|
+void PlatformViewIOS::RegisterExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader) {
+  RegisterImageLoader(std::make_shared<IOSExternalImageLoader>(imageLoader));
 }
 
 // |PlatformView|

@@ -115,8 +115,11 @@ source_set("ui") {
     "window/window.h",
   ]
 
-  # BD ADD:
+
+  # BD ADD: START
   sources += bd_flutter_lib_ui_sources
+  sources += image_loader_sources
+  # END
 
   public_configs = [ "//flutter:config" ]
 

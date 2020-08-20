@@ -859,6 +859,16 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return self;
 }
 
+/**
+ * BD ADD:
+ *
+ */
+#pragma mark - FlutterImageLoaderRegistry
+
+- (void)registerImageLoader:(NSObject<FlutterImageLoader>*)imageLoader {
+    self.iosPlatformView->RegisterExternalImageLoader(imageLoader);
+}
+
 #pragma mark - FlutterPluginRegistry
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
@@ -1030,6 +1040,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (NSObject<FlutterTextureRegistry>*)textures {
   return _flutterEngine;
+}
+
+/**
+ * BD ADD:
+ *
+ */
+- (NSObject<FlutterImageLoaderRegistry>*)imageLoaders {
+    return _flutterEngine;
 }
 
 - (void)publish:(NSObject*)value {

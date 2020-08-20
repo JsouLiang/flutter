@@ -1,0 +1,18 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+bd_flutter_android_path = "//flutter/bdflutter/shell/platform/android"
+
+android_external_image_loader_sources = [
+  "$bd_flutter_android_path/android_external_image_loader.h",
+  "$bd_flutter_android_path/android_external_image_loader.cc",
+]
+
+android_image_loader_java_sources = [
+  "$bd_flutter_android_path/io/flutter/view/AndroidImageLoader.java",
+  "$bd_flutter_android_path/io/flutter/view/NativeLoadCallback.java",
+  "$bd_flutter_android_path/io/flutter/view/ImageLoaderRegistry.java",
+  "$bd_flutter_android_path/io/flutter/view/ImageLoaderRegistryImpl.java",
+]
+

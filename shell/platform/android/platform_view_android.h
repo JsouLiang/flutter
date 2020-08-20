@@ -122,6 +122,10 @@ class PlatformViewAndroid final : public PlatformView {
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;
   }
+  /**
+   * BD ADD: register android image loader
+   */
+  void RegisterExternalImageLoader(const fml::jni::JavaObjectWeakGlobalRef& android_image_loader);
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

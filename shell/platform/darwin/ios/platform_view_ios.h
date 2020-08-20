@@ -90,6 +90,12 @@ class PlatformViewIOS final : public PlatformView {
   // |PlatformView|
   PointerDataDispatcherMaker GetDispatcherMaker() override;
 
+  /**
+   * BD ADD:
+   *
+   */
+  void RegisterExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader);
+
   // |PlatformView|
   void SetSemanticsEnabled(bool enabled) override;
 

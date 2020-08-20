@@ -11,6 +11,11 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.TextureRegistry;
+// BD ADD: START
+import io.flutter.view.ImageLoaderRegistry;
+import io.flutter.view.ImageLoaderRegistryImpl;
+import io.flutter.embedding.engine.FlutterJNI;
+// END
 
 /**
  * Interface to be implemented by all Flutter plugins.
@@ -62,128 +67,145 @@ import io.flutter.view.TextureRegistry;
  */
 public interface FlutterPlugin {
 
-  /**
-   * This {@code FlutterPlugin} has been associated with a {@link FlutterEngine} instance.
-   *
-   * <p>Relevant resources that this {@code FlutterPlugin} may need are provided via the {@code
-   * binding}. The {@code binding} may be cached and referenced until {@link
-   * #onDetachedFromEngine(FlutterPluginBinding)} is invoked and returns.
-   */
-  void onAttachedToEngine(@NonNull FlutterPluginBinding binding);
-
-  /**
-   * This {@code FlutterPlugin} has been removed from a {@link FlutterEngine} instance.
-   *
-   * <p>The {@code binding} passed to this method is the same instance that was passed in {@link
-   * #onAttachedToEngine(FlutterPluginBinding)}. It is provided again in this method as a
-   * convenience. The {@code binding} may be referenced during the execution of this method, but it
-   * must not be cached or referenced after this method returns.
-   *
-   * <p>{@code FlutterPlugin}s should release all resources in this method.
-   */
-  void onDetachedFromEngine(@NonNull FlutterPluginBinding binding);
-
-  /**
-   * Resources made available to all plugins registered with a given {@link FlutterEngine}.
-   *
-   * <p>The provided {@link BinaryMessenger} can be used to communicate with Dart code running in
-   * the Flutter context associated with this plugin binding.
-   *
-   * <p>Plugins that need to respond to {@code Lifecycle} events should implement the additional
-   * {@link ActivityAware} and/or {@link ServiceAware} interfaces, where a {@link Lifecycle}
-   * reference can be obtained.
-   */
-  class FlutterPluginBinding {
-    private final Context applicationContext;
-    private final FlutterEngine flutterEngine;
-    private final BinaryMessenger binaryMessenger;
-    private final TextureRegistry textureRegistry;
-    private final PlatformViewRegistry platformViewRegistry;
-    private final FlutterAssets flutterAssets;
-
-    public FlutterPluginBinding(
-        @NonNull Context applicationContext,
-        @NonNull FlutterEngine flutterEngine,
-        @NonNull BinaryMessenger binaryMessenger,
-        @NonNull TextureRegistry textureRegistry,
-        @NonNull PlatformViewRegistry platformViewRegistry,
-        @NonNull FlutterAssets flutterAssets) {
-      this.applicationContext = applicationContext;
-      this.flutterEngine = flutterEngine;
-      this.binaryMessenger = binaryMessenger;
-      this.textureRegistry = textureRegistry;
-      this.platformViewRegistry = platformViewRegistry;
-      this.flutterAssets = flutterAssets;
-    }
-
-    @NonNull
-    public Context getApplicationContext() {
-      return applicationContext;
-    }
-
     /**
-     * @deprecated Use {@code getBinaryMessenger()}, {@code getTextureRegistry()}, or {@code
-     *     getPlatformViewRegistry()} instead.
-     */
-    @Deprecated
-    @NonNull
-    public FlutterEngine getFlutterEngine() {
-      return flutterEngine;
-    }
-
-    @NonNull
-    public BinaryMessenger getBinaryMessenger() {
-      return binaryMessenger;
-    }
-
-    @NonNull
-    public TextureRegistry getTextureRegistry() {
-      return textureRegistry;
-    }
-
-    @NonNull
-    public PlatformViewRegistry getPlatformViewRegistry() {
-      return platformViewRegistry;
-    }
-
-    @NonNull
-    public FlutterAssets getFlutterAssets() {
-      return flutterAssets;
-    }
-  }
-
-  /** Provides Flutter plugins with access to Flutter asset information. */
-  interface FlutterAssets {
-    /**
-     * Returns the relative file path to the Flutter asset with the given name, including the file's
-     * extension, e.g., {@code "myImage.jpg"}.
+     * This {@code FlutterPlugin} has been associated with a {@link FlutterEngine} instance.
      *
-     * <p>The returned file path is relative to the Android app's standard assets directory.
-     * Therefore, the returned path is appropriate to pass to Android's {@code AssetManager}, but
-     * the path is not appropriate to load as an absolute path.
+     * <p>Relevant resources that this {@code FlutterPlugin} may need are provided via the {@code
+     * binding}. The {@code binding} may be cached and referenced until {@link
+     * #onDetachedFromEngine(FlutterPluginBinding)} is invoked and returns.
      */
-    String getAssetFilePathByName(@NonNull String assetFileName);
+    void onAttachedToEngine(@NonNull FlutterPluginBinding binding);
 
     /**
-     * Same as {@link #getAssetFilePathByName(String)} but with added support for an explicit
-     * Android {@code packageName}.
-     */
-    String getAssetFilePathByName(@NonNull String assetFileName, @NonNull String packageName);
-
-    /**
-     * Returns the relative file path to the Flutter asset with the given subpath, including the
-     * file's extension, e.g., {@code "/dir1/dir2/myImage.jpg"}.
+     * This {@code FlutterPlugin} has been removed from a {@link FlutterEngine} instance.
      *
-     * <p>The returned file path is relative to the Android app's standard assets directory.
-     * Therefore, the returned path is appropriate to pass to Android's {@code AssetManager}, but
-     * the path is not appropriate to load as an absolute path.
+     * <p>The {@code binding} passed to this method is the same instance that was passed in {@link
+     * #onAttachedToEngine(FlutterPluginBinding)}. It is provided again in this method as a
+     * convenience. The {@code binding} may be referenced during the execution of this method, but it
+     * must not be cached or referenced after this method returns.
+     *
+     * <p>{@code FlutterPlugin}s should release all resources in this method.
      */
-    String getAssetFilePathBySubpath(@NonNull String assetSubpath);
+    void onDetachedFromEngine(@NonNull FlutterPluginBinding binding);
 
     /**
-     * Same as {@link #getAssetFilePathBySubpath(String)} but with added support for an explicit
-     * Android {@code packageName}.
+     * Resources made available to all plugins registered with a given {@link FlutterEngine}.
+     *
+     * <p>The provided {@link BinaryMessenger} can be used to communicate with Dart code running in
+     * the Flutter context associated with this plugin binding.
+     *
+     * <p>Plugins that need to respond to {@code Lifecycle} events should implement the additional
+     * {@link ActivityAware} and/or {@link ServiceAware} interfaces, where a {@link Lifecycle}
+     * reference can be obtained.
      */
-    String getAssetFilePathBySubpath(@NonNull String assetSubpath, @NonNull String packageName);
-  }
+    class FlutterPluginBinding {
+        private final Context applicationContext;
+        private final FlutterEngine flutterEngine;
+        private final BinaryMessenger binaryMessenger;
+        private final TextureRegistry textureRegistry;
+        private final PlatformViewRegistry platformViewRegistry;
+        private final FlutterAssets flutterAssets;
+        // BD ADD:
+        private final ImageLoaderRegistry imageLoaderRegistry;
+
+        public FlutterPluginBinding(
+                @NonNull Context applicationContext,
+                @NonNull FlutterEngine flutterEngine,
+                @NonNull BinaryMessenger binaryMessenger,
+                @NonNull TextureRegistry textureRegistry,
+                @NonNull PlatformViewRegistry platformViewRegistry,
+                @NonNull FlutterAssets flutterAssets,
+                // BD ADD:
+                @NonNull FlutterJNI flutterJNI
+        ) {
+            this.applicationContext = applicationContext;
+            this.flutterEngine = flutterEngine;
+            this.binaryMessenger = binaryMessenger;
+            this.textureRegistry = textureRegistry;
+            this.platformViewRegistry = platformViewRegistry;
+            this.flutterAssets = flutterAssets;
+            // BD ADD:
+            this.imageLoaderRegistry = new ImageLoaderRegistryImpl(flutterJNI);
+        }
+
+        @NonNull
+        public Context getApplicationContext() {
+            return applicationContext;
+        }
+
+        /**
+         * @deprecated Use {@code getBinaryMessenger()}, {@code getTextureRegistry()}, or {@code
+         * getPlatformViewRegistry()} instead.
+         */
+        @Deprecated
+        @NonNull
+        public FlutterEngine getFlutterEngine() {
+            return flutterEngine;
+        }
+
+        @NonNull
+        public BinaryMessenger getBinaryMessenger() {
+            return binaryMessenger;
+        }
+
+        @NonNull
+        public TextureRegistry getTextureRegistry() {
+            return textureRegistry;
+        }
+
+        @NonNull
+        public PlatformViewRegistry getPlatformViewRegistry() {
+            return platformViewRegistry;
+        }
+
+        @NonNull
+        public FlutterAssets getFlutterAssets() {
+            return flutterAssets;
+        }
+
+        /**
+         * BD ADD:
+         */
+        @NonNull
+        public ImageLoaderRegistry getImageLoaderRegistry() {
+            return imageLoaderRegistry;
+        }
+    }
+
+    /**
+     * Provides Flutter plugins with access to Flutter asset information.
+     */
+    interface FlutterAssets {
+        /**
+         * Returns the relative file path to the Flutter asset with the given name, including the file's
+         * extension, e.g., {@code "myImage.jpg"}.
+         *
+         * <p>The returned file path is relative to the Android app's standard assets directory.
+         * Therefore, the returned path is appropriate to pass to Android's {@code AssetManager}, but
+         * the path is not appropriate to load as an absolute path.
+         */
+        String getAssetFilePathByName(@NonNull String assetFileName);
+
+        /**
+         * Same as {@link #getAssetFilePathByName(String)} but with added support for an explicit
+         * Android {@code packageName}.
+         */
+        String getAssetFilePathByName(@NonNull String assetFileName, @NonNull String packageName);
+
+        /**
+         * Returns the relative file path to the Flutter asset with the given subpath, including the
+         * file's extension, e.g., {@code "/dir1/dir2/myImage.jpg"}.
+         *
+         * <p>The returned file path is relative to the Android app's standard assets directory.
+         * Therefore, the returned path is appropriate to pass to Android's {@code AssetManager}, but
+         * the path is not appropriate to load as an absolute path.
+         */
+        String getAssetFilePathBySubpath(@NonNull String assetSubpath);
+
+        /**
+         * Same as {@link #getAssetFilePathBySubpath(String)} but with added support for an explicit
+         * Android {@code packageName}.
+         */
+        String getAssetFilePathBySubpath(@NonNull String assetSubpath, @NonNull String packageName);
+    }
 }

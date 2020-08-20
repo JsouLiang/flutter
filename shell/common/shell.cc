@@ -1070,6 +1070,22 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
   });
 }
 
+/**
+ * BD ADD:
+ */
+// |PlatformView::Delegate|
+void Shell::OnPlatformViewRegisterImageLoader(std::shared_ptr<flutter::ImageLoader> imageLoader) {
+    FML_DCHECK(is_setup_);
+    FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+    task_runners_.GetIOTaskRunner()->PostTask(
+      [io_manager = io_manager_->GetWeakPtr(),
+       imageLoader = std::move(imageLoader)] {
+        if (io_manager) {
+          io_manager->RegisterImageLoader(imageLoader);
+      }
+    });
+}
+
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {
   FML_DCHECK(is_setup_);

@@ -90,6 +90,9 @@ source_set("flow") {
       "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
       "$fuchsia_sdk_root/fidl:fuchsia.ui.views",
       "$fuchsia_sdk_root/pkg:scenic_cpp",
+      "//sdk/lib/ui/scenic/cpp",
+      "//topaz/public/dart-pkg/zircon",
+      "//zircon/public/lib/zx",
     ]
   }
 }

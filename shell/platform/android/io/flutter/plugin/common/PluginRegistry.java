@@ -13,6 +13,8 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.platform.PlatformViewRegistry;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
+// BD ADD:
+import io.flutter.view.ImageLoaderRegistry;
 import io.flutter.view.TextureRegistry;
 
 /**
@@ -160,6 +162,13 @@ public interface PluginRegistry {
      * http://flutter.dev/go/android-plugin-migration
      */
     PlatformViewRegistry platformViewRegistry();
+
+    /**
+     * BD ADD:
+     * Returns a {@link ImageLoaderRegistry} which the plugin can use for
+     * managing backend image loaders.
+     */
+    ImageLoaderRegistry imageLoaderRegistry();
 
     /**
      * Returns the {@link FlutterView} that's instantiated by this plugin's {@link #activity()

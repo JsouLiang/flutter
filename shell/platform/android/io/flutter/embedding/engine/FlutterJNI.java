@@ -31,12 +31,12 @@ import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.util.Preconditions;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
+// BD ADD: START
+import io.flutter.view.AndroidImageLoader;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+// END
 
 /**
  * Interface between Flutter embedding's Java code and Flutter engine's C/C++ code.
@@ -700,6 +700,31 @@ public class FlutterJNI {
 
   private native void nativeSetAccessibilityFeatures(long nativeShellHolderId, int flags);
   // ------ End Accessibility Support ----
+  /**
+   * BD ADD: register android image loader HuWeijie
+   */
+  @UiThread
+  public void registerAndroidImageLoader(AndroidImageLoader androidImageLoader) {
+    ensureAttachedToNative();
+    nativeRegisterAndroidImageLoader(nativePlatformViewId, androidImageLoader);
+  }
+  /**
+   * BD ADD: register android image loader HuWeijie
+   */
+  private native void nativeRegisterAndroidImageLoader(long nativePlatformViewId, AndroidImageLoader androidImageLoader);
+
+  /**
+   * BD ADD: unregister android image loader
+   */
+  @UiThread
+  public void unRegisterAndroidImageLoader() {
+    ensureAttachedToNative();
+    nativeUnregisterAndroidImageLoader(nativePlatformViewId);
+  }
+  /**
+   * BD ADD: unregister android image loader HuWeijie
+   */
+  private native void nativeUnregisterAndroidImageLoader(long nativePlatformViewId);
 
   // ------ Start Texture Registration Support -----
   /**

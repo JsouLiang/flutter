@@ -144,7 +144,7 @@ public class FlutterNativeView implements BinaryMessenger {
     dartExecutor.getBinaryMessenger().setMessageHandler(channel, handler);
   }
 
-  /*package*/ FlutterJNI getFlutterJNI() {
+  public FlutterJNI getFlutterJNI() {
     return mFlutterJNI;
   }
 
@@ -153,17 +153,24 @@ public class FlutterNativeView implements BinaryMessenger {
     dartExecutor.onAttachedToJNI();
   }
 
-  private final class EngineLifecycleListenerImpl implements EngineLifecycleListener {
-    // Called by native to notify when the engine is restarted (cold reload).
-    @SuppressWarnings("unused")
-    public void onPreEngineRestart() {
-      if (mFlutterView != null) {
-        mFlutterView.resetAccessibilityTree();
-      }
-      if (mPluginRegistry == null) {
-        return;
-      }
-      mPluginRegistry.onPreEngineRestart();
+    // BD ADD: START
+    public void scheduleBackgroundFrame() {
+        mFlutterJNI.scheduleBackgroundFrame();
+    }
+    // END
+
+    private final class EngineLifecycleListenerImpl implements EngineLifecycleListener {
+        // Called by native to notify when the engine is restarted (cold reload).
+        @SuppressWarnings("unused")
+        public void onPreEngineRestart() {
+            if (mFlutterView != null) {
+                mFlutterView.resetAccessibilityTree();
+            }
+            if (mPluginRegistry == null) {
+                return;
+            }
+            mPluginRegistry.onPreEngineRestart();
+        }
     }
 
     public void onEngineWillDestroy() {

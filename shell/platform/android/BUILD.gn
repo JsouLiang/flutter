@@ -8,6 +8,9 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
+# BD ADD
+import("//flutter/bdflutter/shell/platform/android/BD_BUILD.gni")
+
 
 shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
@@ -50,6 +53,9 @@ shared_library("flutter_shell_native") {
     "vsync_waiter_android.h",
   ]
 
+# BD ADD:
+    sources += android_external_image_loader_sources
+
   deps = [
     ":android_gpu_configuration",
     ":icudtl_object",
@@ -87,6 +93,8 @@ shared_library("flutter_shell_native") {
   }
 
   libs = [
+    # BD ADD:
+    "jnigraphics",
     "android",
     "EGL",
     "GLESv2",
@@ -249,6 +257,9 @@ android_java_sources = [
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
+
+# BD ADD:
+android_java_sources += android_image_loader_java_sources
 
 list_script = rebase_path("//build/ls.py", ".", "//")
 embedding_dependencies_jars =

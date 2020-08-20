@@ -10,6 +10,7 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
 import("//flutter/testing/testing.gni")
+import("//flutter/bdflutter/shell/platform/darwin/ios/BD_BUILD.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
@@ -35,6 +36,10 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
   "framework/Headers/FlutterViewController.h",
 ]
+
+# BD ADD: START
+_flutter_framework_headers += image_loader_framework_headers
+# END
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
@@ -116,6 +121,10 @@ source_set("flutter_framework_source") {
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
   ]
+
+  # BD ADD: START
+  sources += external_image_loader_sources
+  # END
 
   sources += _flutter_framework_headers
 

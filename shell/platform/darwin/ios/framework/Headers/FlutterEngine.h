@@ -13,6 +13,8 @@
 #import "FlutterMacros.h"
 #import "FlutterPlugin.h"
 #import "FlutterTexture.h"
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/darwin/ios/framework/Headers/FlutterImageLoader.h"
 
 @class FlutterViewController;
 
@@ -57,6 +59,9 @@ extern NSString* const FlutterDefaultInitialRoute;
  */
 FLUTTER_DARWIN_EXPORT
 @interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+FLUTTER_EXPORT
+// BD MOD: add FlutterImageLoaderRegistry
+@interface FlutterEngine : NSObject <FlutterBinaryMessenger, FlutterTextureRegistry, FlutterImageLoaderRegistry, FlutterPluginRegistry>
 
 /**
  * Default initializer for a FlutterEngine.

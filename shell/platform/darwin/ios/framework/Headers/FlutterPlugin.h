@@ -13,6 +13,8 @@
 #import "FlutterCodecs.h"
 #import "FlutterPlatformViews.h"
 #import "FlutterTexture.h"
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/darwin/ios/framework/Headers/FlutterImageLoader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;
@@ -290,6 +292,9 @@ typedef enum {
  * @return The texture registry.
  */
 - (NSObject<FlutterTextureRegistry>*)textures;
+
+// BD ADD:
+- (NSObject<FlutterImageLoaderRegistry>*)imageLoaders;
 
 /**
  * Registers a `FlutterPlatformViewFactory` for creation of platform views.
