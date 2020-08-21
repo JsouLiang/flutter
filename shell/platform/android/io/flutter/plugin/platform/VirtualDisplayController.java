@@ -7,6 +7,8 @@ package io.flutter.plugin.platform;
 import static android.view.View.OnFocusChangeListener;
 
 import android.annotation.TargetApi;
+//BD ADD
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -92,7 +94,12 @@ class VirtualDisplayController {
             viewId,
             createParams,
             focusChangeListener);
-    presentation.show();
+    // BD MOD: XieRan
+    // presentation.show();
+    if (context instanceof Activity && !((Activity) context).isFinishing()) {
+      presentation.show();
+    }
+    // END
   }
 
   public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
@@ -158,7 +165,12 @@ class VirtualDisplayController {
             presentationState,
             focusChangeListener,
             isFocused);
-    newPresentation.show();
+    // BD MOD: XieRan
+    // presentation.show();
+    if (context instanceof Activity && !((Activity) context).isFinishing()) {
+      presentation.show();
+    }
+    // END
     presentation.cancel();
     presentation = newPresentation;
   }
@@ -166,9 +178,20 @@ class VirtualDisplayController {
   public void dispose() {
     PlatformView view = presentation.getView();
     // Fix rare crash on HuaWei device described in: https://github.com/flutter/engine/pull/9192
-    presentation.cancel();
+    // BD MOD: XieRan
+    // presentation.cancel();
+    // Activity已销毁后调用该方法会抛出异常
+    try {
+      presentation.cancel();
+    } catch (Exception ignore) {}
+    // END
     presentation.detachState();
-    view.dispose();
+    // BD MOD:
+    // view.dispose();
+    if (view != null) {
+      view.dispose();
+    }
+    // END
     virtualDisplay.release();
     textureEntry.release();
   }
@@ -206,7 +229,12 @@ class VirtualDisplayController {
   public View getView() {
     if (presentation == null) return null;
     PlatformView platformView = presentation.getView();
-    return platformView.getView();
+    // BD MOD: XieRan
+    // return platformView.getView();
+    if (platformView != null) {
+      return platformView.getView();
+    }
+    return null;
   }
 
   /** Dispatches a motion event to the presentation for this controller. */

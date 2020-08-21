@@ -235,8 +235,13 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
           vdControllers.put(request.viewId, vdController);
           View platformView = vdController.getView();
-          platformView.setLayoutDirection(request.direction);
-          contextToPlatformView.put(platformView.getContext(), platformView);
+          // BD MOD: START
+          // platformView.setLayoutDirection(request.direction);
+          // contextToPlatformView.put(platformView.getContext(), platformView);
+          if (platformView != null) {
+            platformView.setLayoutDirection(request.direction);
+            contextToPlatformView.put(platformView.getContext(), platformView);
+          }
 
           // TODO(amirh): copy accessibility nodes to the FlutterView's accessibility tree.
 

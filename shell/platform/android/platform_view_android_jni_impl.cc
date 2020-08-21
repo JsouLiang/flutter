@@ -1346,6 +1346,9 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
   // END
 
+  // 解决5.x手机上的crash
+  fml::jni::ClearException(env);
+
   g_attach_to_gl_context_method = env->GetMethodID(
       g_texture_wrapper_class->obj(), "attachToGLContext", "(I)V");
 

@@ -215,8 +215,16 @@ class SingleViewPresentation extends Presentation {
   }
 
   public PresentationState detachState() {
-    container.removeAllViews();
-    rootView.removeAllViews();
+    // BD MOD: START
+    //container.removeAllViews();
+    //rootView.removeAllViews();
+    if (container != null) {
+      container.removeAllViews();
+    }
+    if (rootView != null) {
+      rootView.removeAllViews();
+    }
+    // END
     return state;
   }
 
