@@ -48,7 +48,7 @@ function checkResult() {
 
 cd ..
 for liteMode in ${liteModes[@]}; do
-	for mode in 'debug' 'profile' 'release' 'release_dynamicart' 'profile_dynamicart'; do
+	for mode in 'debug' 'profile' 'release'; do
 		# lite only build for release mode
 		if [ $mode == 'debug' ] || [ $mode == 'profile' ] || [[ $mode == *"profile_dynamicart"* ]]; then
 		  if [ $liteMode != 'normal' ]; then
