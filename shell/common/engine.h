@@ -794,6 +794,8 @@ class Engine final : public RuntimeDelegate,
   void ScheduleBackgroundFrame();
 
   void ExitApp();
+
+  void NotifyLowMemoryWarning();
   // END
 
   // |PointerDataDispatcher::Delegate|

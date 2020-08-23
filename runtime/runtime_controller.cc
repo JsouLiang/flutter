@@ -528,6 +528,10 @@ void RuntimeController::ExitApp() {
   }
 }
 
+void RuntimeController::NotifyLowMemoryWarning() {
+  Dart_NotifyLowMemory();
+}
+
 std::vector<double> RuntimeController::GetFps(int thread_type, int fps_type, bool do_clear) {
   return client_.GetFps(thread_type, fps_type, do_clear);
 }

@@ -586,8 +586,10 @@ class RuntimeController : public PlatformConfigurationClient {
     return snapshot_delegate_;
   }
 
-  // BD ADD:
+  // BD ADD: START
   void ExitApp();
+  void NotifyLowMemoryWarning();
+  // END
 
  protected:
   /// Constructor for Mocks.
