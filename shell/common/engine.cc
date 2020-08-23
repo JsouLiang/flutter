@@ -624,6 +624,10 @@ std::vector<double> Engine::GetFps(int thread_type,
                                    bool do_clear) {
   return delegate_.GetFps(thread_type, fps_type, do_clear);
 }
+
+void Engine::NotifyLowMemoryWarning() {
+  runtime_controller_->NotifyLowMemoryWarning();
+}
 // END
 
 }  // namespace flutter
