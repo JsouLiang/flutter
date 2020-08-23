@@ -7,6 +7,7 @@ package io.flutter.plugin.platform;
 import static android.view.View.OnFocusChangeListener;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -158,7 +159,12 @@ class VirtualDisplayController {
             presentationState,
             focusChangeListener,
             isFocused);
-    newPresentation.show();
+    // BD MOD: XieRan
+    // newPresentation.show();
+    if (context instanceof Activity && !((Activity) context).isFinishing()) {
+      newPresentation.show();
+    }
+    // END
     presentation.cancel();
     presentation = newPresentation;
   }
