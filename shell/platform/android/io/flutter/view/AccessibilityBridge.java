@@ -680,7 +680,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (semanticsNode.parent != null) {
       Rect parentBounds = semanticsNode.parent.getGlobalRect();
       Rect boundsInParent = new Rect(bounds);
-      boundsInParent.offset(-parentBounds.left, -parentBounds.top);
+      // BD ADD
+      if (parentBounds != null) {
+        boundsInParent.offset(-parentBounds.left, -parentBounds.top);
+      }
       result.setBoundsInParent(boundsInParent);
     } else {
       result.setBoundsInParent(bounds);
@@ -1436,7 +1439,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           event.setScrollX((int) position);
           event.setMaxScrollX((int) max);
         }
-        if (object.scrollChildren > 0) {
+        // BD MOD
+        //if (object.scrollChildren > 0) {
+        if (object.scrollChildren > 0 && object.childrenInHitTestOrder != null) {
           // We don't need to add 1 to the scroll index because TalkBack does this automagically.
           event.setItemCount(object.scrollChildren);
           event.setFromIndex(object.scrollIndex);
@@ -1590,6 +1595,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // https://developer.android.com/reference/android/view/View.html#sendAccessibilityEvent(int)
     // We just want the final part at this point, since the event parameter
     // has already been correctly populated.
+    // BD ADD: START
+    if (rootAccessibilityView.getParent() == null) {
+      Log.w(TAG, "FlutterView has no parent. Skip accessibility event!");
+      return;
+    }
+    // END
     rootAccessibilityView.getParent().requestSendAccessibilityEvent(rootAccessibilityView, event);
   }
 
@@ -2249,6 +2260,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (globalTransform == null) {
           globalTransform = new float[16];
         }
+        // BD ADD: START
+        if (ancestorTransform == null) {
+          ancestorTransform = new float[16];
+        }
+        if (transform == null) {
+          transform = new float[16];
+        }
+        //END
+
         Matrix.multiplyMM(globalTransform, 0, ancestorTransform, 0, transform, 0);
 
         final float[] sample = new float[4];
