@@ -246,6 +246,11 @@ public class FlutterLoader {
       if (settings.getLogTag() != null) {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
+      // BD ADD:START
+      if (settings.isDisableLeakVM()) {
+          shellArgs.add("--disable-leak-vm");
+      }
+      // END
 
       ApplicationInfo applicationInfo =
           applicationContext
@@ -406,6 +411,18 @@ public class FlutterLoader {
 
   public static class Settings {
     private String logTag;
+    // BD ADD START:
+    private boolean disableLeakVM = false;
+
+    public boolean isDisableLeakVM() {
+        return disableLeakVM;
+    }
+
+    // 页面退出后，FlutterEngine默认是不销毁VM的，disableLeakVM设置在所有页面退出后销毁VM
+    public void disableLeakVM() {
+        disableLeakVM = true;
+    }
+    // END
 
     @Nullable
     public String getLogTag() {

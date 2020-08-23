@@ -360,6 +360,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.HasOption(FlagForSwitch(Switch::LimitSkiaWorker));
   settings.disable_preload =
       command_line.HasOption(FlagForSwitch(Switch::DisablePreload));
+  if (command_line.HasOption(FlagForSwitch(Switch::DisableLeakVM))) {
+      settings.leak_vm = false;
+  }
   // END
   if (settings.icu_initialization_required) {
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),

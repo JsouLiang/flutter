@@ -305,5 +305,12 @@ void AndroidShellHolder::ScheduleBackgroundFrame() {
   }
   shell_->ScheduleBackgroundFrame();
 }
+
+void AndroidShellHolder::ExitApp(fml::closure closure) {
+  if (!IsValid()) {
+    return;
+  }
+  shell_->ExitApp(std::move(closure));
+}
 // END
 }  // namespace flutter

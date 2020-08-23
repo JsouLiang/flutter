@@ -213,6 +213,7 @@ DEF_SWITCH(LimitSkiaWorker,
 DEF_SWITCH(DisablePreload,
      "disable-preload",
      "Disable preload DartVM and SkFontMgr")
+DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
 // END
 DEF_SWITCHES_END
 
