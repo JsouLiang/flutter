@@ -128,16 +128,46 @@ void PlatformViewAndroid::NotifyCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
   if (android_surface_) {
     InstallFirstFrameCallback();
-
+  // BD MOD: START
+  //fml::AutoResetWaitableEvent latch;
+  //fml::TaskRunner::RunNowOrPostTask(
+  //      task_runners_.GetRasterTaskRunner(),
+  //      [&latch, surface = android_surface_.get(),
+  //       native_window = std::move(native_window)]() {
+  //       surface->SetNativeWindow(native_window);
+  //       latch.Signal();
+  //     });
+  if (AndroidContextGL::NeedBindAndUnbindContext()) {
+    fml::AutoResetWaitableEvent latch;
+    fml::RefPtr<fml::TaskRunner> raster_runner = task_runners_.GetRasterTaskRunner();
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetIOTaskRunner(),
+        [&latch, raster_runner, surface = android_surface_.get(),
+        native_window = std::move(native_window)]() {
+        surface->ResourceContextClearCurrent();
+          fml::AutoResetWaitableEvent latch_ui;
+          fml::TaskRunner::RunNowOrPostTask(
+              raster_runner, [&surface, native_window, &latch_ui]() {
+                surface->SetNativeWindow(native_window);
+                latch_ui.Signal();
+              });
+          latch_ui.Wait();
+          surface->ResourceContextMakeCurrent();
+          latch.Signal();
+        });
+    latch.Wait();
+  } else {
     fml::AutoResetWaitableEvent latch;
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
         [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window)]() {
-          surface->SetNativeWindow(native_window);
-          latch.Signal();
+        native_window = std::move(native_window)]() {
+            surface->SetNativeWindow(native_window);
+            latch.Signal();
         });
     latch.Wait();
+    }
+    // END
   }
 
   PlatformView::NotifyCreated();

@@ -117,6 +117,8 @@ class AndroidContextGL : public AndroidContext {
   ///
   EGLContext CreateNewContext() const;
 
+  // BD ADD:
+  static bool NeedBindAndUnbindContext();
  private:
   fml::RefPtr<AndroidEnvironmentGL> environment_;
   EGLConfig config_;
