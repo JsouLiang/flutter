@@ -104,6 +104,10 @@ class AndroidShellHolder {
     return shell_->GetPlatformMessageHandler();
   }
 
+  // BD ADD: START
+  void ExitApp(fml::closure closure);
+  // END
+
  private:
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
