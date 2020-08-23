@@ -166,9 +166,9 @@ class VirtualDisplayController {
             focusChangeListener,
             isFocused);
     // BD MOD: XieRan
-    // presentation.show();
+    // newPresentation.show();
     if (context instanceof Activity && !((Activity) context).isFinishing()) {
-      presentation.show();
+      newPresentation.show();
     }
     // END
     presentation.cancel();
