@@ -826,6 +826,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
 
   // BD ADD: START
   void ExitApp();
+
+  void NotifyLowMemoryWarning();
   // END
 
   // |PointerDataDispatcher::Delegate|
