@@ -87,6 +87,20 @@ cd ..
 cd ..
 bd_upload $cacheDir/dart-sdk-darwin-x64.zip flutter_infra/flutter/$tosDir/dart-sdk-darwin-x64.zip
 
+# font-subset.zip
+cd out/host_debug
+zip -rq ../../$cacheDir/font-subset.zip font-subset
+cd ..
+cd ..
+bd_upload $cacheDir/font-subset.zip flutter/framework/$tosDir/darwin-x64/font-subset.zip
+
+# flutter_web_sdk.zip
+cd out/host_debug
+zip -rq ../../$cacheDir/flutter-web-sdk-darwin-x64.zip flutter_web_sdk
+cd ..
+cd ..
+bd_upload $cacheDir/flutter-web-sdk-darwin-x64.zip flutter_infra/flutter/$tosDir/flutter-web-sdk-darwin-x64.zip
+
 ./flutter/tools/gn --runtime-mode=release --no-lto
 ninja -C out/host_release -j $jcount
 checkResult
