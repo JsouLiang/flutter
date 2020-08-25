@@ -104,6 +104,8 @@ class LayoutCacheKey {
   void doLayout(Layout* layout,
                 LayoutContext* ctx,
                 const std::shared_ptr<FontCollection>& collection) const {
+    // BD ADD:
+    TRACE_EVENT0("flutter", "LayoutCacheKey::doLayout");
     layout->mAdvances.resize(mCount, 0);
     ctx->clearHbFonts();
     layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx,
@@ -142,6 +144,8 @@ class LayoutCache : private android::OnEntryRemoved<LayoutCacheKey, Layout*> {
   Layout* get(LayoutCacheKey& key,
               LayoutContext* ctx,
               const std::shared_ptr<FontCollection>& collection) {
+    // BD ADD:
+    TRACE_EVENT0("flutter", "LayoutCache::get");
     Layout* layout = mCache.get(key);
     if (layout == NULL) {
       key.copyText();
@@ -615,8 +619,10 @@ float Layout::measureText(const uint16_t* buf,
                           const std::shared_ptr<FontCollection>& collection,
                           float* advances) {
   std::scoped_lock _l(gMinikinLock);
-  // BD ADD:
-  TRACE_EVENT1("flutter", "Layout::measureText", "text count", std::to_string(count).c_str());
+  // BD ADD: START
+  TRACE_EVENT1("flutter", "Layout::measureText", "text count",
+               std::to_string(count).c_str());
+  // END
 
   LayoutContext ctx;
   ctx.style = style;
@@ -640,6 +646,8 @@ float Layout::doLayoutRunCached(
     const std::shared_ptr<FontCollection>& collection,
     Layout* layout,
     float* advances) {
+  // BD ADD:
+  TRACE_EVENT0("flutter", "Layout::doLayoutRunCached");
   const uint32_t originalHyphen = ctx->paint.hyphenEdit.getHyphen();
   float advance = 0;
   if (!isRtl) {
@@ -705,6 +713,10 @@ float Layout::doLayoutWord(const uint16_t* buf,
                            const std::shared_ptr<FontCollection>& collection,
                            Layout* layout,
                            float* advances) {
+  // BD ADD: START
+  TRACE_EVENT1("flutter", "Layout::doLayoutWord", "count",
+               std::to_string(count).c_str());
+  // END
   LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
   LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count,
                      bufSize, isRtl);
@@ -923,6 +935,8 @@ void Layout::doLayoutRun(const uint16_t* buf,
                          bool isRtl,
                          LayoutContext* ctx,
                          const std::shared_ptr<FontCollection>& collection) {
+  // BD ADD:
+  TRACE_EVENT0("flutter", "Layout::doLayoutRun");
   hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
   std::vector<FontCollection::Run> items;
   collection->itemize(buf + start, count, ctx->style, &items);
@@ -1025,9 +1039,15 @@ void Layout::doLayoutRun(const uint16_t* buf,
       const uint32_t clusterStart =
           addToHbBuffer(buffer, buf, start, count, bufSize, scriptRunStart,
                         scriptRunEnd, ctx->paint.hyphenEdit, hbFont);
-
-      hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0],
-               features.size());
+      // BD MOD: START
+      // hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0],
+      //          features.size());
+      {
+        TRACE_EVENT0("flutter", "Layout::doLayoutRun::hb_shape");
+        hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0],
+                 features.size());
+      }
+      // END
       unsigned int numGlyphs;
       hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
       hb_glyph_position_t* positions =

@@ -69,6 +69,12 @@ std::shared_ptr<minikin::FontCollection> FontCollection::Create(
 
 FontCollection::FontCollection() : mMaxChar(0) {}
 
+// BD ADD: START
+FontCollection::~FontCollection() {
+  sFallbackFamilies.clear();
+}
+// END
+
 bool FontCollection::init(
     const std::vector<std::shared_ptr<FontFamily>>& typefaces) {
   std::scoped_lock _l(gMinikinLock);
@@ -494,6 +500,8 @@ void FontCollection::itemize(const uint16_t* string,
                              size_t string_size,
                              FontStyle style,
                              vector<Run>* result) const {
+  // BD ADD:
+  TRACE_EVENT0("flutter", "FontCollection::itemize");
   const uint32_t langListId = style.getLanguageListId();
   int variant = style.getVariant();
   const FontFamily* lastFamily = nullptr;

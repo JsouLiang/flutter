@@ -21,7 +21,8 @@
 #include <set>
 #include <string>
 #include <unordered_map>
-
+// BD ADD:
+#include <mutex>
 #include "flutter/fml/macros.h"
 #include "minikin/FontCollection.h"
 #include "minikin/FontFamily.h"
@@ -50,6 +51,8 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   void SetAssetFontManager(sk_sp<SkFontMgr> font_manager);
   void SetDynamicFontManager(sk_sp<SkFontMgr> font_manager);
   void SetTestFontManager(sk_sp<SkFontMgr> font_manager);
+  // BD ADD:
+  void SetAsyncMode(bool async);
 
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamilies(
       const std::vector<std::string>& font_families,
@@ -94,6 +97,10 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   sk_sp<SkFontMgr> asset_font_manager_;
   sk_sp<SkFontMgr> dynamic_font_manager_;
   sk_sp<SkFontMgr> test_font_manager_;
+  // BD ADD: START
+  std::mutex mutex_;
+  std::atomic_bool is_async_mode_;
+  // END
   std::unordered_map<FamilyKey,
                      std::shared_ptr<minikin::FontCollection>,
                      FamilyKey::Hasher>

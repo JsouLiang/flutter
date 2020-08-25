@@ -2076,4 +2076,10 @@ std::vector<LineMetrics>& ParagraphTxt::GetLineMetrics() {
   return line_metrics_;
 }
 
+// BD ADD: START
+void ParagraphTxt::SetAsyncMode(bool async) {
+  font_collection_->SetAsyncMode(async);
+}
+// END
+
 }  // namespace txt

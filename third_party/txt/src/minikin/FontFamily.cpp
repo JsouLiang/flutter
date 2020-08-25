@@ -34,6 +34,8 @@
 #include "FontUtils.h"
 #include "HbFontCache.h"
 #include "MinikinInternal.h"
+// BD ADD:
+#include "flutter/fml/trace_event.h"
 
 using std::vector;
 
@@ -175,6 +177,8 @@ bool FontFamily::isColorEmojiFamily() const {
 }
 
 void FontFamily::computeCoverage() {
+  // BD ADD:
+  TRACE_EVENT0("flutter", "FontFamily::computeCoverage");
   std::scoped_lock _l(gMinikinLock);
   const FontStyle defaultStyle;
   const MinikinFont* typeface = getClosestMatch(defaultStyle).font;

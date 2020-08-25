@@ -67,6 +67,9 @@ class ParagraphSkia : public Paragraph {
 
   Range<size_t> GetWordBoundary(size_t offset) override;
 
+  // BD ADD:
+  void SetAsyncMode(bool async) override;
+  
  private:
   std::unique_ptr<skia::textlayout::Paragraph> paragraph_;
   std::optional<std::vector<LineMetrics>> line_metrics_;
