@@ -213,4 +213,8 @@ Paragraph::Range<size_t> ParagraphSkia::GetWordBoundary(size_t offset) {
   return Paragraph::Range<size_t>(range.start, range.end);
 }
 
+// BD ADD: START
+void ParagraphSkia::SetAsyncMode(bool async) {}
+// END
+
 }  // namespace txt
