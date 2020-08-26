@@ -82,6 +82,7 @@ bd_upload $cacheDir/flutter_patched_sdk.zip flutter/framework/$tosDir/flutter_pa
 
 # dart-sdk-darwin-x64.zip
 cd out/host_debug
+cp -rf gen/const_finder.dart.snapshot dart-sdk/
 zip -rq ../../$cacheDir/dart-sdk-darwin-x64.zip dart-sdk
 cd ..
 cd ..
