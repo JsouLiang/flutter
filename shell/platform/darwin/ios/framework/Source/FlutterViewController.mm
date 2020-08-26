@@ -698,12 +698,12 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
   [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
   [[_engine.get() restorationPlugin] markRestorationComplete];
 
+  [self onUserSettingsChanged:nil];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
-  [self onUserSettingsChanged:nil];
   [self onAccessibilityStatusChanged:nil];
   if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
     [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.resumed"];
