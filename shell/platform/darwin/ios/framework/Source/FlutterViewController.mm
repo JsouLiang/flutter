@@ -109,6 +109,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
   fml::scoped_nsobject<UIPanGestureRecognizer> _panGestureRecognizer API_AVAILABLE(ios(13.4));
   fml::scoped_nsobject<UIView> _keyboardAnimationView;
   MouseState _mouseState;
+  // BD ADD:
+  BOOL _surfaceCreated;
 }
 
 @synthesize displayingFlutterUI = _displayingFlutterUI;
@@ -135,6 +137,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
     _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
     _ongoingTouches.reset([[NSMutableSet alloc] init]);
+    // BD ADD:
+    _surfaceCreated = NO;
 
     [self performCommonViewControllerInitialization];
     [engine setViewController:self];
@@ -211,6 +215,8 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [_engine.get() createShell:nil libraryURI:nil initialRoute:initialRoute];
   _engineNeedsLaunch = YES;
   _ongoingTouches.reset([[NSMutableSet alloc] init]);
+  // BD ADD:
+  _surfaceCreated = NO;
   [self loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
 }
@@ -652,16 +658,20 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and raster
   // thread.
-  if (appeared) {
+  // BD MOD
+  // if (appeared) {
+  if (appeared && !_surfaceCreated) {
     [self installFirstFrameCallback];
     [_engine.get() platformViewsController]->SetFlutterView(_flutterView.get());
     [_engine.get() platformViewsController]->SetFlutterViewController(self);
     [_engine.get() iosPlatformView]->NotifyCreated();
+    _surfaceCreated = YES;
   } else {
     self.displayingFlutterUI = NO;
     [_engine.get() iosPlatformView]->NotifyDestroyed();
     [_engine.get() platformViewsController]->SetFlutterView(nullptr);
     [_engine.get() platformViewsController]->SetFlutterViewController(nullptr);
+    _surfaceCreated = NO;
   }
 }
 
