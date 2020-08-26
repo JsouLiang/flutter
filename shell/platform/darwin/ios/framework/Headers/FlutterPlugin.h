@@ -14,7 +14,7 @@
 #import "FlutterPlatformViews.h"
 #import "FlutterTexture.h"
 // BD ADD:
-#include "flutter/bdflutter/shell/platform/darwin/ios/framework/Headers/FlutterImageLoader.h"
+#include "FlutterImageLoader.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;

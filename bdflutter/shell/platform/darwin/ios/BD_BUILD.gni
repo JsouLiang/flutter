@@ -4,10 +4,6 @@
 
 bd_flutter_ios_path = "//flutter/bdflutter/shell/platform/darwin/ios"
 
-image_loader_framework_headers = [
-  "$bd_flutter_ios_path/framework/Headers/FlutterImageLoader.h",
-]
-
 external_image_loader_sources = [
   "$bd_flutter_ios_path/ios_external_image_loader.h",
   "$bd_flutter_ios_path/ios_external_image_loader.mm",

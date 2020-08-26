@@ -35,11 +35,10 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPlugin.h",
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
   "framework/Headers/FlutterViewController.h",
+  # BD ADD: START
+  "framework/Headers/FlutterImageLoader.h",
+  # END
 ]
-
-# BD ADD: START
-_flutter_framework_headers += image_loader_framework_headers
-# END
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 

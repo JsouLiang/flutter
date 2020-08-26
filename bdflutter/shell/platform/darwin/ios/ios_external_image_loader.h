@@ -3,7 +3,7 @@
 
 #include "flutter/bdflutter/lib/ui/painting/image_loader.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "flutter/bdflutter/shell/platform/darwin/ios/framework/Headers/FlutterImageLoader.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterImageLoader.h"
 
 // BD ADD: START
 namespace flutter {
