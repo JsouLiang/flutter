@@ -67,6 +67,8 @@ class Performance {
 
   bool requestHeapSnapshot(String outFilePath) native 'Performance_requestHeapSnapshot';
 
+  String getHeapInfo() native 'Performance_heapInfo';
+
   NotifyIdleCallback? get onNotifyIdle => _onNotifyIdle;
   NotifyIdleCallback? _onNotifyIdle;
   Zone? _onNotifyIdleZone;

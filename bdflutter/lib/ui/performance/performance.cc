@@ -175,6 +175,10 @@ void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
     Dart_SetReturnValue(args, res);
 }
 
+void Performance_heapInfo(Dart_NativeArguments args) {
+  Dart_SetReturnValue(args, Dart_HeapInfo());
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -192,6 +196,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_stopStackTraceSamples", Performance_stopStackTraceSamples, 1, true},
       {"Performance_getStackTraceSamples", Performance_getStackTraceSamples, 2, true},
       {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
+      {"Performance_heapInfo", Performance_heapInfo, 1, true},
   });
 }
 
