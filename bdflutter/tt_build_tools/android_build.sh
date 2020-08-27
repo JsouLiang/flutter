@@ -82,7 +82,6 @@ bd_upload $cacheDir/flutter_patched_sdk.zip flutter/framework/$tosDir/flutter_pa
 
 # dart-sdk-darwin-x64.zip
 cd out/host_debug
-cp -rf gen/const_finder.dart.snapshot dart-sdk/
 zip -rq ../../$cacheDir/dart-sdk-darwin-x64.zip dart-sdk
 cd ..
 cd ..
@@ -133,11 +132,11 @@ for liteMode in ${liteModes[@]}; do
   for mode in 'debug' 'profile' 'release'; do
       for platform in ${platforms[@]}; do
           # x64和x86只打debug
-          #if [ $mode != 'debug' ]; then
-          #    if [ $platform = 'x64' -o $platform = 'x86' ]; then
-          #        continue
-          #    fi
-          #fi
+          if [ $mode != 'debug' ]; then
+              if [ $platform = 'x86' ]; then
+                  continue
+              fi
+          fi
           if [ $mode != 'release' -a $liteMode != 'normal' ]; then
             echo 'lite mode only build for release!'
             continue
@@ -268,7 +267,7 @@ cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$mod
 cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
 zip -rjq $cacheDir/$modeDir/artifacts.zip out/host_debug/flutter_tester out/host_debug/gen/frontend_server.dart.snapshot \
 third_party/icu/flutter/icudtl.dat out/host_debug/gen/flutter/lib/snapshot/isolate_snapshot.bin \
-out/host_debug/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin \
+out/host_debug/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin out/host_debug/gen/const_finder.dart.snapshot $cacheDir/$modeDir/product_isolate_snapshot.bin \
 $cacheDir/$modeDir/product_vm_isolate_snapshot.bin out/host_debug/gen_snapshot
 bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/$modeDir/artifacts.zip
 
