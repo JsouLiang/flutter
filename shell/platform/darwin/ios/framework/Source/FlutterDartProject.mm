@@ -222,14 +222,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   return self;
 }
 
-// BD ADD: START
-#pragma mark - Dynamic
-
-- (void)setLeakDartVMEnabled:(BOOL)enabled {
-  _settings.leak_vm = enabled;
-}
-// END
-
 #pragma mark - PlatformData accessors
 
 - (const flutter::PlatformData)defaultPlatformData {
@@ -392,6 +384,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
 + (BOOL)needDecompressData {
   return [[FlutterCompressSizeModeManager sharedInstance] needDecompressData];
+}
+
+- (void)setLeakDartVMEnabled:(BOOL)enabled {
+  _settings.leak_vm = enabled;
 }
 
 // END

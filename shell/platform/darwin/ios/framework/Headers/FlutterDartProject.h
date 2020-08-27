@@ -127,6 +127,11 @@ FLUTTER_DARWIN_EXPORT
  */
 + (void)predecompressData;
 
+/**
+ * @param enabled FlutterEngine释放以后是否保留dart vm，默认是YES
+ */
+- (void)setLeakDartVMEnabled:(BOOL)enabled;
+
 // END
 
 @end
