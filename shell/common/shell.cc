@@ -547,9 +547,13 @@ void Shell::NotifyLowMemoryWarning() const {
     engine_->NotifyLowMemoryWarning();
   }
 
-  auto io_task = [io_manager = io_manager_.get()]() {
-    io_manager->GetSkiaUnrefQueue()->Drain();
-    io_manager->GetResourceContext()->freeGpuResources();
+  auto io_task = [io_manager = io_manager_->GetWeakPtr()]() {
+    if (io_manager) {
+      io_manager->GetSkiaUnrefQueue()->Drain();
+      if (io_manager->GetResourceContext()) {
+        io_manager->GetResourceContext()->freeGpuResources();
+      }
+    }
   };
   // Dart VM对象的释放：
   // 1.Dart_NotifyLowMemory()->Isolate::NotifyLowMemory()->Isolate::KillAllIsolates(LibMsgId
