@@ -32,6 +32,9 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
+// BD ADD:
+#include "flutter/bdflutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessengerProvider.h"
+
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
 NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
@@ -42,7 +45,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine;
 @end
 
-@interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger>
+// BD MOD:
+// @interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger>
+@interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger, FlutterBinaryMessengerProvider>
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
@@ -59,6 +64,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   std::unique_ptr<flutter::Shell> _shell;
   NSString* _labelPrefix;
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory;
+  // BD ADD:
+  std::unique_ptr<fml::WeakPtrFactory<NSObject<FlutterBinaryMessenger>>>
+      _weakBinaryMessengerFactory;
 
   fml::WeakPtr<FlutterViewController> _viewController;
   fml::scoped_nsobject<FlutterObservatoryPublisher> _publisher;
@@ -125,6 +133,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _labelPrefix = [labelPrefix copy];
 
   _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(self);
+  // BD ADD:
+  _weakBinaryMessengerFactory =
+      std::make_unique<fml::WeakPtrFactory<NSObject<FlutterBinaryMessenger>>>(self);
 
   if (project == nil)
     _dartProject.reset([[FlutterDartProject alloc] init]);
@@ -1119,6 +1130,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (const flutter::ThreadHost&)threadHost {
   return *_threadHost;
 }
+
+// BD ADD: START
+#pragma mark - FlutterPluginRegistry
+
+- (fml::WeakPtr<NSObject<FlutterBinaryMessenger>>)getWeakBinaryMessengerPtr {
+  return _weakBinaryMessengerFactory->GetWeakPtr();
+}
+// END
 
 @end
 

@@ -4,6 +4,8 @@
 
 import("//flutter/common/config.gni")
 import("framework_shared.gni")
+# BD ADD:
+import("//flutter/bdflutter/shell/platform/darwin/common/BD_BUILD.gni")
 
 source_set("common") {
   cflags_objc = flutter_cflags_objc
@@ -48,6 +50,10 @@ source_set("framework_shared") {
     "framework/Source/FlutterStandardCodec_Internal.h",
   ]
 
+  # BD ADD: START
+  deps = messenger_provider_deps
+  # END
+
   public = framework_shared_headers
 
   defines = [ "FLUTTER_FRAMEWORK" ]
@@ -56,4 +62,5 @@ source_set("framework_shared") {
     "//flutter:config",
     ":framework_relative_headers",
   ]
+
 }

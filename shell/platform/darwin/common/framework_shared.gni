@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# BD ADD:
+import("//flutter/bdflutter/shell/platform/darwin/common/BD_BUILD.gni")
+
 framework_shared_headers =
     get_path_info([
                     "framework/Headers/FlutterMacros.h",
@@ -11,3 +14,6 @@ framework_shared_headers =
                     "framework/Headers/FlutterTexture.h",
                   ],
                   "abspath")
+
+# BD ADD
+framework_shared_headers += messenger_provider_headers

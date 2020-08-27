@@ -418,6 +418,12 @@ shared_library("copy_and_verify_framework_module") {
     "-Wnon-modular-include-in-framework-module",
   ]
 
+  # BD ADD
+  cflags_objc += [
+    "-Wno-incomplete-umbrella",
+  ]
+  # END
+
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
     ":copy_framework_headers",
