@@ -36,6 +36,7 @@ NSString* const FlutterCompressSizeModeErrorDomain = @"FlutterCompressSizeModeEr
 static NSString* const kFLTAssetsPath = @"FLTAssetsPath";
 static NSString* const kFlutterAssets = @"flutter_assets";
 static FlutterCompressSizeModeMonitor kFlutterCompressSizeModeMonitor = nil;
+static BOOL highQoS = false;
 // END
 
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
@@ -182,6 +183,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     settings.old_gen_heap_size = std::round([NSProcessInfo processInfo].physicalMemory * .48 /
                                             flutter::kMegaByteSizeInBytes);
   }
+  // BD ADD:
+  settings.high_qos = highQoS;
   return settings;
 }
 
@@ -390,6 +393,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   _settings.leak_vm = enabled;
 }
 
++ (void)setThreadHighQoS:(BOOL)enabled {
+  highQoS = enabled;
+}
 // END
 
 @end

@@ -688,6 +688,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
+  // BD ADD
+  [self setupQualityOfService:task_runners];
+  
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell =
       flutter::Shell::Create(std::move(task_runners),  // task runners
@@ -1139,6 +1142,22 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (fml::WeakPtr<NSObject<FlutterBinaryMessenger>>)getWeakBinaryMessengerPtr {
   return _weakBinaryMessengerFactory->GetWeakPtr();
+}
+// END
+
+// BD ADD: START
+- (void)setupQualityOfService:(flutter::TaskRunners&)task_runners {
+  auto settings = [_dartProject.get() settings];
+
+  if (!settings.high_qos) {
+    return;
+  }
+
+  task_runners.GetUITaskRunner()->PostTask(
+      [] { pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0); });
+
+  task_runners.GetRasterTaskRunner()->PostTask(
+      [] { pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0); });
 }
 // END
 
