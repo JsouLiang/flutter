@@ -90,6 +90,17 @@ public class FlutterLoader {
 
   private boolean initialized = false;
   @Nullable private Settings settings;
+
+  // BD ADD START:
+  public interface SoLoader {
+    void loadLibrary(Context context, String libraryName);
+  }
+
+  public interface MonitorCallback {
+    void onMonitor(String event, long cost);
+  }
+  // END
+
   private long initStartTimestampMillis;
   private FlutterApplicationInfo flutterApplicationInfo;
   private FlutterJNI flutterJNI;
@@ -173,7 +184,14 @@ public class FlutterLoader {
               try {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
-                flutterJNI.loadLibrary();
+                // BD MOD:
+                //flutterJNI.loadLibrary();
+                if (settings != null && settings.getSoLoader() != null) {
+                  settings.getSoLoader().loadLibrary(appContext, "flutter");
+                } else {
+                  flutterJNI.loadLibrary();
+                }
+
 
                 // Prefetch the default font manager as soon as possible on a background thread.
                 // It helps to reduce time cost of engine setup that blocks the platform thread.
@@ -181,6 +199,12 @@ public class FlutterLoader {
 
                 if (resourceExtractor != null) {
                   resourceExtractor.waitForCompletion();
+                  // BD ADD START:
+                   if (settings != null && settings.monitorCallback != null) {
+                                  settings.monitorCallback.onMonitor("resourceExtractor.waitForCompletion", SystemClock.uptimeMillis() - initStartTimestampMillis);
+                                }
+                                // END
+
                 }
 
                 return new InitResult(
@@ -227,9 +251,18 @@ public class FlutterLoader {
       List<String> shellArgs = new ArrayList<>();
       shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
 
+      // BD ADD: START
+      String nativeLibraryDir = settings.getNativeLibraryDir();
+      if (nativeLibraryDir == null) {
+        nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
+      }
+      // END
+
       shellArgs.add(
           "--icu-native-lib-path="
-              + flutterApplicationInfo.nativeLibraryDir
+              // BD MOD:
+              //+ flutterApplicationInfo.nativeLibraryDir
+              + nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
       if (args != null) {
@@ -256,7 +289,9 @@ public class FlutterLoader {
             "--"
                 + AOT_SHARED_LIBRARY_NAME
                 + "="
-                + flutterApplicationInfo.nativeLibraryDir
+                // BD MOD:
+                //+ flutterApplicationInfo.nativeLibraryDir
+                + nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
 
@@ -324,6 +359,11 @@ public class FlutterLoader {
           initTimeMillis);
 
       initialized = true;
+      // BD ADD:START
+      if (settings.monitorCallback != null) {
+        settings.monitorCallback.onMonitor("EnsureInitialized", SystemClock.uptimeMillis() - initStartTimestampMillis);
+      }
+      // END
     } catch (Exception e) {
       Log.e(TAG, "Flutter initialization failed.", e);
       throw new RuntimeException(e);
@@ -444,6 +484,9 @@ public class FlutterLoader {
   public static class Settings {
     private String logTag;
     // BD ADD START:
+    private String nativeLibraryDir;
+    private SoLoader soLoader;
+    private MonitorCallback monitorCallback;
     private boolean disableLeakVM = false;
 
     public boolean isDisableLeakVM() {
@@ -453,6 +496,26 @@ public class FlutterLoader {
     // 页面退出后，FlutterEngine默认是不销毁VM的，disableLeakVM设置在所有页面退出后销毁VM
     public void disableLeakVM() {
         disableLeakVM = true;
+    }
+
+    public String getNativeLibraryDir() {
+      return nativeLibraryDir;
+    }
+
+    public SoLoader getSoLoader() {
+      return soLoader;
+    }
+
+    public void setNativeLibraryDir(String dir) {
+      nativeLibraryDir = dir;
+    }
+
+    public void setSoLoader(SoLoader loader) {
+      soLoader = loader;
+    }
+
+    public void setMonitorCallback(MonitorCallback monitorCallback) {
+      this.monitorCallback = monitorCallback;
     }
     // END
 
