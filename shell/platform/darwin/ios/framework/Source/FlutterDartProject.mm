@@ -41,6 +41,7 @@ NSString* const FlutterCompressSizeModeErrorDomain = @"FlutterCompressSizeModeEr
 static NSString* const kFLTAssetsPath = @"FLTAssetsPath";
 static NSString* const kFlutterAssets = @"flutter_assets";
 static FlutterCompressSizeModeMonitor kFlutterCompressSizeModeMonitor = nil;
+static BOOL highQoS = false;
 // END
 
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
@@ -197,6 +198,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     settings.old_gen_heap_size = std::round([NSProcessInfo processInfo].physicalMemory * .48 /
                                             flutter::kMegaByteSizeInBytes);
   }
+  // BD ADD:
+  settings.high_qos = highQoS;
   return settings;
 }
 
@@ -218,7 +221,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   if (self) {
     _settings = FLTDefaultSettingsForBundle(bundle);
     // BD ADD: START
-    [self checkIsDynamicHost];
     [[FlutterCompressSizeModeManager sharedInstance]
         updateSettingsIfNeeded:_settings
                        monitor:kFlutterCompressSizeModeMonitor];
@@ -234,7 +236,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   if (self) {
     _settings = settings;
     // BD ADD: START
-    [self checkIsDynamicHost];
     [[FlutterCompressSizeModeManager sharedInstance]
         updateSettingsIfNeeded:_settings
                        monitor:kFlutterCompressSizeModeMonitor];
@@ -243,14 +244,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
   return self;
 }
-
-// BD ADD: START
-#pragma mark - Dynamic
-
-- (void)setLeakDartVMEnabled:(BOOL)enabled {
-  _settings.leak_vm = enabled;
-}
-// END
 
 #pragma mark - PlatformData accessors
 
@@ -460,6 +453,14 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
 + (BOOL)needDecompressData {
   return [[FlutterCompressSizeModeManager sharedInstance] needDecompressData];
+}
+
+- (void)setLeakDartVMEnabled:(BOOL)enabled {
+  _settings.leak_vm = enabled;
+}
+
++ (void)setThreadHighQoS:(BOOL)enabled {
+  highQoS = enabled;
 }
 
 // END

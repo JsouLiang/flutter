@@ -738,6 +738,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   _isGpuDisabled =
       [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
+  // BD ADD
+  [self setupQualityOfService:task_runners];
+
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
       /*platform_data=*/std::move(platformData),
@@ -1251,6 +1254,24 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (const flutter::ThreadHost&)threadHost {
   return *_threadHost;
 }
+
+// BD ADD: START
+#pragma mark - FlutterPluginRegistry
+
+- (void)setupQualityOfService:(flutter::TaskRunners&)task_runners {
+  auto settings = [_dartProject.get() settings];
+
+  if (!settings.high_qos) {
+    return;
+  }
+
+  task_runners.GetUITaskRunner()->PostTask(
+      [] { pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0); });
+
+  task_runners.GetRasterTaskRunner()->PostTask(
+      [] { pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0); });
+}
+// END
 
 @end
 
