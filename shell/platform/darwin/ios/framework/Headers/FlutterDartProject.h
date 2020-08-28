@@ -140,6 +140,10 @@ FLUTTER_DARWIN_EXPORT
                           fromPackage:(NSString*)package
                            fromBundle:(nullable NSBundle*)bundle;
 
+// 是否开启线程QoS优化
+// 默认不开启，在引擎启动前设置生效
++ (void)setThreadHighQoS:(BOOL)enabled;
+
 // END
 
 @end
