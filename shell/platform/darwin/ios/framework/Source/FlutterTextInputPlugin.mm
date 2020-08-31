@@ -667,7 +667,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
            @"Expected a FlutterTextRange for range (got %@).", [range class]);
   NSRange textRange = ((FlutterTextRange*)range).range;
   NSAssert(textRange.location != NSNotFound, @"Expected a valid text range.");
-  return [self.text substringWithRange:textRange];
+  // BD MOD: START
+  // return [self.text substringWithRange:textRange];
+  NSRange fixedRange = [self clampSelection:textRange forText:self.text];
+  return [self.text substringWithRange:fixedRange];
+  // END
 }
 
 // Replace the text within the specified range with the given text,
@@ -756,18 +760,34 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   if (markedText == nil)
     markedText = @"";
 
+  // BD ADD: START
+  // if (markedTextRange.length > 0) {
+  //   // Replace text in the marked range with the new text.
+  //   [self replaceRange:self.markedTextRange withText:markedText];
+  //   markedTextRange.length = markedText.length;
+  // } else {
+  //   // Replace text in the selected range with the new text.
+  //   [self replaceRange:_selectedTextRange withText:markedText];
+  //   markedTextRange = NSMakeRange(selectedRange.location, markedText.length);
+  // }
+  //
+  // self.markedTextRange =
+  //     markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
+  FlutterTextRange* lastMarkedTextRange = [[self.markedTextRange copy] autorelease];
   if (markedTextRange.length > 0) {
     // Replace text in the marked range with the new text.
-    [self replaceRangeLocal:markedTextRange withText:markedText];
     markedTextRange.length = markedText.length;
+    self.markedTextRange =
+        markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
+    [self replaceRange:lastMarkedTextRange withText:markedText];
   } else {
     // Replace text in the selected range with the new text.
-    [self replaceRangeLocal:selectedRange withText:markedText];
     markedTextRange = NSMakeRange(selectedRange.location, markedText.length);
+    self.markedTextRange =
+        markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
+    [self replaceRange:_selectedTextRange withText:markedText];
   }
-
-  self.markedTextRange =
-      markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
+  // END
 
   NSUInteger selectionLocation = markedSelectedRange.location + markedTextRange.location;
   selectedRange = NSMakeRange(selectionLocation, markedSelectedRange.length);
@@ -1047,8 +1067,14 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   NSInteger composingBase = -1;
   NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
-    composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
-    composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    // BD MOD: START
+    // composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
+    // composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
+    NSRange composingRange = [self clampSelection:((FlutterTextRange*)self.markedTextRange).range
+                                          forText:self.text];
+    composingBase = composingRange.location;
+    composingExtent = composingRange.location + composingRange.length;
+    // END
   }
 
   NSDictionary* state = @{
