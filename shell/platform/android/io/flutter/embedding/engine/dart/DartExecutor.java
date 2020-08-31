@@ -113,6 +113,11 @@ public class DartExecutor implements BinaryMessenger {
     return isApplicationRunning;
   }
 
+  /** BD ADD */
+  public FlutterJNI getFlutterJNI() {
+    return flutterJNI;
+  }
+
   /**
    * Starts executing Dart code based on the given {@code dartEntrypoint}.
    *
