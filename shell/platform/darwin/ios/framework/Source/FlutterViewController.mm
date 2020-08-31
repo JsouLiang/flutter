@@ -294,6 +294,11 @@ typedef enum UIAccessibilityContrast : NSInteger {
                object:nil];
 
   [center addObserver:self
+             selector:@selector(onLocaleUpdated:)
+                 name:NSCurrentLocaleDidChangeNotification
+               object:nil];
+    
+  [center addObserver:self
              selector:@selector(onAccessibilityStatusChanged:)
                  name:UIAccessibilityVoiceOverStatusChanged
                object:nil];
@@ -650,19 +655,28 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and raster
   // thread.
-  if (appeared && !_surfaceCreated) {
+  // BD MOD: BaiKunlun
+  // if (appeared) {
+  if (appeared && !_surfaceCreated &&
+      [UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {
     [self installFirstFrameCallback];
     [_engine.get() platformViewsController]->SetFlutterView(_flutterView.get());
     [_engine.get() platformViewsController]->SetFlutterViewController(self);
     [_engine.get() platformView]->NotifyCreated();
+    // BD ADD: BaiKunlun
     _surfaceCreated = YES;
-  } else {
+  // BD ADD: BaiKunlun
+  // } else {
+  } else if (!appeared && _surfaceCreated) {
     self.displayingFlutterUI = NO;
     [_engine.get() platformView]->NotifyDestroyed();
     [_engine.get() platformViewsController]->SetFlutterView(nullptr);
     [_engine.get() platformViewsController]->SetFlutterViewController(nullptr);
+
+    // BD ADD: BaiKunlun
     _surfaceCreated = NO;
   }
+  // END
 }
 
 #pragma mark - UIViewController lifecycle notifications
@@ -712,6 +726,7 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
+  [self onLocaleUpdated:nil];
   [self onAccessibilityStatusChanged:nil];
   if (UIApplication.sharedApplication.applicationState == UIApplicationStateActive) {
     [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.resumed"];
@@ -1301,6 +1316,48 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
   platformView->SetAccessibilityFeatures(flags);
 #endif
+}
+
+#pragma mark - Locale updates
+
+- (void)onLocaleUpdated:(NSNotification*)notification {
+  NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
+  NSMutableArray<NSString*>* data = [[NSMutableArray new] autorelease];
+
+  // Force prepend the [NSLocale currentLocale] to the front of the list
+  // to ensure we are including the full default locale. preferredLocales
+  // is not guaranteed to include anything beyond the languageCode.
+  NSLocale* currentLocale = [NSLocale currentLocale];
+  NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
+  NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+  NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
+  NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
+  if (languageCode) {
+    [data addObject:languageCode];
+    [data addObject:(countryCode ? countryCode : @"")];
+    [data addObject:(scriptCode ? scriptCode : @"")];
+    [data addObject:(variantCode ? variantCode : @"")];
+  }
+
+  // Add any secondary locales/languages to the list.
+  for (NSString* localeID in preferredLocales) {
+    NSLocale* currentLocale = [[[NSLocale alloc] initWithLocaleIdentifier:localeID] autorelease];
+    NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
+    NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
+    NSString* scriptCode = [currentLocale objectForKey:NSLocaleScriptCode];
+    NSString* variantCode = [currentLocale objectForKey:NSLocaleVariantCode];
+    if (!languageCode) {
+      continue;
+    }
+    [data addObject:languageCode];
+    [data addObject:(countryCode ? countryCode : @"")];
+    [data addObject:(scriptCode ? scriptCode : @"")];
+    [data addObject:(variantCode ? variantCode : @"")];
+  }
+  if (data.count == 0) {
+    return;
+  }
+  [[_engine.get() localizationChannel] invokeMethod:@"setLocale" arguments:data];
 }
 
 #pragma mark - Set user settings
