@@ -27,6 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic) BOOL isCompressSizeMode;
 
+//the unzip path for compress-size mode
+@property(nonatomic, readonly) NSString* assetsPath;
+
 + (instancetype)sharedInstance;
 
 /**

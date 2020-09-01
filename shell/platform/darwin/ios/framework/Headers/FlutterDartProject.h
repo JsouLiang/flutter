@@ -136,6 +136,17 @@ FLUTTER_DARWIN_EXPORT
 // 默认不开启，在引擎启动前设置生效
 + (void)setThreadHighQoS:(BOOL)enabled;
 
+/**
+* Returns absolute path for the given asset which originates from the specified package.
+* The returned path may be in main bundle or in document(when compress-size enabled).
+*
+* @param asset The name of the asset. The name can be hierarchical.
+* @param package The name of the package from which the asset originates.
+* @param bundle The bundle to use when doing the lookup.
+* @return the absolute path for the given asset.
+*/
++ (NSString *)flutterAssetAbsolutePath:(NSString*)asset fromPackage:(NSString*)package fromBundle:(nullable NSBundle*)bundle;
+
 // END
 
 @end

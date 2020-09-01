@@ -332,6 +332,32 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   return @"io.flutter.flutter.app";
 }
 
+// BD ADD: START
++ (NSString *)flutterAssetAbsolutePath:(NSString *)asset fromPackage:(NSString *)package fromBundle:(NSBundle *)bundle {
+  if (bundle == nil) {
+    bundle = [NSBundle bundleWithIdentifier:[FlutterDartProject defaultBundleIdentifier]];
+  }
+  if (bundle == nil) {
+    bundle = [NSBundle mainBundle];
+  }
+  NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:kFLTAssetsPath];
+  if (flutterAssetsName == nil) {
+    flutterAssetsName = [NSString stringWithFormat:@"Frameworks/App.framework/%@", kFlutterAssets];
+  }
+  NSString *assetName = asset;
+  if (package.length > 0) {
+    assetName = [NSString stringWithFormat:@"packages/%@/%@", package, asset];
+  }
+  if (self.isCompressSizeMode) {
+    FlutterCompressSizeModeManager *compressMgr = [FlutterCompressSizeModeManager sharedInstance];
+    return [NSString stringWithFormat:@"%@/%@", compressMgr.assetsPath, assetName];
+  } else {
+    NSString *bundle = [[NSBundle mainBundle] pathForResource:flutterAssetsName ofType:@""];
+    return [NSString stringWithFormat:@"%@/%@", bundle, assetName];
+  }
+}
+// END
+
 #pragma mark - Settings utilities
 
 - (void)setPersistentIsolateData:(NSData*)data {
