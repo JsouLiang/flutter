@@ -153,7 +153,11 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
  */
 // |PlatformView|
 void PlatformViewIOS::RegisterExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader) {
-  RegisterImageLoader(std::make_shared<IOSExternalImageLoader>(imageLoader));
+  //  RegisterImageLoader(std::make_shared<IOSExternalImageLoader>(imageLoader));
+  IOSExternalImageLoader* raw_loader = IOSExternalImageLoader::FromIOSRenderingAPI(
+      flutter::GetRenderingAPIForProcess(true), imageLoader);
+  std::shared_ptr<IOSExternalImageLoader> shared_loader(raw_loader);
+  RegisterImageLoader(std::move(shared_loader));
 }
 
 // |PlatformView|

@@ -61,6 +61,12 @@ source_set("ui") {
     "painting/matrix.h",
     "painting/multi_frame_codec.cc",
     "painting/multi_frame_codec.h",
+    "painting/native_codec.cc",
+    "painting/native_codec.h",
+    "painting/native_export_codec.cc",
+
+    # BD ADD: START
+    "painting/native_export_codec.h",
     "painting/paint.cc",
     "painting/paint.h",
     "painting/path.cc",
@@ -128,6 +134,8 @@ source_set("ui") {
     "window/viewport_metrics.h",
     "window/window.cc",
     "window/window.h",
+
+    # END
   ]
 
   # BD ADD: START
