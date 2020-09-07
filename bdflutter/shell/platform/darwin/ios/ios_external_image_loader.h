@@ -18,11 +18,9 @@ namespace flutter {
         
         ~IOSExternalImageLoader() override = default;
         
-//        void Load(const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) override;
-        
+
     protected:
         NSObject<FlutterImageLoader>* imageLoader_;
-//        fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
         FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalImageLoader);
     };
     
