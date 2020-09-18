@@ -96,6 +96,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
  */
 void CallJavaImageLoader(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback);
 
+void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback);
+
+void CallJavaImageLoaderGetNextFrame(jobject android_image_loader, ImageLoaderContext loaderContext, const int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage> image)> callback);
+
 }  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_IMPL_H_

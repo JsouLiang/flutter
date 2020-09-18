@@ -12,22 +12,25 @@
  * BD ADD: android image loader
  */
 namespace flutter {
-    class AndroidExternalImageLoader : public flutter::ImageLoader {
-    public:
-        AndroidExternalImageLoader(const fml::jni::JavaObjectWeakGlobalRef& android_image_loader);
-        ~AndroidExternalImageLoader() override;
+class AndroidExternalImageLoader : public flutter::ImageLoader {
+ public:
+  AndroidExternalImageLoader(const fml::jni::JavaObjectWeakGlobalRef& android_image_loader);
+  ~AndroidExternalImageLoader() override;
 
-        void Load(const std::string url,
-                  const int width,
-                  const int height,
-                  const float scale,
-                  ImageLoaderContext contextPtr,
-                  std::function<void(sk_sp<SkImage> image)> callback) override;
+  void Load(const std::string url,
+            const int width,
+            const int height,
+            const float scale,
+            ImageLoaderContext contextPtr,
+            std::function<void(sk_sp<SkImage> image)> callback) override;
 
-       private:
-        fml::jni::JavaObjectWeakGlobalRef android_image_loader_;
-        FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalImageLoader);
-    };
+  void LoadCodec(const std::string url, const int width, const int height, const float scale, ImageLoaderContext contextPtr, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) override;
+
+  void GetNextFrame(ImageLoaderContext contextPtr, int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage>)> callback) override;
+ private:
+  fml::jni::JavaObjectWeakGlobalRef android_image_loader_;
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalImageLoader);
+};
 }
 
 

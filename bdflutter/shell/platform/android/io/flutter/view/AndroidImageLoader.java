@@ -28,6 +28,18 @@ public class AndroidImageLoader {
     void release(String key);
   }
 
+  abstract public static class ImageLoader implements RealImageLoader {
+
+    /**
+     * load animated image next frame.
+     * @param currentFrame current frame.
+     * @param codec
+     * @param callback
+     * @param key
+     */
+    abstract public void getNextFrame(int currentFrame, Object codec, NativeLoadCallback callback, String key);
+  }
+
   private RealImageLoader realImageLoader;
 
   /**
@@ -42,6 +54,17 @@ public class AndroidImageLoader {
       return;
     }
     realImageLoader.load(url, width, height, scale, callback, key);
+  }
+
+  void getNextFrame(int currentFrame, Object codec, NativeLoadCallback callback, String key) {
+    if (realImageLoader == null) {
+      callback.onLoadFail(key);
+      return;
+    }
+    if (realImageLoader instanceof ImageLoader) {
+      ImageLoader imageLoader = (ImageLoader) realImageLoader;
+      imageLoader.getNextFrame(currentFrame, codec, callback, key);
+    }
   }
 
   /**

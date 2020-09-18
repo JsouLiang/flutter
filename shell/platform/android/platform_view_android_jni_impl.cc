@@ -145,6 +145,8 @@ static jmethodID g_native_callback_constructor = nullptr;
  * BD ADD: android image loader load method
  */
 static jmethodID g_image_loader_class_load = nullptr;
+
+static jmethodID g_image_loader_class_load_gif = nullptr;
 /**
  * BD ADD: android image loader release method
  */
@@ -152,17 +154,17 @@ static jmethodID g_image_loader_class_release = nullptr;
 /**
  * BD ADD: lock pixel buffer from android Bitmap
  */
-void ObtainPixelsFromJavaBitmap(JNIEnv* env, jobject jbitmap, uint32_t* width, uint32_t* height, int32_t* format, uint32_t* stride, void** pixels) {
+bool ObtainPixelsFromJavaBitmap(JNIEnv* env, jobject jbitmap, uint32_t* width, uint32_t* height, int32_t* format, uint32_t* stride, void** pixels) {
     FML_CHECK(CheckException(env));
     AndroidBitmapInfo info;
     if (ANDROID_BITMAP_RESULT_SUCCESS != AndroidBitmap_getInfo(env, jbitmap, &info)) {
         FML_LOG(ERROR)<<"ObtainPixelsFromJavaBitmap: get bitmap info failed"<<std::endl;
-        return;
+        return false;
     }
 
     if(info.format == ANDROID_BITMAP_FORMAT_NONE){
         FML_LOG(ERROR)<<"ObtainPixelsFromJavaBitmap: format not support"<<std::endl;
-        return;
+        return false;
     }
 
     *width = info.width;
@@ -171,7 +173,9 @@ void ObtainPixelsFromJavaBitmap(JNIEnv* env, jobject jbitmap, uint32_t* width, u
     *format = info.format;
     if (ANDROID_BITMAP_RESULT_SUCCESS != AndroidBitmap_lockPixels(env, jbitmap, pixels) || *pixels == nullptr) {
         FML_LOG(ERROR)<<"ObtainPixelsFromJavaBitmap: lock dst bitmap failed"<<std::endl;
+        return false;
     }
+    return true;
 }
 /**
  * BD ADD: release image load context
@@ -188,63 +192,221 @@ public:
     loaderContext(_loaderContext),
     androidImageLoader(_imageLoader),
     callback(std::move(_callback)){}
+
+    AndroidImageLoadContext(std::function<void(std::unique_ptr<NativeExportCodec> codec)> _callback, ImageLoaderContext _loaderContext, jobject _imageLoader):
+    loaderContext(_loaderContext),
+    androidImageLoader(_imageLoader),
+    codecCallback(std::move(_callback)){}
+
     ~AndroidImageLoadContext(){
     }
 
+    void onLoadForCodecSuccess(JNIEnv *env, std::string cKey, jobject jCodec) {
+      if (!loaderContext.task_runners.IsValid()) {
+        return;
+      }
+      auto loaderContentRef = loaderContext;
+      loaderContext.task_runners.GetUITaskRunner()->PostTask([loaderContentRef, jCodec, cKey,
+                                                               androidImageLoader = androidImageLoader,
+                                                               codecCallback = std::move(codecCallback)] {
+        JNIEnv *env = fml::jni::AttachCurrentThread();
+        jclass clazz = env->GetObjectClass(jCodec);
+        jint width = env->GetIntField(jCodec, env->GetFieldID(clazz, "width", "I"));
+        jint height = env->GetIntField(jCodec, env->GetFieldID(clazz, "height", "I"));
+        jint frameCount = env->GetIntField(jCodec, env->GetFieldID(clazz, "frameCount", "I"));
+        jint repeatCount = env->GetIntField(jCodec, env->GetFieldID(clazz, "repeatCount", "I"));
+        jobject jObject = env->GetObjectField(jCodec, env->GetFieldID(clazz, "codec", "Ljava/lang/Object;"));
+        int* frameDurations = nullptr;
+        jobject frameDurationsObj = env->GetObjectField(jCodec, env->GetFieldID(clazz, "frameDurations", "[I"));
+        if (frameDurationsObj) {
+          jintArray *frameDurationsJni = reinterpret_cast<jintArray*>(&frameDurationsObj);
+          frameDurations = env->GetIntArrayElements(*frameDurationsJni, NULL);
+        }
+
+        NativeExportCodec *codec = new NativeExportCodec();
+        codec->frameDurations = frameDurations;
+        codec->repetitionCount_ = repeatCount;
+        codec->frameCount_ = frameCount;
+        codec->width = width;
+        codec->height = height;
+        codec->key = new std::string(cKey);
+        auto context = loaderContentRef.resourceContext;
+        auto task_runners = loaderContentRef.task_runners;
+        if (codec->frameCount_ == -1) {
+          jObject = env->NewGlobalRef(jObject);
+          loaderContentRef.task_runners.GetIOTaskRunner()->PostTask(
+            [cKey, task_runners, context,
+              codecCallback = std::move(codecCallback),
+               codec, jObject, jCodec, androidImageLoader]() {
+              JNIEnv *env = fml::jni::AttachCurrentThread();
+              codec->skImage = uploadTexture(env, jObject, context);
+              std::unique_ptr<NativeExportCodec> codec2(codec);
+              codecCallback(std::move(codec2));
+              task_runners.GetPlatformTaskRunner()->PostTask([jCodec] {
+                JNIEnv *env = fml::jni::AttachCurrentThread();
+                  env->DeleteGlobalRef(jCodec);
+              });
+              task_runners.GetUITaskRunner()->PostTask([jObject, androidImageLoader, cKey, task_runners] {
+                JNIEnv *env = fml::jni::AttachCurrentThread();
+                env->DeleteGlobalRef(jObject);
+                env->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
+                                    fml::jni::StringToJavaString(env, cKey).obj());
+                task_runners.GetIOTaskRunner()->PostTask([androidImageLoader = androidImageLoader] {
+                  JNIEnv *env = fml::jni::AttachCurrentThread();
+                  env->DeleteGlobalRef(androidImageLoader);
+                });
+              });
+            });
+        } else {
+          codec->codec = env->NewGlobalRef(jObject);
+          std::unique_ptr<NativeExportCodec> codec2(codec);
+          codecCallback(std::move(codec2));
+          task_runners.GetPlatformTaskRunner()->PostTask([cKey, task_runners, jObject, jCodec, androidImageLoader] {
+            JNIEnv *env = fml::jni::AttachCurrentThread();
+            env->DeleteGlobalRef(jCodec);
+            task_runners.GetUITaskRunner()->PostTask([task_runners, cKey, jObject, androidImageLoader] {
+              JNIEnv *env = fml::jni::AttachCurrentThread();
+              env->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
+                                  fml::jni::StringToJavaString(env, cKey).obj());
+              task_runners.GetIOTaskRunner()->PostTask([androidImageLoader = androidImageLoader] {
+                JNIEnv *env = fml::jni::AttachCurrentThread();
+                env->DeleteGlobalRef(androidImageLoader);
+              });
+            });
+          });
+        }
+      });
+    }
+
+    void onGetNextFrameSuccess(JNIEnv *env, std::string cKey, jobject jbitmap) {
+      if (!loaderContext.task_runners.IsValid()) {
+        return;
+      }
+      loaderContext.task_runners.GetIOTaskRunner()->PostTask(
+        [this, cKey, jbitmap, androidImageLoader = androidImageLoader,
+          callback = std::move(callback)]() {
+          JNIEnv *env = fml::jni::AttachCurrentThread();
+          env->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
+                              fml::jni::StringToJavaString(env, cKey).obj());
+          env->DeleteGlobalRef(androidImageLoader);
+          auto context = loaderContext.resourceContext;
+          callback(uploadTexture(env, jbitmap, context));
+          loaderContext.task_runners.GetPlatformTaskRunner()->PostTask([jbitmap] {
+            JNIEnv *env = fml::jni::AttachCurrentThread();
+            if (env->GetObjectRefType(jbitmap) == 2) {
+              env->DeleteGlobalRef(jbitmap);
+            }
+          });
+        });
+    }
+
     void onLoadSuccess(JNIEnv *env, std::string cKey, jobject jbitmap) {
-      JNIEnv *jniEnv = fml::jni::AttachCurrentThread();
-      void* pixels = nullptr;
+      if (!loaderContext.task_runners.IsValid()) {
+        return;
+      }
+      loaderContext.task_runners.GetIOTaskRunner()->PostTask(
+          [this, cKey, jbitmap, androidImageLoader = androidImageLoader, loaderContext = loaderContext,
+           callback = std::move(callback)]() {
+            JNIEnv* env = fml::jni::AttachCurrentThread();
+            auto context = loaderContext.resourceContext;
+            callback(uploadTexture(env, jbitmap, context));
+            env->CallVoidMethod(androidImageLoader,
+                                g_image_loader_class_release,
+                                fml::jni::StringToJavaString(env, cKey).obj());
+            env->DeleteGlobalRef(androidImageLoader);
+            loaderContext.task_runners.GetPlatformTaskRunner()->PostTask(
+                [jbitmap] {
+                  JNIEnv* env = fml::jni::AttachCurrentThread();
+                  if (env->GetObjectRefType(jbitmap) == 2) {
+                    env->DeleteGlobalRef(jbitmap);
+                  }
+                });
+          });
+    }
+
+    static sk_sp<SkImage> uploadTexture(JNIEnv *env, jobject jbitmap, fml::WeakPtr<GrContext> context) {
+      if (jbitmap == nullptr) {
+        return nullptr;
+      }
+      void *pixels = nullptr;
       uint32_t width = 0;
       uint32_t height = 0;
       int32_t format = 0;
       uint32_t stride;
-      ObtainPixelsFromJavaBitmap(jniEnv, jbitmap, &width, &height, &format, &stride, &pixels);
+      if (!ObtainPixelsFromJavaBitmap(env, jbitmap, &width, &height, &format, &stride, &pixels)) {
+        return nullptr;
+      }
       sk_sp<SkImage> skImage;
       SkColorType ct;
       // if android
       switch (format) {
-        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_NONE:ct = kUnknown_SkColorType;
+        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_NONE:
+          ct = kUnknown_SkColorType;
           break;
-        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGBA_8888:ct = kRGBA_8888_SkColorType;
+        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGBA_8888:
+          ct = kRGBA_8888_SkColorType;
           break;
-        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGB_565:ct = kRGB_565_SkColorType;
+        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGB_565:
+          ct = kRGB_565_SkColorType;
           break;
-        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGBA_4444:ct = kARGB_4444_SkColorType;
+        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGBA_4444:
+          ct = kARGB_4444_SkColorType;
           break;
-        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_A_8:ct = kAlpha_8_SkColorType;
+        case AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_A_8:
+          ct = kAlpha_8_SkColorType;
           break;
       }
       SkImageInfo sk_info =
-          SkImageInfo::Make(width, height, ct, kPremul_SkAlphaType);
+              SkImageInfo::Make(width, height, ct, kPremul_SkAlphaType);
       size_t row_bytes = stride;
       if (row_bytes < sk_info.minRowBytes()) {
-        return;
+        return nullptr;
       }
 
-      auto context = loaderContext.resourceContext;
       sk_sp<SkData> buffer = SkData::MakeWithProc(pixels, row_bytes * height, ReleaseLoadContext,
                                                   nullptr);
       SkPixmap pixelMap(sk_info, buffer->data(), row_bytes);
       skImage = SkImage::MakeCrossContextFromPixmap(context.get(), pixelMap, false, true);
-      auto res = AndroidBitmap_unlockPixels(jniEnv, jbitmap);
+      auto res = AndroidBitmap_unlockPixels(env, jbitmap);
+//      jclass clazz = env->GetObjectClass(jbitmap);
+//      env->CallVoidMethod(jbitmap, env->GetMethodID(clazz, "recycle", "()V"));
       if (ANDROID_BITMAP_RESULT_SUCCESS != res) {
         FML_LOG(ERROR)
-            << "FlutterViewHandleBitmapPixels: unlock dst bitmap failed code is " + std::to_string(res)
-            << std::endl;
+        << "FlutterViewHandleBitmapPixels: unlock dst bitmap failed code is " + std::to_string(res)
+        << std::endl;
       }
-      jniEnv->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
-                          fml::jni::StringToJavaString(jniEnv, cKey).obj());
-      jniEnv->DeleteGlobalRef(androidImageLoader);
-      jniEnv->DeleteGlobalRef(jbitmap);
-      callback(skImage);
+      return skImage;
     }
 
     void onLoadFail(JNIEnv* env, std::string cKey) {
         callback(nullptr);
     }
+
+    void onCodecLoadFail(JNIEnv* env, std::string cKey) {
+      if (!loaderContext.task_runners.IsValid()) {
+        return;
+      }
+      loaderContext.task_runners.GetIOTaskRunner()->PostTask([callback = std::move(codecCallback),
+                                                               androidImageLoader = androidImageLoader](){
+        fml::jni::AttachCurrentThread()->DeleteGlobalRef(androidImageLoader);
+        callback(nullptr);
+      });
+    }
+
+    void onGetNextFrameFail(JNIEnv* env, std::string cKey) {
+      if (!loaderContext.task_runners.IsValid()) {
+        return;
+      }
+      loaderContext.task_runners.GetIOTaskRunner()->PostTask([callback = std::move(callback),
+                                                                androidImageLoader = androidImageLoader](){
+        fml::jni::AttachCurrentThread()->DeleteGlobalRef(androidImageLoader);
+        callback(nullptr);
+      });
+    }
 private:
     jobject androidImageLoader;
     std::function<void(sk_sp<SkImage> image)> callback;
+    std::function<void(std::unique_ptr<NativeExportCodec> codec)> codecCallback;
 };
 // END
 
@@ -268,6 +430,30 @@ void CallJavaImageLoader(jobject android_image_loader, const std::string url, co
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
                       reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
+  env->DeleteLocalRef(callObject);
+}
+
+void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
+  auto key = url + std::to_string(reinterpret_cast<jlong>(loadContext.get()));
+  g_image_load_contexts[key] = loadContext;
+  auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
+  auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
+  env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
+                      reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
+  env->DeleteLocalRef(callObject);
+}
+
+
+void CallJavaImageLoaderGetNextFrame(jobject android_image_loader, ImageLoaderContext loaderContext, int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage> image)> callback) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
+  auto key = *codec->key + std::to_string(reinterpret_cast<jlong>(loadContext.get())) + std::to_string(currentFrame);
+  g_image_load_contexts[key] = loadContext;
+  auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
+  auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
+  env->CallVoidMethod(android_image_loader, g_image_loader_class_load_gif, reinterpret_cast<jint>(currentFrame), codec->codec, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
   env->DeleteLocalRef(callObject);
 }
 
@@ -677,6 +863,50 @@ static void ExternalImageLoadSuccess(JNIEnv *env,
     loadContext->onLoadSuccess(jniEnv, cKey, globalJBitmap);
   });
 }
+
+/**
+ * BD ADD: jni call to notify android  image load success
+ */
+static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
+                                     jobject jcaller,
+                                     jstring key,
+                                     jobject jCodec) {
+  auto cKey = fml::jni::JavaStringToString(env, key);
+  auto loadContext = g_image_load_contexts[cKey];
+  if (loadContext == nullptr) {
+    return;
+  }
+  loadContext->onLoadForCodecSuccess(env, cKey, env->NewGlobalRef(jCodec));
+
+  auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
+  if (!loaderContext.task_runners.IsValid()) {
+    return;
+  }
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
+      g_image_load_contexts.erase(cKey);
+  }));
+}
+
+static void ExternalImageLoadForGetNextFrameSuccess(JNIEnv *env,
+                                     jobject jcaller,
+                                     jstring key,
+                                     jobject jBitmap) {
+  auto cKey = fml::jni::JavaStringToString(env, key);
+  auto loadContext = g_image_load_contexts[cKey];
+  if (loadContext == nullptr) {
+    return;
+  }
+  loadContext->onGetNextFrameSuccess(env, cKey, env->NewGlobalRef(jBitmap));
+
+  auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
+  if (!loaderContext.task_runners.IsValid()) {
+    return;
+  }
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
+    g_image_load_contexts.erase(cKey);
+  }));
+}
+
 /**
  * BD ADD: jni call to notify android image load fail
  */
@@ -704,6 +934,49 @@ static void ExternalImageLoadFail(JNIEnv *env,
     loadContext->onLoadFail(env, cKey);
   });
 }
+
+
+/**
+ * BD ADD: jni call to notify android image load fail
+ */
+static void ExternalImageCodecLoadFail(JNIEnv *env,
+                                  jobject jcaller,
+                                  jstring key) {
+  auto cKey = fml::jni::JavaStringToString(env, key);
+  auto loadContext = g_image_load_contexts[cKey];
+  if (loadContext == nullptr) {
+    return;
+  }
+  loadContext->onCodecLoadFail(env, cKey);
+
+  auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
+  if (!loaderContext.task_runners.IsValid()) {
+    return;
+  }
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
+      g_image_load_contexts.erase(cKey);
+  }));
+}
+
+static void ExternalImageGetNextFrameFail(JNIEnv *env,
+                                  jobject jcaller,
+                                  jstring key) {
+  auto cKey = fml::jni::JavaStringToString(env, key);
+  auto loadContext = g_image_load_contexts[cKey];
+  if (loadContext == nullptr) {
+    return;
+  }
+  loadContext->onGetNextFrameFail(env, cKey);
+
+  auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
+  if (!loaderContext.task_runners.IsValid()) {
+    return;
+  }
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
+    g_image_load_contexts.erase(cKey);
+  }));
+}
+
 /**
  * BD ADD: register android image loader
  */
@@ -869,6 +1142,18 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
       },
       // END
+//      // BD ADD: START
+//      {
+//          .name = "nativeUpdateSettings",
+//          .signature = "(JLjava/lang/String;)V",
+//          .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
+//      },
+//      {
+//          .name = "nativeScheduleBackgroundFrame",
+//          .signature = "(J)V",
+//          .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
+//      },
+//      // END
       {
           .name = "nativeDestroy",
           .signature = "(J)V",
@@ -1172,20 +1457,35 @@ bool RegisterApi(JNIEnv* env) {
 
   return true;
 }
-/**
- * BD ADD:
- */
+// BD ADD: START
 static void ExternalImageLoadSuccess(JNIEnv *env,
         jobject jcaller,
         jstring key,
         jobject jBitmap);
-/**
- * BD ADD:
- */
+
+static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
+        jobject jcaller,
+        jstring key,
+        jobject jCodec);
+
+static void ExternalImageLoadForGetNextFrameSuccess(JNIEnv *env,
+                                             jobject jcaller,
+                                             jstring key,
+                                             jobject jCodec);
+
 static void ExternalImageLoadFail(JNIEnv *env,
         jobject jcaller,
         jstring key);
 
+static void ExternalImageCodecLoadFail(JNIEnv *env,
+                                  jobject jcaller,
+                                  jstring key);
+
+static void ExternalImageGetNextFrameFail(JNIEnv *env,
+                                       jobject jcaller,
+                                       jstring key);
+
+// END
 bool PlatformViewAndroid::Register(JNIEnv* env) {
   if (env == nullptr) {
     FML_LOG(ERROR) << "No JNIEnv provided";
@@ -1309,6 +1609,12 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_image_loader_class_load_gif = env->GetMethodID(g_image_loader_class->obj(), "getNextFrame", "(ILjava/lang/Object;Lio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
+  if (g_image_loader_class_load == nullptr) {
+    FML_LOG(ERROR) << "Could not locate AndroidImageLoader load method";
+    return false;
+  }
+
   g_image_loader_class_release = env->GetMethodID(g_image_loader_class->obj(), "release", "(Ljava/lang/String;)V");
   if (g_image_loader_class_release == nullptr) {
     FML_LOG(ERROR) << "Could not locate AndroidImageLoader release method";
@@ -1334,9 +1640,29 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
               .fnPtr = reinterpret_cast<void*>(&ExternalImageLoadSuccess),
           },
           {
+              .name = "nativeCodecSuccessCallback",
+              .signature = "(Ljava/lang/String;Lio/flutter/view/NativeCodec;)V",
+              .fnPtr = reinterpret_cast<void*>(&ExternalImageLoadForCodecSuccess),
+          },
+          {
+              .name = "nativeGetNextFrameSuccessCallback",
+              .signature = "(Ljava/lang/String;Landroid/graphics/Bitmap;)V",
+              .fnPtr = reinterpret_cast<void*>(&ExternalImageLoadForGetNextFrameSuccess),
+          },
+          {
               .name = "nativeFailCallback",
               .signature = "(Ljava/lang/String;)V",
               .fnPtr = reinterpret_cast<void*>(&ExternalImageLoadFail),
+          },
+          {
+              .name = "nativeCodecFailCallback",
+              .signature = "(Ljava/lang/String;)V",
+              .fnPtr = reinterpret_cast<void*>(&ExternalImageCodecLoadFail),
+          },
+          {
+              .name = "nativeGetNextFrameFailCallback",
+              .signature = "(Ljava/lang/String;)V",
+              .fnPtr = reinterpret_cast<void*>(&ExternalImageGetNextFrameFail),
           },
   };
 

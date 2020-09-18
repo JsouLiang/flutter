@@ -10,17 +10,15 @@
 
 // BD ADD: START
 namespace flutter {
-
+    template<typename T>
     struct ImageLoaderCallbackContext {
-        std::function<void(sk_sp<SkImage> image)> callback;
-        const TaskRunners task_runners;
-        ImageLoaderCallbackContext(const TaskRunners& task_runners) : callback(nullptr), task_runners(task_runners){}
+        std::function<T> callback;
+        fml::RefPtr<fml::TaskRunner> io_task_runner;
+        fml::WeakPtr<GrContext> resourceContext;
+        ImageLoaderCallbackContext(std::function<T> callback) : callback(callback){}
         ~ ImageLoaderCallbackContext() {
-            if (callback != nullptr && task_runners.IsValid()) {
-                task_runners.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-                    [callback = std::move(callback)]() mutable {
-                      callback(nullptr);
-                    }));
+            if (callback != nullptr) {
+                callback(nullptr);
             }
         }
     };

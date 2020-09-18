@@ -35,7 +35,8 @@ namespace flutter {
         }
     }
 
-    IOSExternalImageLoader::IOSExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader): imageLoader_(imageLoader) {
+    IOSExternalImageLoader::IOSExternalImageLoader(NSObject<FlutterImageLoader>* imageLoader)
+        : imageLoader_(fml::scoped_nsobject<NSObject<FlutterImageLoader>>([imageLoader retain])) {
         FML_DCHECK(imageLoader_);
     }
     

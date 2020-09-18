@@ -119,6 +119,12 @@ source_set("flutter_framework_source") {
     "platform_view_ios.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
+    # BD ADD: START
+    # "ios_external_image_loader.h",
+    # "ios_external_image_loader.mm",
+    "ios_native_export_codec.h",
+    "ios_native_export_codec.mm",
+    # END
   ]
 
   # BD ADD: START
