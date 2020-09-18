@@ -287,12 +287,24 @@ android_java_sources = [
   "io/flutter/view/FlutterNativeView.java",
   "io/flutter/view/FlutterRunArguments.java",
   "io/flutter/view/FlutterView.java",
+
+  # BD ADD: START
+  # "io/flutter/view/AndroidImageLoader.java",
+  # "io/flutter/view/NativeLoadCallback.java",
+  "io/flutter/view/NativeCodec.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
+
+  # "io/flutter/view/ImageLoaderRegistry.java",
+  # "io/flutter/view/ImageLoaderRegistryImpl.java",
+  # END
 ]
 
-# BD ADD:
+# BD ADD: START
 android_java_sources += android_image_loader_java_sources
+android_java_sources += android_lib_loader
+
+# END
 
 list_script = rebase_path("//build/ls.py", ".", "//")
 embedding_dependencies_jars =

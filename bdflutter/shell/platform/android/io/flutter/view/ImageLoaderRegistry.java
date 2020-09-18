@@ -9,8 +9,8 @@ public interface ImageLoaderRegistry {
    *
    * @param imageLoader the image loader impl
    */
-  void registerImageLoader(RealImageLoader imageLoader);
+  public void registerImageLoader(RealImageLoader imageLoader);
 
   /** unregister image loader */
-  void unRegisterImageLoader();
+  public void unRegisterImageLoader();
 }
