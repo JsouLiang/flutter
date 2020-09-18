@@ -6,6 +6,7 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
@@ -172,6 +173,16 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   // BD ADD:
   settings.high_qos = highQoS;
 
+  // If we even support setting this e.g. from the command line or the plist,
+  // we should let the user override it.
+  // Otherwise, we want to set this to a value that will avoid having the OS
+  // kill us. On most iOS devices, that happens somewhere near half
+  // the available memory.
+  // The VM expects this value to be in megabytes.
+  if (settings.old_gen_heap_size <= 0) {
+    settings.old_gen_heap_size = std::round([NSProcessInfo processInfo].physicalMemory * .48 /
+                                            flutter::kMegaByteSizeInBytes);
+  }
   return settings;
 }
 
