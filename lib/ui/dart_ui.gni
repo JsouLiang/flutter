@@ -21,7 +21,7 @@ dart_ui_files = [
   "//flutter/lib/ui/ui.dart",
   "//flutter/lib/ui/window.dart",
   # BD ADD:
-  "//flutter/bdflutter/lib/ui/performance.dart",
+  "//flutter/lib/ui/performance.dart",
 ]
 
 dart_ui_path = "//flutter/lib/ui/ui.dart"
