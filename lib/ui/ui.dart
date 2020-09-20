@@ -42,4 +42,4 @@ part 'text.dart';
 part 'window.dart';
 
 // BD ADD:
-part '../../bdflutter/lib/ui/performance.dart';
+part 'performance.dart';
