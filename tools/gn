@@ -59,6 +59,13 @@ def get_out_dir(args):
     if args.macos_enable_metal:
       target_dir.append('metal')
 
+    # BD ADD: START
+    if args.enable_lite:
+        target_dir.append('lite')
+    if args.enable_lite_global:
+        target_dir.append('liteg')
+    # END
+
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
@@ -95,6 +102,25 @@ def to_gn_args(args):
         gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
+
+    # BD ADD: START
+    if args.enable_lite:
+        gn_args['lite_suffix'] = 'lite'
+    elif args.enable_lite_global:
+        gn_args['lite_suffix'] = 'liteg'
+
+    if args.enable_lite or args.enable_lite_global:
+        print("enable lite mode.")
+        gn_args['dart_disable_boringssl'] = True
+        gn_args['dart_enable_opt_oz'] = True
+        if args.enable_lite:
+            # Use crop icudtl.dat
+            gn_args['icu_use_lite_data_file'] = True
+            # Crop harfbuzz, remove support for complex text and apple advanced type.
+            gn_args['hb_disable_aat'] = True
+            gn_args['hb_disable_all_lang'] = True
+
+    # END
 
     # Skia GN args.
     gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
@@ -190,6 +216,10 @@ def to_gn_args(args):
     else:
         # Building host artifacts
         gn_args['target_cpu'] = 'x64'
+        # BD ADD: START
+        gn_args['dart_disable_boringssl'] = False
+        gn_args['dart_enable_opt_oz'] = False
+        # END
 
     # DBC is not supported anymore.
     if args.interpreter:
@@ -442,6 +472,13 @@ def parse_args(args):
   parser.add_argument('--msan', default=False, action='store_true')
   parser.add_argument('--tsan', default=False, action='store_true')
   parser.add_argument('--ubsan', default=False, action='store_true')
+
+  # BD ADD: START
+  parser.add_argument('--lite', dest='enable_lite', action='store_const', const='true',
+                      help='Enable lite mode.')
+  parser.add_argument('--liteg', dest='enable_lite_global', action='store_const', const='true',
+                      help='Enable lite global mode.')
+  # END
 
   return parser.parse_args(args)
 

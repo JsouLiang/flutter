@@ -336,8 +336,22 @@ action("copy_framework_headers") {
 
 copy("copy_framework_icu") {
   visibility = [ ":*" ]
-  sources = [ "//third_party/icu/flutter/icudtl.dat" ]
-  outputs = [ "$_flutter_framework_dir/{{source_file_part}}" ]
+  # BD ADD: START
+  icu_data_dir_name = "flutter"
+  if (icu_use_lite_data_file) {
+    icu_data_dir_name = "flutter_lite"
+  }
+  # END
+  sources = [
+    # BD MOD:
+    # "//third_party/icu/flutter/icudtl.dat",
+    "//third_party/icu/${icu_data_dir_name}/icudtl.dat",
+  ]
+  outputs = [
+    # BD MOD:
+    # "$_flutter_framework_dir/{{source_file_part}}",
+    "$_flutter_framework_dir/icudtl.dat",
+  ]
 }
 
 copy("copy_framework_podspec") {
