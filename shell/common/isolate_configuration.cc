@@ -281,7 +281,7 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForDynamicart(
     std::vector<std::unique_ptr<const fml::Mapping>> pieces;
 
     std::unique_ptr<fml::Mapping> kernel_blob =
-            asset_manager.GetAsMapping("kernel_blob.bin");
+            fml::FileMapping::CreateReadOnly(settings.application_kernel_asset);
     if (kernel_blob != nullptr && kernel_blob->GetSize() > 0) {
       TT_LOG() << "Created IsolateConfiguration load kernel_blob.bin";
       pieces.push_back(std::move(kernel_blob));
