@@ -177,6 +177,11 @@ source_set("flutter_framework_source") {
     "QuartzCore.framework",
     "UIKit.framework",
   ]
+  # BD ADD:
+  if (is_skia_component_build) {
+    libs += skia_lite_libs
+  }
+  # END
   if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "debug") {
     # This is required by the profiler_metrics_ios.mm to get GPU statistics.
     # Usage in release builds will cause rejection from the App Store.
@@ -299,6 +304,35 @@ copy("copy_dylib") {
   deps = [ ":create_flutter_framework_dylib" ]
 }
 
+# BD ADD: START
+action("update_skia_framework_install_name") {
+  visibility = [ ":*" ]
+  stamp_file = "$root_out_dir/skia_install_name_stamp"
+  script = "//flutter/sky/tools/change_install_name.py"
+  inputs = [
+    "$_flutter_framework_dir/Flutter",
+  ]
+  outputs = [
+    stamp_file,
+  ]
+
+  args = [
+    "--dylib",
+    rebase_path("$_flutter_framework_dir/Flutter"),
+    "--old_install_name",
+    "./libskia.dylib",
+    "--install_name",
+    "@rpath/skialite.framework/skialite",
+    "--stamp",
+    rebase_path(stamp_file),
+  ]
+
+  deps = [
+    ":copy_dylib",
+  ]
+}
+# END
+
 action("copy_framework_info_plist") {
   script = "//flutter/build/copy_info_plist.py"
   visibility = [ ":*" ]
@@ -394,6 +428,11 @@ group("universal_flutter_framework") {
     ":copy_framework_podspec",
     ":copy_license",
   ]
+  # BD ADD: START
+  if (is_skia_component_build) {
+    deps += [":update_skia_framework_install_name"]
+  }
+  # END
 }
 
 action("flutter_framework") {

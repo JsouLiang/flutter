@@ -64,6 +64,8 @@ def get_out_dir(args):
         target_dir.append('lite')
     if args.enable_lite_global:
         target_dir.append('liteg')
+    if args.enable_lite_share_skia:
+        target_dir.append('lites')
     # END
 
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
@@ -108,18 +110,30 @@ def to_gn_args(args):
         gn_args['lite_suffix'] = 'lite'
     elif args.enable_lite_global:
         gn_args['lite_suffix'] = 'liteg'
+    elif args.enable_lite_share_skia:
+        gn_args['lite_suffix'] = 'lites'
 
-    if args.enable_lite or args.enable_lite_global:
+    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia:
         print("enable lite mode.")
         gn_args['dart_disable_boringssl'] = True
         gn_args['dart_enable_opt_oz'] = True
-        if args.enable_lite:
+        gn_args['skia_enable_ccpr'] = False
+        gn_args['skialite_disable_pathop_apis'] = True
+        gn_args['skialite_disable_sksl_codegenerators'] = True
+        if args.enable_lite or args.enable_lite_share_skia:
             # Use crop icudtl.dat
             gn_args['icu_use_lite_data_file'] = True
             # Crop harfbuzz, remove support for complex text and apple advanced type.
             gn_args['hb_disable_aat'] = True
             gn_args['hb_disable_all_lang'] = True
 
+            # enable share skia
+            if args.enable_lite_share_skia and args.runtime_mode == 'release' and args.target_os == 'ios':
+                gn_args['is_skia_lite_build'] = True
+                gn_args['is_skia_component_build'] = True
+                gn_args['skialite_use_component_name_skialite'] = False
+                gn_args['skialite_enable_test'] = False
+                gn_args['skialite_only_lite_apis'] = True
     # END
 
     # Skia GN args.
@@ -478,6 +492,8 @@ def parse_args(args):
                       help='Enable lite mode.')
   parser.add_argument('--liteg', dest='enable_lite_global', action='store_const', const='true',
                       help='Enable lite global mode.')
+  parser.add_argument('--lites', dest='enable_lite_share_skia', action='store_const', const='true',
+                      help='Enable lite and share skia mode.')
   # END
 
   return parser.parse_args(args)
