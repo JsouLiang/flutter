@@ -31,6 +31,8 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
   @Nullable private Bundle splashScreenState;
   @Nullable private String transitioningIsolateId;
   @Nullable private String previousCompletedSplashIsolate;
+  // BD ADD
+  private boolean mSplashByRoute;
 
   @NonNull
   private final FlutterView.FlutterEngineAttachmentListener flutterEngineAttachmentListener =
@@ -45,12 +47,24 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
         public void onFlutterEngineDetachedFromFlutterView() {}
       };
 
+   // BD ADD: START
+   void setSplashByRoute() {
+     mSplashByRoute = true;
+   }
+   void onFrameShown() {
+     Log.v(TAG, "onFrameShown()");
+     transitionToFlutter();
+   }
+   // END
+
   @NonNull
   private final FlutterUiDisplayListener flutterUiDisplayListener =
       new FlutterUiDisplayListener() {
         @Override
         public void onFlutterUiDisplayed() {
-          if (splashScreen != null) {
+          // BD MOD
+          //if (splashScreen != null) {
+          if (splashScreen != null && !mSplashByRoute) {
             transitionToFlutter();
           }
         }

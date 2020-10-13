@@ -541,6 +541,16 @@ public class FlutterActivity extends Activity
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);
     delegate.onResume();
   }
+  // BD ADD: START
+  protected void setSplashByRoute() {
+    delegate.setSplashByRoute();
+  }
+
+  protected void onFrameShown() {
+    Log.v(TAG, "onFrameShown()");
+    delegate.onFrameShown();
+  }
+  // END
 
   @Override
   public void onPostResume() {

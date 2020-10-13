@@ -420,6 +420,16 @@ import java.util.Arrays;
     ensureAlive();
     flutterEngine.getLifecycleChannel().appIsResumed();
   }
+  // BD ADD: START
+  void setSplashByRoute() {
+    flutterSplashView.setSplashByRoute();
+  }
+
+  void onFrameShown() {
+    Log.v(TAG, "onFrameShown()");
+    flutterSplashView.onFrameShown();
+  }
+  // END
 
   /**
    * Invoke this from {@code Activity#onPostResume()}.
