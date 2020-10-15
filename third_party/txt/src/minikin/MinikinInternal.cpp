@@ -24,7 +24,15 @@
 
 namespace minikin {
 
-std::recursive_mutex gMinikinLock;
+//BD MOD: START
+//std::recursive_mutex gMinikinLock;
+#if U_PLATFORM == U_PF_IPHONE
+    [[clang::no_destroy]] std::recursive_mutex gMinikinLock;
+#else
+    std::recursive_mutex gMinikinLock;
+#endif
+//BD END
+
 
 void assertMinikinLocked() {
 #ifdef ENABLE_RACE_DETECTION
