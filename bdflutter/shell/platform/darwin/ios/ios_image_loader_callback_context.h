@@ -14,7 +14,7 @@ namespace flutter {
     struct ImageLoaderCallbackContext {
         std::function<T> callback;
         fml::RefPtr<fml::TaskRunner> io_task_runner;
-        fml::WeakPtr<GrContext> resourceContext;
+        fml::WeakPtr<GrDirectContext> resourceContext;
         ImageLoaderCallbackContext(std::function<T> callback) : callback(callback){}
         ~ ImageLoaderCallbackContext() {
             if (callback != nullptr) {

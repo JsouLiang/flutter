@@ -34,6 +34,12 @@ class MockDelegate : public Engine::Delegate {
                std::unique_ptr<std::vector<std::string>>(
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
+  
+  // BD: ADD START
+  MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
+  MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  MOCK_METHOD3(GetFps, std::vector<double>(int, int, bool));
+  // END
 };
 
 class MockResponse : public PlatformMessageResponse {
@@ -58,6 +64,12 @@ class MockRuntimeDelegate : public RuntimeDelegate {
                std::unique_ptr<std::vector<std::string>>(
                    const std::vector<std::string>&));
   MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
+
+  // BD: ADD START
+  MOCK_METHOD1(AddNextFrameCallback, void(fml::closure));
+  MOCK_METHOD0(GetEngineMainEnterMicros, int64_t());
+  MOCK_METHOD3(GetFps, std::vector<double>(int, int, bool));
+  // END
 };
 
 class MockRuntimeController : public RuntimeController {

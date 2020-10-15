@@ -58,7 +58,7 @@ class NativeCodec : public Codec {
     void GetNextFrameAndInvokeCallback(
         std::unique_ptr<DartPersistentValue> callback,
         fml::RefPtr<fml::TaskRunner> ui_task_runner,
-        fml::WeakPtr<GrContext> resourceContext,
+        fml::WeakPtr<GrDirectContext> resourceContext,
         fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
         size_t trace_id,
         sk_sp<SkImage> skImage,

@@ -16,8 +16,8 @@ namespace flutter {
 
     struct ImageLoaderContext {
         const TaskRunners task_runners;
-        fml::WeakPtr<GrContext> resourceContext;
-        ImageLoaderContext(const TaskRunners& task_runners, fml::WeakPtr<GrContext> resourceContext) : task_runners(task_runners), resourceContext(std::move(resourceContext)){}
+        fml::WeakPtr<GrDirectContext> resourceContext;
+        ImageLoaderContext(const TaskRunners& task_runners, fml::WeakPtr<GrDirectContext> resourceContext) : task_runners(task_runners), resourceContext(std::move(resourceContext)){}
     };
 
     class ImageLoader {

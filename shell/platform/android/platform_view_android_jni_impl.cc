@@ -324,7 +324,7 @@ public:
           });
     }
 
-    static sk_sp<SkImage> uploadTexture(JNIEnv *env, jobject jbitmap, fml::WeakPtr<GrContext> context) {
+    static sk_sp<SkImage> uploadTexture(JNIEnv *env, jobject jbitmap, fml::WeakPtr<GrDirectContext> context) {
       if (jbitmap == nullptr) {
         return nullptr;
       }

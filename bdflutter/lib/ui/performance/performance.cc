@@ -2,7 +2,7 @@
 
 #include "performance.h"
 #include "flutter/flow/instrumentation.h"
-#include "flutter/lib/ui/window/window.h"
+#include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -48,18 +48,18 @@ void Performance_imageMemoryUsage(Dart_NativeArguments args) {
 
 void Performance_getEngineMainEnterMicros(Dart_NativeArguments args) {
   Dart_SetIntegerReturnValue(args,
-                             UIDartState::Current()->window()->client()->GetEngineMainEnterMicros());
+                             UIDartState::Current()->platform_configuration()->client()->GetEngineMainEnterMicros());
 }
 
 void AddNextFrameCallback(Dart_Handle callback) {
   UIDartState* dart_state = UIDartState::Current();
-  if (!dart_state->window()) {
+  if (!dart_state->platform_configuration()) {
     return;
   }
 
   tonic::DartPersistentValue* next_frame_callback =
       new tonic::DartPersistentValue(dart_state, callback);
-  dart_state->window()->client()->AddNextFrameCallback(
+  dart_state->platform_configuration()->client()->AddNextFrameCallback(
       [next_frame_callback]() mutable {
         std::shared_ptr<tonic::DartState> dart_state_ =
             next_frame_callback->dart_state().lock();
@@ -122,7 +122,7 @@ void performance_getFps(Dart_NativeArguments args) {
       tonic::DartConverter<int>::FromArguments(args, 1, exception);
   int fps_type = tonic::DartConverter<int>::FromArguments(args, 2, exception);
   bool do_clear = tonic::DartConverter<bool>::FromArguments(args, 3, exception);
-  std::vector<double> fpsInfo = UIDartState::Current()->window()->client()->GetFps(
+  std::vector<double> fpsInfo = UIDartState::Current()->platform_configuration()->client()->GetFps(
       thread_type, fps_type, do_clear);
   Dart_Handle data_handle = Dart_NewList(fpsInfo.size());
   for(std::vector<int>::size_type i = 0; i != fpsInfo.size(); i++) {

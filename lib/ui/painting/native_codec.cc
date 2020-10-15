@@ -1,3 +1,4 @@
+// BD: ADD START
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -45,7 +46,7 @@ static void InvokeNextFrameCallback(
 void NativeCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
-    fml::WeakPtr<GrContext> resourceContext,
+    fml::WeakPtr<GrDirectContext> resourceContext,
     fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     size_t trace_id,
     sk_sp<SkImage> skImage,
@@ -162,5 +163,5 @@ int NativeCodec::frameCount() const {
 int NativeCodec::repetitionCount() const {
   return state_->repetitionCount_;
 }
-
+// EMD
 }  // namespace flutter

@@ -1,6 +1,6 @@
 /// BD ADD
 
-// @dart = 2.9
+// @dart = 2.10
 part of dart.ui;
 
 typedef TimeToFirstFrameMicrosCallback = void Function(int frameworkInitTime, int firstFrameTime);

@@ -33,7 +33,7 @@ namespace flutter {
         std::function<void(sk_sp<SkImage> image)> callback = std::move(imageloaderCallbackContext->callback);
         imageloaderCallbackContext->callback = nullptr;
         auto io_task_runner = imageloaderCallbackContext->io_task_runner;
-        fml::WeakPtr<GrContext> context = imageloaderCallbackContext->resourceContext;
+        fml::WeakPtr<GrDirectContext> context = imageloaderCallbackContext->resourceContext;
         if (!cache_ref_) {
             CVMetalTextureCacheRef cache = NULL;
             auto cv_return = CVMetalTextureCacheCreate(kCFAllocatorDefault,
@@ -111,7 +111,7 @@ namespace flutter {
         NSString* urlStr = [NSString stringWithCString:url.c_str() encoding:[NSString defaultCStringEncoding]];
         const auto& task_runners = loaderContext.task_runners;
         auto io_task_runner = task_runners.GetIOTaskRunner();
-        fml::WeakPtr<GrContext> context = loaderContext.resourceContext;
+        fml::WeakPtr<GrDirectContext> context = loaderContext.resourceContext;
         std::shared_ptr<ImageLoaderCallbackContext<void(sk_sp<SkImage> image)>> imageLoaderCallbackContext = std::make_shared<ImageLoaderCallbackContext<void(sk_sp<SkImage> image)>>(std::move(callback));
         imageLoaderCallbackContext->io_task_runner = io_task_runner;
         imageLoaderCallbackContext->resourceContext = context;
@@ -155,7 +155,7 @@ namespace flutter {
         IOSNativeExportCodec *iOSCodec = static_cast<IOSNativeExportCodec *>(codec.get());
         const auto& task_runners = loaderContext.task_runners;
         auto io_task_runner = task_runners.GetIOTaskRunner();
-        fml::WeakPtr<GrContext> resourceContext = loaderContext.resourceContext;
+        fml::WeakPtr<GrDirectContext> resourceContext = loaderContext.resourceContext;
         std::shared_ptr<ImageLoaderCallbackContext<void(sk_sp<SkImage> skimage)>> imageLoaderCallbackContext = std::make_shared<ImageLoaderCallbackContext<void(sk_sp<SkImage> skimage)>>(callback);
         imageLoaderCallbackContext->io_task_runner = io_task_runner;
         imageLoaderCallbackContext->resourceContext = resourceContext;

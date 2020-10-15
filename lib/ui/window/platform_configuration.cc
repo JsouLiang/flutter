@@ -476,24 +476,26 @@ void PlatformConfiguration::RegisterNatives(
 
 // BD ADD: START
 void PlatformConfiguration::NotifyIdle(int64_t microseconds) {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart("dart:ui"));
+  std::shared_ptr<tonic::DartState> dart_state = library->dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_notifyIdle",
+  tonic::LogIfError(tonic::DartInvokeField(library->value(), "_notifyIdle",
                                            {
                                                Dart_NewInteger(microseconds),
                                            }));
 }
 
 void PlatformConfiguration::ExitApp() {
-  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart("dart:ui"));
+  std::shared_ptr<tonic::DartState> dart_state = library->dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_exitApp", {}));
+  tonic::LogIfError(tonic::DartInvokeField(library->value(), "_exitApp", {}));
 }
 // END
 
