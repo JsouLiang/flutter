@@ -155,28 +155,42 @@ void Performance_disableMips(Dart_NativeArguments args) {
 }
 
 void Performance_startStackTraceSamples(Dart_NativeArguments args) {
-    Dart_StartProfiling2();
+  #if THIRD_PARTY_DART_BD
+  Dart_StartProfiling2();
+  #else
+  Dart_StartProfiling();
+  #endif
 }
 
 void Performance_stopStackTraceSamples(Dart_NativeArguments args) {
-   Dart_StopProfiling2();
+  #if THIRD_PARTY_DART_BD
+  Dart_StopProfiling2();
+  #else
+  Dart_StopProfiling();
+  #endif
 }
 
 void Performance_getStackTraceSamples(Dart_NativeArguments args) {
-    int64_t microseconds = (int64_t)DartConverter<int64_t>::FromDart(Dart_GetNativeArgument(args, 0));
-    Dart_Handle res = Dart_GetStackSamples(microseconds);
-    Dart_SetReturnValue(args, res);
+  #if THIRD_PARTY_DART_BD
+  int64_t microseconds = (int64_t)DartConverter<int64_t>::FromDart(Dart_GetNativeArgument(args, 0));
+  Dart_Handle res = Dart_GetStackSamples(microseconds);
+  Dart_SetReturnValue(args, res);
+  #endif
 }
 
 void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
-    const char* filePath = nullptr;
-    Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
-    Dart_Handle res = Dart_RequestSnapshot(filePath);
-    Dart_SetReturnValue(args, res);
+  const char* filePath = nullptr;
+  Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
+  #if THIRD_PARTY_DART_BD
+  Dart_Handle res = Dart_RequestSnapshot(filePath);
+  Dart_SetReturnValue(args, res);
+  #endif
 }
 
 void Performance_heapInfo(Dart_NativeArguments args) {
+  #if THIRD_PARTY_DART_BD
   Dart_SetReturnValue(args, Dart_HeapInfo());
+  #endif
 }
 
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
