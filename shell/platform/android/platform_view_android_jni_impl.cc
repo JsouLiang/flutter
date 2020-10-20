@@ -403,15 +403,41 @@ static std::map<std::string, std::shared_ptr<AndroidImageLoadContext>> g_image_l
 static std::recursive_mutex g_mutex;
 
 /**
+ * BD ADD: get the context from g_image_load_contexts with g_mutex lock
+ */
+static inline auto getImageLoadContextWithLock(const std::string &cKey) {
+  g_mutex.lock();
+  auto loadContext = g_image_load_contexts[cKey];
+  g_mutex.unlock();
+  return loadContext;
+}
+
+/**
+ * BD ADD: put the context into g_image_load_contexts with g_mutex lock
+ */
+static inline void putImageLoadContextWithLock(std::shared_ptr<AndroidImageLoadContext> context, const std::string &cKey) {
+  g_mutex.lock();
+  g_image_load_contexts[cKey] = context;
+  g_mutex.unlock();
+}
+
+/**
+ * BD ADD: erase the context from g_image_load_contexts with g_mutex lock
+ */
+static inline void eraseImageLoadContextWithLock(const std::string &cKey) {
+  g_mutex.lock();
+  g_image_load_contexts.erase(cKey);
+  g_mutex.unlock();
+}
+
+/**
  * BD ADD: call android to load image
  */
 void CallJavaImageLoader(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
-  auto androidLoadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
-  auto key = url + std::to_string(reinterpret_cast<jlong>(androidLoadContext.get()));
-  g_mutex.lock();
-  g_image_load_contexts[key] = androidLoadContext;
-  g_mutex.unlock();
+  auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
+  auto key = url + std::to_string(reinterpret_cast<jlong>(loadContext.get()));
+  putImageLoadContextWithLock(loadContext, key);
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
@@ -423,7 +449,7 @@ void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
   auto key = url + std::to_string(reinterpret_cast<jlong>(loadContext.get()));
-  g_image_load_contexts[key] = loadContext;
+  putImageLoadContextWithLock(loadContext, key);
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
@@ -436,7 +462,7 @@ void CallJavaImageLoaderGetNextFrame(jobject android_image_loader, ImageLoaderCo
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
   auto key = *codec->key + std::to_string(reinterpret_cast<jlong>(loadContext.get())) + std::to_string(currentFrame);
-  g_image_load_contexts[key] = loadContext;
+  putImageLoadContextWithLock(loadContext, key);
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   AndroidNativeExportCodec *androidCodec = static_cast<AndroidNativeExportCodec *>(codec.get());
@@ -831,10 +857,8 @@ static void ExternalImageLoadSuccess(JNIEnv *env,
         jstring key,
         jobject jBitmap) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  g_mutex.lock();
-  auto loadContext = g_image_load_contexts[cKey];
-  g_image_load_contexts.erase(cKey);
-  g_mutex.unlock();
+  auto loadContext = getImageLoadContextWithLock(cKey);
+  eraseImageLoadContextWithLock(cKey);
   auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
   if (!loaderContext.task_runners.IsValid()) {
     return;
@@ -859,7 +883,7 @@ static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
                                      jstring key,
                                      jobject jCodec) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  auto loadContext = g_image_load_contexts[cKey];
+  auto loadContext = getImageLoadContextWithLock(cKey);
   if (loadContext == nullptr) {
     return;
   }
@@ -870,7 +894,7 @@ static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
     return;
   }
   loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
-      g_image_load_contexts.erase(cKey);
+    eraseImageLoadContextWithLock(cKey);
   }));
 }
 
@@ -879,7 +903,7 @@ static void ExternalImageLoadForGetNextFrameSuccess(JNIEnv *env,
                                      jstring key,
                                      jobject jBitmap) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  auto loadContext = g_image_load_contexts[cKey];
+  auto loadContext = getImageLoadContextWithLock(cKey);
   if (loadContext == nullptr) {
     return;
   }
@@ -890,7 +914,7 @@ static void ExternalImageLoadForGetNextFrameSuccess(JNIEnv *env,
     return;
   }
   loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
-    g_image_load_contexts.erase(cKey);
+    eraseImageLoadContextWithLock(cKey);
   }));
 }
 
@@ -901,10 +925,8 @@ static void ExternalImageLoadFail(JNIEnv *env,
         jobject jcaller,
         jstring key) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  g_mutex.lock();
-  auto loadContext = g_image_load_contexts[cKey];
-  g_image_load_contexts.erase(cKey);
-  g_mutex.unlock();
+  auto loadContext = getImageLoadContextWithLock(cKey);
+  eraseImageLoadContextWithLock(cKey);
   if (!loadContext) {
     return;
   }
@@ -930,38 +952,47 @@ static void ExternalImageCodecLoadFail(JNIEnv *env,
                                   jobject jcaller,
                                   jstring key) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  auto loadContext = g_image_load_contexts[cKey];
-  if (loadContext == nullptr) {
+  auto loadContext = getImageLoadContextWithLock(cKey);
+  eraseImageLoadContextWithLock(cKey);
+  if (!loadContext) {
     return;
   }
-  loadContext->onCodecLoadFail(env, cKey);
 
   auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
   if (!loaderContext.task_runners.IsValid()) {
     return;
   }
-  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
-      g_image_load_contexts.erase(cKey);
-  }));
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask([env,
+                                                             cKey,
+                                                             loadContext]{
+    if (loadContext == nullptr) {
+      return;
+    }
+    loadContext->onCodecLoadFail(env, cKey);
+  });
 }
 
 static void ExternalImageGetNextFrameFail(JNIEnv *env,
                                   jobject jcaller,
                                   jstring key) {
   auto cKey = fml::jni::JavaStringToString(env, key);
-  auto loadContext = g_image_load_contexts[cKey];
-  if (loadContext == nullptr) {
+  auto loadContext = getImageLoadContextWithLock(cKey);
+  eraseImageLoadContextWithLock(cKey);
+  if (!loadContext) {
     return;
   }
-  loadContext->onGetNextFrameFail(env, cKey);
-
   auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
   if (!loaderContext.task_runners.IsValid()) {
     return;
   }
-  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
-    g_image_load_contexts.erase(cKey);
-  }));
+  loaderContext.task_runners.GetIOTaskRunner()->PostTask([env,
+                                                             cKey,
+                                                             loadContext](){
+    if (loadContext == nullptr) {
+      return;
+    }
+    loadContext->onGetNextFrameFail(env, cKey);
+  });
 }
 
 /**
