@@ -560,6 +560,8 @@ void Shell::NotifyLowMemoryWarning() const {
     if (io_manager) {
       io_manager->GetSkiaUnrefQueue()->Drain();
       if (io_manager->GetResourceContext()) {
+        FML_LOG(INFO) << "[BDFlutterTesting]Shell::NotifyLowMemoryWarning "
+                         "GrDirectContext->freeGpuResources";
         io_manager->GetResourceContext()->freeGpuResources();
       }
     }
