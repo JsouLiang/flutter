@@ -46,7 +46,10 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   void RetainDartWrappableReference() const override;
   void ReleaseDartWrappableReference() const override;
 
-  void setMips(bool isMips) { isMips_ = isMips; }
+  void setMips(bool isMips) {
+    FML_LOG(INFO) << "[BDFlutterTesting]CanvasImage::setMips value=" << isMips;
+    isMips_ = isMips;
+  }
   // END
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
