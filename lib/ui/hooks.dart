@@ -130,6 +130,11 @@ void _exitApp() {
 @pragma('vm:entry-point')
 // ignore: unused_element
 void _notifyIdle(int microseconds) {
+  assert(() {
+      print('[BDFlutterTesting]dart_notifyIdle microseconds=$microseconds');
+      return true;
+    } ());
+
   _invoke1<Duration>(performance.onNotifyIdle, performance._onNotifyIdleZone!,
       new Duration(microseconds: microseconds));
 }

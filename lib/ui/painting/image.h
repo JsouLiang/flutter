@@ -47,6 +47,7 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   void ReleaseDartWrappableReference() const override;
   
   void setMips(bool isMips) {
+    FML_LOG(INFO) << "[BDFlutterTesting]CanvasImage::setMips value=" << isMips;
     isMips_ = isMips;
   }
   // END

@@ -64,6 +64,7 @@ void TaskRunner::RunNowOrPostTask(fml::RefPtr<fml::TaskRunner> runner,
 
 // BD ADD: START
 void TaskRunner::PostTaskAtHead(fml::closure task) {
+  FML_LOG(INFO) << "[BDFlutterTesting]TaskRunner::PostTaskAtHead";
   loop_->PostTask(std::move(task), fml::TimePoint::FromEpochDelta(
                                        TimeDelta::FromNanoseconds(1)));
 }
