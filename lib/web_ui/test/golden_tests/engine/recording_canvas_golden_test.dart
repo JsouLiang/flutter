@@ -720,6 +720,9 @@ class TestImage implements Image {
   void dispose() {}
 
   @override
+  bool get debugDisposed => false;
+
+  @override
   Image clone() => this;
 
   @override
