@@ -47,6 +47,9 @@ import io.flutter.view.AccessibilityBridge;
 import java.util.HashSet;
 import java.util.Set;
 
+// BD ADD:
+import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+
 /**
  * Displays a Flutter UI on an Android device.
  *
@@ -103,7 +106,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
   @Nullable private LocalizationPlugin localizationPlugin;
   @Nullable private AndroidKeyProcessor androidKeyProcessor;
   @Nullable private AndroidTouchProcessor androidTouchProcessor;
-  @Nullable private AccessibilityBridge accessibilityBridge;
+  // BD MOD:
+  // @Nullable private AccessibilityBridge accessibilityBridge;
+  private AccessibilityBridge accessibilityBridge;
 
   // Directly implemented View behavior that communicates with Flutter.
   private final FlutterRenderer.ViewportMetrics viewportMetrics =
@@ -803,6 +808,11 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
       return super.onHoverEvent(event);
     }
 
+    // BD ADD:
+    if (accessibilityBridge == null) {
+      return false;
+    }
+    // END
     boolean handled = accessibilityBridge.onAccessibilityHoverEvent(event);
     if (!handled) {
       // TODO(ianh): Expose hover events to the platform,
@@ -898,21 +908,46 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
         new AndroidKeyProcessor(this, this.flutterEngine.getKeyEventChannel(), textInputPlugin);
     androidTouchProcessor =
         new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
-    accessibilityBridge =
-        new AccessibilityBridge(
-            this,
-            flutterEngine.getAccessibilityChannel(),
-            (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
-            getContext().getContentResolver(),
-            this.flutterEngine.getPlatformViewsController());
-    accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
-    resetWillNotDraw(
-        accessibilityBridge.isAccessibilityEnabled(),
-        accessibilityBridge.isTouchExplorationEnabled());
+    // BD MOD: START
+    // accessibilityBridge =
+    //     new AccessibilityBridge(
+    //         this,
+    //         flutterEngine.getAccessibilityChannel(),
+    //         (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
+    //         getContext().getContentResolver(),
+    //         this.flutterEngine.getPlatformViewsController());
+    // accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
+    // resetWillNotDraw(
+    //     accessibilityBridge.isAccessibilityEnabled(),
+    //     accessibilityBridge.isTouchExplorationEnabled());
+    //
+    // // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
+    // // This allows platform Views to hook into Flutter's overall accessibility system.
+    // this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
+    AccessibilityChannel accessibilityChannel = flutterEngine.getAccessibilityChannel();
+    boolean enableAccess = accessibilityChannel != null;
+    if (enableAccess) {
+      accessibilityBridge =
+            new AccessibilityBridge(
+                this,
+                flutterEngine.getAccessibilityChannel(),
+                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
+                getContext().getContentResolver(),
+                this.flutterEngine.getPlatformViewsController());
+        accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
+        resetWillNotDraw(
+            accessibilityBridge.isAccessibilityEnabled(),
+            accessibilityBridge.isTouchExplorationEnabled());
 
-    // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
-    // This allows platform Views to hook into Flutter's overall accessibility system.
-    this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
+        // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
+        // This allows platform Views to hook into Flutter's overall accessibility system.
+        this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
+    } else {
+        resetWillNotDraw(
+                    false,
+                    accessibilityBridge.isTouchExplorationEnabled());
+    }
+    // END
     this.flutterEngine
         .getPlatformViewsController()
         .attachToFlutterRenderer(this.flutterEngine.getRenderer());
@@ -970,8 +1005,14 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     flutterEngine.getPlatformViewsController().detachAccessibiltyBridge();
 
     // Disconnect and clean up the AccessibilityBridge.
-    accessibilityBridge.release();
-    accessibilityBridge = null;
+    // BD MOD:
+    // accessibilityBridge.release();
+    // accessibilityBridge = null;
+    if (accessibilityBridge != null) {
+      accessibilityBridge.release();
+      accessibilityBridge = null;
+    }
+    // END
 
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that the engine is detached. The new InputConnection will be null, which
