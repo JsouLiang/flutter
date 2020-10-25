@@ -78,7 +78,9 @@ public class FlutterEngine {
   @NonNull private final LocalizationPlugin localizationPlugin;
 
   // System channels.
-  @NonNull private final AccessibilityChannel accessibilityChannel;
+  // BD MOD:
+  // @NonNull private final AccessibilityChannel accessibilityChannel;
+  private AccessibilityChannel accessibilityChannel;
   @NonNull private final KeyEventChannel keyEventChannel;
   @NonNull private final LifecycleChannel lifecycleChannel;
   @NonNull private final LocalizationChannel localizationChannel;
@@ -92,6 +94,9 @@ public class FlutterEngine {
 
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
+
+  // BD ADD:
+  private final boolean disableAccessibility;
 
   // Engine Lifecycle.
   @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
@@ -198,6 +203,7 @@ public class FlutterEngine {
         automaticallyRegisterPlugins,
         waitForRestorationData,
         // BD ADD:
+        false,
         false);
   }
 
@@ -220,7 +226,8 @@ public class FlutterEngine {
         @NonNull Context context,
         @NonNull FlutterLoader flutterLoader,
         @NonNull FlutterJNI flutterJNI,
-        boolean isPreload
+        boolean isPreload,
+        boolean disableAccessibility
   ) {
     this(
         context,                      // Context context
@@ -230,7 +237,8 @@ public class FlutterEngine {
         null,                         // dartVmArgs
         false,                        // automaticallyRegisterPlugins
         false,                        // waitForRestorationData
-        isPreload
+        isPreload,
+        disableAccessibility
         );
   }
   // END
@@ -276,6 +284,7 @@ public class FlutterEngine {
         automaticallyRegisterPlugins,
         false,
         // BD ADD:
+        false,
         false);
   }
 
@@ -288,13 +297,19 @@ public class FlutterEngine {
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins,
       boolean waitForRestorationData,
-      // BD ADD:
-      boolean isPreload
+      // BD ADD: START
+      boolean isPreload,
+      boolean disableAccessibility
+      // END
       ) {
     this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
     this.dartExecutor.onAttachedToJNI();
-
-    accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
+    // BD MOD: START
+    // accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
+    if (!disableAccessibility) {
+      accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
+    }
+    // END
     keyEventChannel = new KeyEventChannel(dartExecutor);
     lifecycleChannel = new LifecycleChannel(dartExecutor);
     localizationChannel = new LocalizationChannel(dartExecutor);
@@ -321,6 +336,8 @@ public class FlutterEngine {
     // BD MOD:
     // attachToJni();
     attachToJni(isPreload);
+    // BD ADD:
+    this.disableAccessibility = disableAccessibility;
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
     // possible.
@@ -449,7 +466,8 @@ public class FlutterEngine {
   }
 
   /** System channel that sends accessibility requests and events from Flutter to Android. */
-  @NonNull
+  // BD DEL:
+  // @NonNull
   public AccessibilityChannel getAccessibilityChannel() {
     return accessibilityChannel;
   }
