@@ -30,6 +30,8 @@
 #include "rapidjson/writer.h"
 // BD ADD:
 #include "flutter/lib/ui/boost.h"
+#include "flutter/lib/ui/performance.h"
+// END
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
@@ -231,6 +233,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     }
     latch.Wait();
   }
+  Performance::GetInstance()->SetRasterizer(shell->weak_rasterizer_);
   // END
   return shell;
 }
