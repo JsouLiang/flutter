@@ -36,6 +36,7 @@ import io.flutter.view.AndroidImageLoader;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 // END
 
 /**
@@ -861,6 +862,8 @@ public class FlutterJNI {
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager assetManager) {
+    // BD ADD:
+    long startTimestamp = System.currentTimeMillis() * 1000;
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
@@ -869,6 +872,10 @@ public class FlutterJNI {
         entrypointFunctionName,
         pathToEntrypointFunction,
         assetManager);
+    // BD ADD: START
+    FlutterJNI.nativeTraceEngineInitApmStartAndEnd("execute_dart_entry", startTimestamp);
+    FlutterLoader.getInstance().onBundleRun();
+    // END
   }
 
   private native void nativeRunBundleAndSnapshotFromLibrary(
@@ -1371,4 +1378,9 @@ public class FlutterJNI {
   public interface AsyncWaitForVsyncDelegate {
     void asyncWaitForVsync(final long cookie);
   }
+
+  // BD ADD: START
+  public static native long[] nativeGetEngineInitInfo();
+  public static native void nativeTraceEngineInitApmStartAndEnd(String event, long value);
+  // END
 }

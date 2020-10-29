@@ -165,6 +165,8 @@ public class FlutterLoader {
           public InitResult call() {
             ResourceExtractor resourceExtractor = initResources(appContext);
 
+            // BD ADD:
+            long initTaskStartTimestamp = System.currentTimeMillis() * 1000;
             // BD MOD: START
             // System.loadLibrary("flutter");
             if (settings != null && settings.isDebugModeEnable()) {
@@ -178,9 +180,9 @@ public class FlutterLoader {
             } else {
                 System.loadLibrary("flutter");
               }
-              //Todo @wanglikun wait flutter apm ad
-              //FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
-            // END
+
+            // BD ADD:
+            FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
 
             // Prefetch the default font manager as soon as possible on a background thread.
             // It helps to reduce time cost of engine setup that blocks the platform thread.
@@ -360,6 +362,8 @@ public class FlutterLoader {
       }
       // END
 
+      // BD ADD:
+      long nativeInitStartTimestamp = System.currentTimeMillis() * 1000;
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
       flutterJNI.init(
@@ -369,6 +373,9 @@ public class FlutterLoader {
           result.appStoragePath,
           result.engineCachesPath,
           initTimeMillis);
+
+      // BD ADD:
+      FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
 
       initialized = true;
       // BD ADD:START
@@ -609,4 +616,22 @@ public class FlutterLoader {
       logTag = tag;
     }
   }
+
+  // BD ADD: START
+  private FlutterLoader.onBundleRunListener onBundleRunListener;
+
+  public void onBundleRun() {
+      if (onBundleRunListener != null) {
+          onBundleRunListener.onBundleRun(FlutterJNI.nativeGetEngineInitInfo());
+      }
+  }
+
+  public interface onBundleRunListener {
+      void onBundleRun(long[] infos);
+  }
+
+  public void setOnBundleRunListener(FlutterLoader.onBundleRunListener onBundleRunListener) {
+      this.onBundleRunListener = onBundleRunListener;
+  }
+  // END
 }

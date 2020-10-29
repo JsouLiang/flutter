@@ -23,6 +23,9 @@
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
 
+// BD ADD:
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
+
 namespace flutter {
 
 extern "C" {
@@ -173,6 +176,24 @@ static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
   SkFontMgr::RefDefault();
 }
 
+// BD ADD: START
+static jlongArray engineInitInfo(JNIEnv *env, jobject jcaller) {
+    std::vector<int64_t> info = Performance::GetInstance()->GetEngineInitApmInfo();
+    jlongArray result = env->NewLongArray(info.size());
+    jlong buf[info.size()];
+    for (size_t index = 0; index < info.size(); ++index) {
+        buf[index] = static_cast<jlong>(info[index]);
+    }
+    env->SetLongArrayRegion(result, 0, info.size(), buf);
+    return result;
+}
+
+static void traceEngineInitApmStartAndEnd(JNIEnv *env, jobject jcaller, jstring jevent, jlong start) {
+    std::string event = env->GetStringUTFChars(jevent, JNI_FALSE);
+    Performance::GetInstance()->TraceApmStartAndEnd(event, static_cast<int64_t>(start));
+}
+// BD ADD: END
+
 bool FlutterMain::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
@@ -181,6 +202,18 @@ bool FlutterMain::Register(JNIEnv* env) {
                        "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
+      // BD ADD: START
+      {
+          .name = "nativeGetEngineInitInfo",
+          .signature = "()[J",
+          .fnPtr = reinterpret_cast<void*>(&engineInitInfo),
+      },
+      {
+          .name = "nativeTraceEngineInitApmStartAndEnd",
+          .signature = "(Ljava/lang/String;J)V",
+          .fnPtr = reinterpret_cast<void*>(&traceEngineInitApmStartAndEnd),
+      },
+      // BD ADD: END
       {
           .name = "nativePrefetchDefaultFontManager",
           .signature = "()V",

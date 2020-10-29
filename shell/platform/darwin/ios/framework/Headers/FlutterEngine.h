@@ -170,6 +170,10 @@ FLUTTER_DARWIN_EXPORT
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
           restorationEnabled:(BOOL)restorationEnabled
                      preLoad:(BOOL)preLoad;
+
++ (NSArray*)getEngineInitApmInfos;
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
 // END
 
 + (instancetype)new NS_UNAVAILABLE;
