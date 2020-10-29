@@ -14,8 +14,10 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
-// BD ADD:
+// BD ADD: START
 #include "flutter/bdflutter/lib/ui/performance/boost.h"
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
+// END
 
 namespace flutter {
 
@@ -59,6 +61,8 @@ RuntimeController::RuntimeController(
   // Create the root isolate as soon as the runtime controller is initialized.
   // It will be run at a later point when the engine provides a run
   // configuration and then runs the isolate.
+  // BD ADD:
+  int64_t read_isolate_snapshot_start_timestamp = Performance::CurrentTimestamp();
   auto strong_root_isolate =
       DartIsolate::CreateRootIsolate(
           vm_->GetVMData()->GetSettings(),                //
@@ -77,7 +81,8 @@ RuntimeController::RuntimeController(
           isolate_shutdown_callback_                      //
           )
           .lock();
-
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("read_isolate_snapshort", read_isolate_snapshot_start_timestamp);
   FML_CHECK(strong_root_isolate) << "Could not create root isolate.";
 
   // The root isolate ivar is weak.

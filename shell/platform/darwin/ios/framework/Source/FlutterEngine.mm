@@ -32,6 +32,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+// BD ADD:
+#import "flutter/bdflutter/lib/ui/performance/performance.h"
 
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
@@ -88,6 +90,21 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   FlutterBinaryMessengerRelay* _binaryMessenger;
   std::unique_ptr<flutter::ConnectionCollection> _connections;
 }
+
+// BD ADD: START
++ (NSArray *)getEngineInitApmInfos {
+  std::vector<int64_t> infos = flutter::Performance::GetInstance()->GetEngineInitApmInfo();
+  NSMutableArray *result = [NSMutableArray array];
+  for (size_t index = 0; index < infos.size(); index++) {
+    [result addObject:[NSNumber numberWithLongLong:infos[index]]];
+  }
+  return result;
+}
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp {
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd(static_cast<std::string>([event UTF8String]), [timestamp longLongValue]);
+}
+// END
 
 - (instancetype)init {
   return [self initWithName:@"FlutterEngine" project:nil allowHeadlessExecution:YES];
@@ -545,8 +562,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     return;
   }
   // END
+  // BD ADD:
+  int64_t start_timestamp = flutter::Performance::CurrentTimestamp();
   self.shell.RunEngine([_dartProject.get() runConfigurationForEntrypoint:entrypoint
                                                             libraryOrNil:libraryOrNil]);
+  // BD ADD:
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("execute_dart_entry", start_timestamp);
+
 }
 
 - (BOOL)createShell:(NSString*)entrypoint
@@ -564,6 +586,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     return NO;
   }
 
+  // BD ADD:
+  // to report ber_shell_create cost, need a start time, use android apm native_init event, see android code
+  // start time arg ignore
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("native_init", 0);
   static size_t shellCount = 1;
   self.initialRoute = initialRoute;
 

@@ -145,6 +145,10 @@ FLUTTER_EXPORT
                      project:(nullable FlutterDartProject*)project
   allowHeadlessExecution:(BOOL)allowHeadlessExecution
   preLoad:(BOOL)preLoad;
+
++ (NSArray*)getEngineInitApmInfos;
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
 // END
 
 + (instancetype)new NS_UNAVAILABLE;
