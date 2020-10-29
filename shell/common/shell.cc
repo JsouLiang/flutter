@@ -204,20 +204,37 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                            shell = shell.get()    //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
+        // BD ADD:
+        int64_t rasterizer_init_start_timestamp =
+            Performance::CurrentTimestamp();
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
         snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
+        // BD ADD:
+        Performance::GetInstance()->TraceApmStartAndEnd(
+            "rasterizer_init", rasterizer_init_start_timestamp);
       });
 
   // Create the platform view on the platform thread (this thread).
+  // BD ADD:
+  int64_t platform_view_create_start_timestamp =
+      Performance::CurrentTimestamp();
   auto platform_view = on_create_platform_view(*shell.get());
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd(
+      "platform_view_init", platform_view_create_start_timestamp);
   if (!platform_view || !platform_view->GetWeakPtr()) {
     return nullptr;
   }
 
   // Ask the platform view for the vsync waiter. This will be used by the engine
   // to create the animator.
+  // BD ADD:
+  int64_t vsync_waiter_create_start_timestamp = Performance::CurrentTimestamp();
   auto vsync_waiter = platform_view->CreateVSyncWaiter();
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd(
+      "vsync_waiter", vsync_waiter_create_start_timestamp);
   if (!vsync_waiter) {
     return nullptr;
   }
@@ -248,6 +265,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch()  //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
+        // BD ADD:
+        int64_t io_manager_create_timestamp = Performance::CurrentTimestamp();
         std::shared_ptr<ShellIOManager> io_manager;
         if (parent_io_manager) {
           io_manager = parent_io_manager;
@@ -259,6 +278,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(io_manager);
+        // BD ADD:
+        Performance::GetInstance()->TraceApmStartAndEnd(
+            "shell_io_manger", io_manager_create_timestamp);
       });
 
   // Send dispatcher_maker to the engine constructor because shell won't have
@@ -282,6 +304,10 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          &on_create_engine]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
+        // BD ADD: START
+        int64_t ui_animator_pre_start_timestamp =
+            Performance::CurrentTimestamp();
+        // BD ADD: END
 
         // The animator is owned by the UI thread but it gets its vsync pulses
         // from the platform.
@@ -301,8 +327,11 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                              unref_queue_future.get(),        //
                              snapshot_delegate_future.get(),  //
                              shell->volatile_path_tracker_));
+        Performance::GetInstance()->TraceApmStartAndEnd(
+            "ui_animator", ui_animator_pre_start_timestamp);
       }));
-
+  // BD ADD:
+  int64_t shell_wait_start_timestamp = Performance::CurrentTimestamp();
   if (!shell->Setup(std::move(platform_view),  //
                     engine_future.get(),       //
                     rasterizer_future.get(),   //
@@ -314,6 +343,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   Performance::GetInstance()->SetRasterizerAndIOManager(
       shell->weak_rasterizer_, shell->io_manager_->GetWeakPtr());
 #endif
+  Performance::GetInstance()->TraceApmStartAndEnd("shell_wait",
+                                                  shell_wait_start_timestamp);
   // END
   return shell;
 }

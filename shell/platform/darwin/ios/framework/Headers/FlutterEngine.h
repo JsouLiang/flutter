@@ -167,7 +167,13 @@ FLUTTER_DARWIN_EXPORT
           restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
 
 // BD ADD: START
+
 - (FlutterDartProject*)dartProjectSetting;
+
++ (NSArray*)getEngineInitApmInfos;
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
+// END
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that

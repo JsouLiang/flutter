@@ -15,8 +15,10 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
-// BD ADD:
+// BD ADD: START
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
 #include "flutter/bdflutter/lib/ui/performance/boost.h"
+// END
 
 namespace flutter {
 
@@ -391,6 +393,9 @@ bool RuntimeController::LaunchRootIsolate(
     return false;
   }
 
+  // BD ADD:
+  int64_t read_isolate_snapshot_start_timestamp =
+      Performance::CurrentTimestamp();
   auto strong_root_isolate =
       DartIsolate::CreateRunningRootIsolate(
           settings,                                       //
@@ -407,6 +412,9 @@ bool RuntimeController::LaunchRootIsolate(
           context_,                                       //
           spawning_isolate_.lock().get())                 //
           .lock();
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd(
+      "read_isolate_snapshort", read_isolate_snapshot_start_timestamp);
 
   if (!strong_root_isolate) {
     FML_LOG(ERROR) << "Could not create root isolate.";

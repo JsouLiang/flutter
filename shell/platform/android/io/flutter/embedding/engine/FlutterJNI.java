@@ -27,6 +27,7 @@ import io.flutter.embedding.engine.deferredcomponents.DeferredComponentManager;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
+import io.flutter.FlutterInjector;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -42,6 +43,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import io.flutter.embedding.engine.loader.FlutterLoader;
 // END
 
 /**
@@ -935,6 +937,8 @@ public class FlutterJNI {
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager assetManager,
       @Nullable List<String> entrypointArgs) {
+    // BD ADD:
+    long startTimestamp = System.currentTimeMillis() * 1000;
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
@@ -944,6 +948,10 @@ public class FlutterJNI {
         pathToEntrypointFunction,
         assetManager,
         entrypointArgs);
+    // BD ADD: START
+    FlutterJNI.nativeTraceEngineInitApmStartAndEnd("execute_dart_entry", startTimestamp);
+    FlutterInjector.instance().flutterLoader().onBundleRun();
+    // END
   }
 
   private native void nativeRunBundleAndSnapshotFromLibrary(
@@ -1470,4 +1478,9 @@ public class FlutterJNI {
   public interface AsyncWaitForVsyncDelegate {
     void asyncWaitForVsync(final long cookie);
   }
+
+  // BD ADD: START
+  public static native long[] nativeGetEngineInitInfo();
+  public static native void nativeTraceEngineInitApmStartAndEnd(String event, long value);
+  // END
 }
