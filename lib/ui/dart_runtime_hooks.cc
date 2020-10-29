@@ -66,6 +66,7 @@ namespace flutter {
   V(PreloadFontFamilies, 2)     \
   V(DisableMips, 1)             \
   V(Performance_heapInfo, 0)    \
+  V(Performance_getEngineInitApmInfo, 0)   \
   V(Performance_imageMemoryUsage, 0)       \
   V(Performance_startStackTraceSamples, 0) \
   V(Performance_stopStackTraceSamples, 0)  \
@@ -406,6 +407,15 @@ void DisableMips(Dart_NativeArguments args) {
 
 void Performance_heapInfo(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, Dart_HeapInfo());
+}
+
+void Performance_getEngineInitApmInfo(Dart_NativeArguments args) {
+    vector<int64_t> info = Performance::GetInstance()->GetEngineInitApmInfo();
+    Dart_Handle result = Dart_NewList(info.size());
+    for (size_t index = 0; index < info.size(); ++index) {
+        Dart_ListSetAt(result, index, Dart_NewInteger(info[index]));
+    }
+    Dart_SetReturnValue(args, result);
 }
 
 void Performance_imageMemoryUsage(Dart_NativeArguments args) {

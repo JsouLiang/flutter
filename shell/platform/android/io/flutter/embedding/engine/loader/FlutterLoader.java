@@ -77,6 +77,24 @@ public class FlutterLoader {
 
     private static FlutterLoader instance;
 
+    // BD ADD: START
+    private FlutterLoader.onBundleRunListener onBundleRunListener;
+
+    public void onBundleRun() {
+        if (onBundleRunListener != null) {
+            onBundleRunListener.onBundleRun(FlutterJNI.nativeGetEngineInitInfo());
+        }
+    }
+
+    public interface onBundleRunListener {
+        void onBundleRun(long[] infos);
+    }
+
+    public void setOnBundleRunListener(FlutterLoader.onBundleRunListener onBundleRunListener) {
+        this.onBundleRunListener = onBundleRunListener;
+    }
+    // BD ADD: END
+
     /**
      * Returns a singleton {@code FlutterLoader} instance.
      * <p>
@@ -120,6 +138,7 @@ public class FlutterLoader {
                 initResources(context);
                 // BD MOD: START
                 // if (settings.getSoLoader() != null) {
+                long initTaskStartTimestamp = System.currentTimeMillis() * 1000;
                 if (settings.isDebugModeEnable()) {
                     copyDebugFiles(context);
                     File libsDir = context.getDir(DEBUG_FLUTTER_LIBS_DIR, Context.MODE_PRIVATE);
@@ -132,7 +151,7 @@ public class FlutterLoader {
                 } else {
                     System.loadLibrary("flutter");
                 }
-
+                FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
                 VsyncWaiter
                         .getInstance((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
                         .init();
@@ -312,8 +331,12 @@ public class FlutterLoader {
 
             String appStoragePath = PathUtils.getFilesDir(applicationContext);
             String engineCachesPath = PathUtils.getCacheDirectory(applicationContext);
+            // BD ADD:
+            long nativeInitStartTimestamp = System.currentTimeMillis() * 1000;
             FlutterJNI.nativeInit(applicationContext, shellArgs.toArray(new String[0]),
                 kernelPath, appStoragePath, engineCachesPath);
+            // BD ADD:
+            FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
 
             initialized = true;
             if (settings.monitorCallback != null) {

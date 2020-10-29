@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -639,6 +640,10 @@ public class FlutterJNI {
     nativeNotifyLowMemory(nativePlatformViewId);
   }
 
+  public static native long[] nativeGetEngineInitInfo();
+
+  public static native void nativeTraceEngineInitApmStartAndEnd(String event, long value);
+
   private native void nativeNotifyLowMemory(long nativePlatformViewId);
 
   public void scheduleBackgroundFrame() {
@@ -669,6 +674,7 @@ public class FlutterJNI {
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager assetManager
   ) {
+    long startTimestamp = System.currentTimeMillis() * 1000;
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
@@ -678,6 +684,8 @@ public class FlutterJNI {
         pathToEntrypointFunction,
         assetManager
     );
+    FlutterJNI.nativeTraceEngineInitApmStartAndEnd("execute_dart_entry", startTimestamp);
+    FlutterLoader.getInstance().onBundleRun();
   }
 
   private native void nativeRunBundleAndSnapshotFromLibrary(

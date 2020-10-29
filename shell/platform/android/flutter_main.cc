@@ -23,6 +23,9 @@
 #include "flutter/shell/common/switches.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
+// BD ADD:
+#include "flutter/lib/ui/performance.h"
+
 namespace flutter {
 
 extern "C" {
@@ -170,6 +173,24 @@ static void RecordStartTimestamp(JNIEnv* env,
   flutter::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
 }
 
+// BD ADD: START
+static jlongArray engineInitInfo(JNIEnv *env, jobject jcaller) {
+    std::vector<int64_t> info = Performance::GetInstance()->GetEngineInitApmInfo();
+    jlongArray result = env->NewLongArray(info.size());
+    jlong buf[info.size()];
+    for (size_t index = 0; index < info.size(); ++index) {
+        buf[index] = static_cast<jlong>(info[index]);
+    }
+    env->SetLongArrayRegion(result, 0, info.size(), buf);
+    return result;
+}
+
+static void traceEngineInitApmStartAndEnd(JNIEnv *env, jobject jcaller, jstring jevent, jlong start) {
+    string event = env->GetStringUTFChars(jevent, JNI_FALSE);
+    Performance::GetInstance()->TraceApmStartAndEnd(event, static_cast<int64_t>(start));
+}
+// BD ADD: END
+
 bool FlutterMain::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
@@ -178,6 +199,18 @@ bool FlutterMain::Register(JNIEnv* env) {
                        "lang/String;Ljava/lang/String;Ljava/lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
+      // BD ADD: START
+      {
+          .name = "nativeGetEngineInitInfo",
+          .signature = "()[J",
+          .fnPtr = reinterpret_cast<void*>(&engineInitInfo),
+      },
+      {
+          .name = "nativeTraceEngineInitApmStartAndEnd",
+          .signature = "(Ljava/lang/String;J)V",
+          .fnPtr = reinterpret_cast<void*>(&traceEngineInitApmStartAndEnd),
+      },
+      // BD ADD: END
       {
           .name = "nativeRecordStartTimestamp",
           .signature = "(J)V",

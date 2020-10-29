@@ -5,6 +5,11 @@
 #include <atomic>
 #include <flutter/fml/memory/weak_ptr.h>
 #include <flutter/shell/common/rasterizer.h>
+#include <vector>
+#include <string>
+#include <map>
+
+using namespace std;
 
 namespace flutter {
 
@@ -24,12 +29,18 @@ class Performance {
   void GetSkGraphicMemUsageKB(int64_t* bitmapMem,
                               int64_t* fontMem, int64_t* imageFilter);  // KB
 
+  // APM
+  void TraceApmStartAndEnd(const std::string& event, int64_t start);
+  std::vector<int64_t> GetEngineInitApmInfo();
+  static int64_t CurrentTimestamp();
+
  private:
   Performance();
 
   std::atomic_int64_t dart_image_memory_usage;  // KB
   fml::WeakPtr<flutter::Rasterizer> rasterizer_;
 
+  std::map<string, int64_t> apm_map; // Map
 };
 
 }
