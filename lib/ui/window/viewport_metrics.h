@@ -15,7 +15,7 @@ namespace flutter {
 // the Dart side.
 static const double kUnsetDepth = 1.7976931348623157e+308;
 // BD ADD:
-static const double kUnsetWidth = 1.7976931348623157e+308;
+static const double kUnsetWidth = 1.23456;
 
 struct ViewportMetrics {
   ViewportMetrics();
