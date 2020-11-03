@@ -54,6 +54,8 @@ vector<int64_t> Performance::GetEngineInitApmInfo() {
             apm_map["ui_animator_end"],
             apm_map["shell_wait_start"],
             apm_map["shell_wait_end"],
+            apm_map["plugin_registry_start"],
+            apm_map["plugin_registry_end"],
             apm_map["execute_dart_entry_start"],
             apm_map["execute_dart_entry_end"],
     };
