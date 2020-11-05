@@ -393,7 +393,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   if(!IsRunningPrecompiledCode() && settings_.dynamicart_host){
     FML_LOG(ERROR)<<"debug dynamic"<<std::endl;
     args.push_back("--enable_interpreter");
-    args.push_back("--pause_isolates_on_start");
     args.push_back("--compilation_counter_threshold=-1");
   }
 //END
