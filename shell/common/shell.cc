@@ -259,7 +259,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     }
     latch.Wait();
   }
-  Performance::GetInstance()->SetRasterizer(shell->weak_rasterizer_);
+  Performance::GetInstance()->SetRasterizerAndIOManager(
+    shell->weak_rasterizer_, shell->io_manager_->GetWeakPtr());
   // BD ADD:
   Performance::GetInstance()->TraceApmStartAndEnd("shell_wait", shell_wait_start_timestamp);
   // END

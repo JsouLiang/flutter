@@ -5,6 +5,7 @@
 #include <atomic>
 #include <flutter/fml/memory/weak_ptr.h>
 #include <flutter/shell/common/rasterizer.h>
+#include <flutter/shell/common/shell_io_manager.h>
 #include <vector>
 #include <string>
 #include <map>
@@ -25,7 +26,10 @@ class Performance {
   int64_t GetImageMemoryUsageKB();  // KB
   void GetGpuCacheUsageKB(int64_t* grTotalMem,
                           int64_t* grResMem, int64_t* grPurgeableMem);
-  void SetRasterizer(fml::WeakPtr<flutter::Rasterizer> rasterizer);
+  void GetIOGpuCacheUsageKB(int64_t* grTotalMem,
+                          int64_t* grResMem, int64_t* grPurgeableMem);
+  void SetRasterizerAndIOManager(fml::WeakPtr<flutter::Rasterizer> rasterizer,
+    fml::WeakPtr<flutter::ShellIOManager>);
   void GetSkGraphicMemUsageKB(int64_t* bitmapMem,
                               int64_t* fontMem, int64_t* imageFilter);  // KB
 
@@ -39,7 +43,7 @@ class Performance {
 
   std::atomic_int64_t dart_image_memory_usage;  // KB
   fml::WeakPtr<flutter::Rasterizer> rasterizer_;
-
+  fml::WeakPtr<flutter::ShellIOManager> iOManager_;
   std::map<string, int64_t> apm_map; // Map
 };
 

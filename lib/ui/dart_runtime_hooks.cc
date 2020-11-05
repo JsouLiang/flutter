@@ -444,26 +444,40 @@ void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
   auto* dart_state = UIDartState::Current();
 
   const auto& task_runners = dart_state->GetTaskRunners();
-  task_runners.GetGPUTaskRunner()->PostTask(fml::MakeCopyable(
+  task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
     [callback = std::make_unique<tonic::DartPersistentValue>(
       tonic::DartState::Current(), callback_handle),
-      ui_task_runner = task_runners.GetUITaskRunner()]() mutable {
-      if (ui_task_runner.get()) {
-        int64_t grTotalMem = 0;
-        int64_t grResMem = 0;
-        int64_t grPurgeableMem = 0;
-        Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
-        ui_task_runner->PostTask(fml::MakeCopyable(
-          [callback = std::move(callback), grTotalMem, grResMem, grPurgeableMem]() {
-            std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
-            tonic::DartState::Scope scope(dart_state);
-            Dart_Handle data_handle = Dart_NewList(3);
-            Dart_ListSetAt(data_handle, 0, Dart_NewInteger(grTotalMem));
-            Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grResMem));
-            Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grPurgeableMem));
-            tonic::DartInvoke(callback->value(), {data_handle});
+      ui_task_runner = task_runners.GetUITaskRunner(),
+      gpu_task_runner = task_runners.GetGPUTaskRunner()]() mutable {
+        int64_t iOGrTotalMem = 0;
+        int64_t iOGrResMem = 0;
+        int64_t iOGrPurgeableMem = 0;
+        Performance::GetInstance()->GetIOGpuCacheUsageKB(&iOGrTotalMem, &iOGrResMem, &iOGrPurgeableMem);
+        if (!gpu_task_runner.get()) {
+          return;
+        }
+        gpu_task_runner->PostTask(fml::MakeCopyable(
+          [callback = std::move(callback), ui_task_runner, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem]() mutable {
+            if (ui_task_runner.get()) {
+              int64_t grTotalMem = 0;
+              int64_t grResMem = 0;
+              int64_t grPurgeableMem = 0;
+              Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
+              ui_task_runner->PostTask(fml::MakeCopyable(
+                [callback = std::move(callback), grTotalMem, grResMem, grPurgeableMem, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem]() {
+                  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
+                  tonic::DartState::Scope scope(dart_state);
+                  Dart_Handle data_handle = Dart_NewList(6);
+                  Dart_ListSetAt(data_handle, 0, Dart_NewInteger(grTotalMem));
+                  Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grResMem));
+                  Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grPurgeableMem));
+                  Dart_ListSetAt(data_handle, 3, Dart_NewInteger(iOGrTotalMem));
+                  Dart_ListSetAt(data_handle, 4, Dart_NewInteger(iOGrResMem));
+                  Dart_ListSetAt(data_handle, 5, Dart_NewInteger(iOGrPurgeableMem));
+                  tonic::DartInvoke(callback->value(), {data_handle});
+                }));
+            }
           }));
-      }
     }));
 }
 
@@ -483,31 +497,47 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
   int64_t imageFilter = 0;
   performance->GetSkGraphicMemUsageKB(&bitmapMem, &fontMem, &imageFilter);
 
-  task_runners.GetGPUTaskRunner()->PostTask(fml::MakeCopyable(
+  task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
     [callback = std::make_unique<tonic::DartPersistentValue>(
       tonic::DartState::Current(), callback_handle),
-      ui_task_runner = task_runners.GetUITaskRunner(), imageMem, bitmapMem, fontMem, imageFilter
-    ]() mutable {
-      if (ui_task_runner.get()) {
-        int64_t grTotalMem = 0;
-        int64_t grResMem = 0;
-        int64_t grPurgeableMem = 0;
-        Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
-        ui_task_runner->PostTask(fml::MakeCopyable(
-          [callback = std::move(callback), imageMem, bitmapMem, fontMem, imageFilter, grTotalMem, grResMem, grPurgeableMem]() {
-            std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
-            tonic::DartState::Scope scope(dart_state);
-            Dart_Handle data_handle = Dart_NewList(7);
-            Dart_ListSetAt(data_handle, 0, Dart_NewInteger(imageMem));
-            Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grTotalMem));
-            Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grResMem));
-            Dart_ListSetAt(data_handle, 3, Dart_NewInteger(grPurgeableMem));
-            Dart_ListSetAt(data_handle, 4, Dart_NewInteger(bitmapMem));
-            Dart_ListSetAt(data_handle, 5, Dart_NewInteger(fontMem));
-            Dart_ListSetAt(data_handle, 6, Dart_NewInteger(imageFilter));
-            tonic::DartInvoke(callback->value(), {data_handle});
+      ui_task_runner = task_runners.GetUITaskRunner(),
+      gpu_task_runner = task_runners.GetGPUTaskRunner(), imageMem, bitmapMem, fontMem, imageFilter]() mutable {
+        if (!gpu_task_runner.get()) {
+          return;
+        }
+        int64_t iOGrTotalMem = 0;
+        int64_t iOGrResMem = 0;
+        int64_t iOGrPurgeableMem = 0;
+        Performance::GetInstance()->GetIOGpuCacheUsageKB(&iOGrTotalMem, &iOGrResMem, &iOGrPurgeableMem);
+        gpu_task_runner->PostTask(fml::MakeCopyable(
+          [callback = std::move(callback),
+            ui_task_runner, imageMem, bitmapMem, fontMem, imageFilter, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem
+          ]() mutable {
+            if (ui_task_runner.get()) {
+              int64_t grTotalMem = 0;
+              int64_t grResMem = 0;
+              int64_t grPurgeableMem = 0;
+              Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
+              ui_task_runner->PostTask(fml::MakeCopyable(
+                [callback = std::move(callback), imageMem, bitmapMem, fontMem, imageFilter, grTotalMem,
+                 grResMem, grPurgeableMem, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem]() {
+                  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
+                  tonic::DartState::Scope scope(dart_state);
+                  Dart_Handle data_handle = Dart_NewList(10);
+                  Dart_ListSetAt(data_handle, 0, Dart_NewInteger(imageMem));
+                  Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grTotalMem));
+                  Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grResMem));
+                  Dart_ListSetAt(data_handle, 3, Dart_NewInteger(grPurgeableMem));
+                  Dart_ListSetAt(data_handle, 4, Dart_NewInteger(iOGrTotalMem));
+                  Dart_ListSetAt(data_handle, 5, Dart_NewInteger(iOGrResMem));
+                  Dart_ListSetAt(data_handle, 6, Dart_NewInteger(iOGrPurgeableMem));
+                  Dart_ListSetAt(data_handle, 7, Dart_NewInteger(bitmapMem));
+                  Dart_ListSetAt(data_handle, 8, Dart_NewInteger(fontMem));
+                  Dart_ListSetAt(data_handle, 9, Dart_NewInteger(imageFilter));
+                  tonic::DartInvoke(callback->value(), {data_handle});
+                }));
+            }
           }));
-      }
     }));
 }
 

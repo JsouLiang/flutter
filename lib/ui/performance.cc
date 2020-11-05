@@ -11,7 +11,6 @@ Performance::Performance():
       dart_image_memory_usage(0),
       apm_map() {}
 
-
 int64_t Performance::GetImageMemoryUsageKB() {
   int64_t sizeInKB = dart_image_memory_usage.load(std::memory_order_relaxed);
   return  sizeInKB > 0 ? sizeInKB : 0;
@@ -92,7 +91,24 @@ void Performance::GetGpuCacheUsageKB(int64_t* grTotalMem,
   }
 }
 
-void Performance::SetRasterizer(fml::WeakPtr<flutter::Rasterizer> rasterizer) {
+void Performance::GetIOGpuCacheUsageKB(int64_t* grTotalMem,
+                                     int64_t* grResMem, int64_t* grPurgeableMem) {
+#ifndef OS_MACOSX
+  if (iOManager_ && iOManager_.get() && iOManager_->GetResourceContext()) {
+    size_t totalBytes = 0;
+    size_t resourceBytes = 0;
+    size_t purgeableBytes = 0;
+    iOManager_->GetResourceContext()->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
+    *grTotalMem = totalBytes >> 10;
+    *grResMem = resourceBytes >> 10;
+    *grPurgeableMem = purgeableBytes >> 10;
+  }
+#endif
+}
+
+void Performance::SetRasterizerAndIOManager(fml::WeakPtr<flutter::Rasterizer> rasterizer,
+  fml::WeakPtr<flutter::ShellIOManager> ioManager) {
   rasterizer_ = std::move(rasterizer);
+  iOManager_ = std::move(ioManager);
 }
 }
