@@ -31,7 +31,7 @@ class Performance {
   void SetRasterizerAndIOManager(fml::WeakPtr<flutter::Rasterizer> rasterizer,
     fml::WeakPtr<flutter::ShellIOManager>);
   void GetSkGraphicMemUsageKB(int64_t* bitmapMem,
-                              int64_t* fontMem, int64_t* imageFilter);  // KB
+                              int64_t* fontMem, int64_t* imageFilter, int64_t* mallocSize);  // KB
 
   // APM
   void TraceApmStartAndEnd(const std::string& event, int64_t start);

@@ -70,10 +70,16 @@ void Performance::AddImageMemoryUsage(int64_t sizeInKB) {
 }
 
 void Performance::GetSkGraphicMemUsageKB(int64_t* bitmapMem,
-                                         int64_t* fontMem, int64_t* imageFilter) {
+                                         int64_t* fontMem, int64_t* imageFilter, int64_t* mallocSize) {
   *bitmapMem = SkGraphics::GetResourceCacheTotalBytesUsed() >> 10;
   *fontMem = SkGraphics::GetFontCacheUsed() >> 10;
   *imageFilter = SkGraphics::GetImageFilterCacheUsed() >> 10;
+  *mallocSize = SkGraphics::GetSKMallocMemSize();
+  if (*mallocSize >= 0) {
+    *mallocSize = *mallocSize >> 10;
+  } else {
+    *mallocSize = 0;
+  }
 }
 
 void Performance::GetGpuCacheUsageKB(int64_t* grTotalMem,
