@@ -199,6 +199,12 @@ FLUTTER_EXPORT
  */
 - (void)ensureSemanticsEnabled;
 
+// BD ADD: START
++ (NSArray*)getEngineInitApmInfos;
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
+// BD ADD: END
+
 /**
  * Sets the `FlutterViewController` for this instance.  The FlutterEngine must be
  * running (e.g. a successful call to `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI`)

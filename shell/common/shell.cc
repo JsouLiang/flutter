@@ -324,9 +324,10 @@ static void PerformInitializationTasks(const Settings& settings) {
         FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
       }
     }
-      // BD ADD:
-      Performance::GetInstance()->TraceApmStartAndEnd("log_icu_init", logIcuInitStartTimestamp);
+
   });
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("log_icu_init", logIcuInitStartTimestamp);
 }
 
 // BD ADD: START

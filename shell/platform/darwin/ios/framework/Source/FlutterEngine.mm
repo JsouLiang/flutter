@@ -17,6 +17,8 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/darwin/common/command_line.h"
+// BD ADD:
+#include "flutter/lib/ui/performance.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
@@ -76,6 +78,21 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   BOOL _allowHeadlessExecution;
   FlutterBinaryMessengerRelay* _binaryMessenger;
 }
+
+// BD ADD: START
++ (NSArray *)getEngineInitApmInfos {
+    std::vector<int64_t> infos = flutter::Performance::GetInstance()->GetEngineInitApmInfo();
+    NSMutableArray *result = [NSMutableArray array];
+    for (size_t index = 0; index < infos.size(); index++) {
+        [result addObject:[NSNumber numberWithLongLong:infos[index]]];
+    }
+    return result;
+}
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp {
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd(static_cast<string>([event UTF8String]), [timestamp longLongValue]);
+}
+// BD ADD: END
 
 - (instancetype)initWithName:(NSString*)labelPrefix {
   return [self initWithName:labelPrefix project:nil allowHeadlessExecution:YES];
@@ -390,9 +407,13 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil {
+  // BD ADD:
+  int64_t start_timestamp = flutter::Performance::CurrentTimestamp();
   // Launch the Dart application with the inferred run configuration.
   self.shell.RunEngine([_dartProject.get() runConfigurationForEntrypoint:entrypoint
                                                             libraryOrNil:libraryOrNil]);
+  // BD ADD:
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("execute_dart_entry", start_timestamp);
 }
 
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
@@ -400,6 +421,10 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
     return NO;
   }
+  // BD ADD:
+  // to report ber_shell_create cost, need a start time, use android apm native_init event, see android code
+  // start time arg ignore
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("native_init", 0);
 
   static size_t shellCount = 1;
 
