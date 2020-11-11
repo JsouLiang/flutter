@@ -726,6 +726,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   // BD ADD: START
   if (!is_setup_ && is_preload_) {
+    is_createView_post_ = true;
     auto platform_task = fml::MakeCopyable([shell = this, surface = std::move(surface)] () mutable {
       shell->OnPlatformViewCreated(std::move(surface));
     });
@@ -771,12 +772,11 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
       task_runners_.GetGPUTaskRunner() != task_runners_.GetPlatformTaskRunner();
 
   auto ui_task = [engine = engine_->GetWeakPtr(),                      //
-                  // BD MOD: START
-                  // gpu_task_runner = task_runners_.GetGPUTaskRunner(),  //
-                  // gpu_task, should_post_gpu_task,
-                  should_post_gpu_task,
-                  // END
-                  &latch  //
+                   gpu_task_runner = task_runners_.GetGPUTaskRunner(),  //
+                   gpu_task, should_post_gpu_task,
+                   &latch,
+                   // BD ADD:
+                   is_post = is_createView_post_
   ] {
     if (engine) {
       engine->OnOutputSurfaceCreated();
@@ -791,7 +791,17 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     //   // the platform thread.
     //   latch.Signal();
     // }
-    if (!should_post_gpu_task) {
+    if (is_post) {
+      // Step 2: Next, tell the GPU thread that it should create a surface for its
+       // rasterizer.
+       if (should_post_gpu_task) {
+         fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
+       } else {
+         // See comment on should_post_gpu_task, in this case we just unblock
+         // the platform thread.
+         latch.Signal();
+       }
+    } else if (!should_post_gpu_task) {
       // See comment on should_post_gpu_task, in this case we just unblock
       // the platform thread.
       latch.Signal();
@@ -809,7 +819,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
 
   auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view,
                   // BD ADD:
-                  gpu_task, should_post_gpu_task, gpu_task_runner = task_runners_.GetGPUTaskRunner(),
+                  gpu_task, should_post_gpu_task, gpu_task_runner = task_runners_.GetGPUTaskRunner(), is_post = is_createView_post_,
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task] {
     if (io_manager && !io_manager->GetResourceContext()) {
       io_manager->NotifyResourceContextAvailable(
@@ -822,7 +832,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     // BD ADD: START
     // Step 2: Next, tell the GPU thread that it should create a surface for its
     // rasterizer.
-    if (should_post_gpu_task) {
+    if (!is_post && should_post_gpu_task) {
       fml::TaskRunner::RunNowOrPostTask(gpu_task_runner, gpu_task);
     }
     // END
@@ -1980,6 +1990,10 @@ bool Shell::SetupEngine(std::unique_ptr<Engine> engine){
 
 void Shell::SetPreloadState(bool preload) {
   is_preload_ = preload;
+}
+
+bool Shell::IsInShellNotBlockAndPosting() {
+  return is_preload_ && !is_setup_;
 }
 // END
 

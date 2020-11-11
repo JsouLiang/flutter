@@ -377,6 +377,12 @@ bool ShellTestPlatformView::GLContextPresent() {
   return gl_surface_.Present();
 }
 
+// BD ADD: START
+bool ShellTestPlatformView::IsValid() const {
+  return true;
+}
+// END
+
 // |GPUSurfaceGLDelegate|
 intptr_t ShellTestPlatformView::GLContextFBO() const {
   return gl_surface_.GetFramebuffer();

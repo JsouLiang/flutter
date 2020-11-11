@@ -208,7 +208,9 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
   sk_sp<SkImage> result;
   SkImageInfo image_info = SkImageInfo::MakeN32Premul(
       size.width(), size.height(), SkColorSpace::MakeSRGB());
-  if (surface_ == nullptr || surface_->GetContext() == nullptr) {
+  // BD MOD:
+  // if (surface_ == nullptr || surface_->GetContext() == nullptr) {
+  if (surface_ == nullptr || surface_->GetContext() == nullptr || !surface_->IsValid()) {
     // Raster surface is fine if there is no on screen surface. This might
     // happen in case of software rendering.
     sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
@@ -242,8 +244,9 @@ sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
 RasterStatus Rasterizer::DoDraw(
     std::unique_ptr<flutter::LayerTree> layer_tree) {
   FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
-
-  if (!layer_tree || !surface_) {
+  // BD MOD:
+  // if (!layer_tree || !surface_) {
+  if (!layer_tree || !surface_ || !surface_->IsValid()) {
     return RasterStatus::kFailed;
   }
 

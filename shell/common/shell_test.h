@@ -153,6 +153,11 @@ class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
   // |GPUSurfaceGLDelegate|
   bool GLContextPresent() override;
 
+  // BD ADD: START
+  // |GPUSurfaceGLDelegate|
+  bool IsValid() const override;
+  // END
+
   // |GPUSurfaceGLDelegate|
   intptr_t GLContextFBO() const override;
 

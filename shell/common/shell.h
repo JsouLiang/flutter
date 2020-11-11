@@ -395,8 +395,10 @@ class Shell final : public PlatformView::Delegate,
   // and read from the GPU thread.
   std::atomic<float> display_refresh_rate_ = 0.0f;
 
-  // BD ADD:
+  // BD ADD: START
   bool is_preload_ = false;
+  bool is_createView_post_ = false;
+  // END
 
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
@@ -424,6 +426,8 @@ class Shell final : public PlatformView::Delegate,
                           std::unique_ptr<ShellIOManager> io_manager);
 
   bool SetupEngine(std::unique_ptr<Engine> engine);
+
+  bool IsInShellNotBlockAndPosting() override;
   // END
 
   DartVM* GetDartVM();

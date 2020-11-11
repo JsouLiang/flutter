@@ -98,17 +98,27 @@ void PlatformViewAndroid::NotifyCreated(
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
+  //  BD ADD: START
+  if (IsInShellNotBlockAndPosting()) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(), [&latch] {
+      latch.Signal();
+    });
+    latch.Wait();
+  }
+  // END
+
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
+     fml::AutoResetWaitableEvent latch;
+     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetGPUTaskRunner(),
         [&latch, surface = android_surface_.get()]() {
-          surface->TeardownOnScreenContext();
-          latch.Signal();
-        });
-    latch.Wait();
+           surface->TeardownOnScreenContext();
+           latch.Signal();
+         });
+     latch.Wait();
   }
 }
 

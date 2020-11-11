@@ -145,4 +145,10 @@ void PlatformView::SetNextFrameCallback(const fml::closure& closure) {
   delegate_.OnPlatformViewSetNextFrameCallback(closure);
 }
 
+// BD ADD: START
+bool PlatformView::IsInShellNotBlockAndPosting() {
+    return delegate_.IsInShellNotBlockAndPosting();
+}
+// END
+
 }  // namespace flutter
