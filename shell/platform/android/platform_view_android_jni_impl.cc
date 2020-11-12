@@ -481,6 +481,11 @@ static void DestroyJNI(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 }
 
 // BD ADD: START
+static void UpdateSettings(JNIEnv *env, jobject jcaller, jlong shell_holder, jstring package_dill_path) {
+  // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
+  ANDROID_SHELL_HOLDER->UpdateSettings(fml::jni::JavaStringToString(env, package_dill_path));
+}
+
 static void ScheduleBackgroundFrame(JNIEnv *env, jobject jcaller, jlong shell_holder) {
   // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
   ANDROID_SHELL_HOLDER->ScheduleBackgroundFrame();
@@ -543,7 +548,13 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
   );
 
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  // BD ADD: START
+  // Running in Dynamicart mode. 注意：仅Android调用
+  if (!ANDROID_SHELL_HOLDER->GetSettings().package_dill_path.empty()) {
+    isolate_configuration = IsolateConfiguration::CreateForDynamicart(ANDROID_SHELL_HOLDER->GetSettings(), *asset_manager);
+  }
+  // END
+  else if (flutter::DartVM::IsRunningPrecompiledCode()) {
     isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
   } else {
     std::unique_ptr<fml::Mapping> kernel_blob =
@@ -1026,6 +1037,11 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&AttachJNI),
       },
       // BD ADD: START
+      {
+              .name = "nativeUpdateSettings",
+              .signature = "(JLjava/lang/String;)V",
+              .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
+      },
       {
           .name = "nativeScheduleBackgroundFrame",
           .signature = "(J)V",

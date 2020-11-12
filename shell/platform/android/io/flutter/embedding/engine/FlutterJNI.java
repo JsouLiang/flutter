@@ -153,6 +153,7 @@ public class FlutterJNI {
           "An AsyncWaitForVsyncDelegate must be registered with FlutterJNI before asyncWaitForVsync() is invoked.");
     }
   }
+  
 
 // BD ADD: START
   public static void loopForVsync(boolean initLooper) {
@@ -671,6 +672,14 @@ public class FlutterJNI {
   }
 
   private native void nativeScheduleBackgroundFrame(long nativePlatformViewId);
+
+  @UiThread
+  public void updateNative(String assetsPath) {
+    ensureAttachedToNative();
+    nativeUpdateSettings(nativePlatformViewId, assetsPath);
+  }
+
+  private native void nativeUpdateSettings(long nativePlatformViewId, String assetsPath);
   // END
 
   // ------ Start Dart Execution Support -------

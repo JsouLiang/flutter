@@ -72,6 +72,9 @@ struct Settings {
   std::string vm_snapshot_instr_path;  // deprecated
   MappingCallback vm_snapshot_instr;
 
+  // BD ADD:
+  std::string package_dill_path; // 本次启动所使用的动态包路径
+
   std::string isolate_snapshot_data_path;  // deprecated
   MappingCallback isolate_snapshot_data;
   std::string isolate_snapshot_instr_path;  // deprecated
@@ -204,6 +207,7 @@ struct Settings {
   bool limit_skia_worker = false;
   bool disable_preload = false;
   bool high_qos = false;
+  bool dynamicart_host = false;
   // END
 
   // Callback to handle the timings of a rasterized frame. This is called as

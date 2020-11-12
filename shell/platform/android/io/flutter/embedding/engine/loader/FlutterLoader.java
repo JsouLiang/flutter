@@ -41,6 +41,9 @@ public class FlutterLoader {
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
+  private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
+  private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
+  private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
   private static FlutterLoader instance;
 
@@ -247,6 +250,11 @@ public class FlutterLoader {
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
       }
+      
+      String hostManifestJson = PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir + File.separator + DEFAULT_HOST_MANIFEST_JSON;
+      if(new File(hostManifestJson).exists()){
+          shellArgs.add("--dynamicart-host");
+      }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
       if (!flutterApplicationInfo.clearTextPermitted) {
@@ -355,15 +363,15 @@ public class FlutterLoader {
       final String packageName = applicationContext.getPackageName();
       final PackageManager packageManager = applicationContext.getPackageManager();
       final AssetManager assetManager = applicationContext.getResources().getAssets();
-      resourceExtractor =
-          new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
+      resourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager, settings);
 
       // In debug/JIT mode these assets will be written to disk and then
       // mapped into memory so they can be provided to the Dart VM.
       resourceExtractor
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
-          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
+          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
+          .addResource(fullAssetPathFrom(DEFAULT_HOST_MANIFEST_JSON));
 
       resourceExtractor.start();
     }
@@ -406,6 +414,11 @@ public class FlutterLoader {
     return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
   }
 
+  public interface InitExceptionCallback {
+      void onRetryException(Throwable t);
+      void onInitException(Throwable t);
+  }
+
   public static class Settings {
     private String logTag;
     // BD ADD START:
@@ -413,6 +426,8 @@ public class FlutterLoader {
     private SoLoader soLoader;
     private MonitorCallback monitorCallback;
     private boolean disableLeakVM = false;
+    private Runnable onInitResources;
+    private InitExceptionCallback initExceptionCallback;
 
     public boolean isDisableLeakVM() {
         return disableLeakVM;
@@ -421,6 +436,22 @@ public class FlutterLoader {
     // 页面退出后，FlutterEngine默认是不销毁VM的，disableLeakVM设置在所有页面退出后销毁VM
     public void disableLeakVM() {
         disableLeakVM = true;
+    }
+
+    public Runnable getOnInitResourcesCallback() {
+         return onInitResources;
+     }
+
+    public void setOnInitResourcesCallback(Runnable callback) {
+         onInitResources = callback;
+    }
+
+     public InitExceptionCallback getInitExceptionCallback() {
+         return initExceptionCallback;
+    }
+
+    public void setInitExceptionCallback(InitExceptionCallback iec) {
+           initExceptionCallback = iec;
     }
 
     public String getNativeLibraryDir() {

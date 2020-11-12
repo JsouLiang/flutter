@@ -92,4 +92,8 @@ bool ShouldCreateLogMessage(LogSeverity severity);
 #define FML_NOTIMPLEMENTED() \
   FML_LOG(ERROR) << "Not implemented in: " << __PRETTY_FUNCTION__
 
+// BD ADD: START
+#define TT_LOG() FML_LOG(ERROR)
+// END
+
 #endif  // FLUTTER_FML_LOGGING_H_

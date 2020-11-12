@@ -200,6 +200,17 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
 }
 
 // BD ADD: START
+void AndroidShellHolder::UpdateSettings(const std::string& package_dill_path) {
+  if (!IsValid()) {
+    return;
+  }
+  std::string a = "bc";
+  std::string b = "cd";
+  a = b;
+  settings_.package_dill_path = package_dill_path;
+}
+
+// BD ADD: START
 void AndroidShellHolder::ScheduleBackgroundFrame() {
   if (!IsValid()) {
     return;

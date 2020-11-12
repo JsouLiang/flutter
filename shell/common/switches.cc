@@ -347,10 +347,14 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                               &settings.temp_directory_path);
 
   // BD ADD:START
+  command_line.GetOptionValue(FlagForSwitch(Switch::PackageDillPath),
+                              &settings.package_dill_path);
   settings.limit_skia_worker =
       command_line.HasOption(FlagForSwitch(Switch::LimitSkiaWorker));
   settings.disable_preload =
       command_line.HasOption(FlagForSwitch(Switch::DisablePreload));
+  settings.dynamicart_host =
+          command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
   if (command_line.HasOption(FlagForSwitch(Switch::DisableLeakVM))) {
       settings.leak_vm = false;
   }

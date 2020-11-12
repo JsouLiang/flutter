@@ -34,6 +34,22 @@ import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
 import java.util.ArrayList;
 
+// BD ADD：
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager.LayoutParams;
+import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.util.Preconditions;
+import io.flutter.view.FlutterMain;
+import io.flutter.view.FlutterNativeView;
+import io.flutter.view.FlutterRunArguments;
+import io.flutter.view.FlutterView;
+
 /**
  * Deprecated class that performs the actual work of tying Android {@link Activity} instances to
  * Flutter.
@@ -148,6 +164,14 @@ public final class FlutterActivityDelegate
     if (flutterView == null) {
       FlutterNativeView nativeView = viewFactory.createFlutterNativeView();
       flutterView = new FlutterView(activity, null, nativeView);
+
+      // BD ADD:
+      String path = activity.getIntent().getStringExtra("package_dill_path");
+      if (!TextUtils.isEmpty(path)){
+          flutterView.getFlutterNativeView().updateNative(path);
+      }
+      // END
+
       flutterView.setLayoutParams(matchParent);
       activity.setContentView(flutterView);
       launchView = createLaunchView();

@@ -199,6 +199,12 @@ bool DartVM::IsRunningPrecompiledCode() {
   return Dart_IsPrecompiledRuntime();
 }
 
+// BD ADD：START
+bool DartVM::IsRunningDynamicCode() {
+  return Dart_IsDynamicRuntime();
+}
+// END
+
 static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
 // Disable Dart's built in profiler when building a debug build. This
 // works around a race condition that would sometimes stop a crash's
@@ -384,6 +390,15 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
         DartOldGenHeapSizeArgs(settings_.old_gen_heap_size);
     args.push_back(old_gen_heap_size_args.c_str());
   }
+
+  // BD ADD: START
+  // 动态化 debug 宿主，需要打开解释器
+  if(!IsRunningPrecompiledCode() && settings_.dynamicart_host){
+    FML_LOG(ERROR)<<"debug dynamic"<<std::endl;
+    args.push_back("--enable_interpreter");
+    args.push_back("--compilation_counter_threshold=-1");
+  }
+  // END
 
 #if defined(OS_FUCHSIA)
   PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));

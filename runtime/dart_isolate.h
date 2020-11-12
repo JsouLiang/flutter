@@ -224,6 +224,12 @@ class DartIsolate : public UIDartState {
   ///
   Phase GetPhase() const;
 
+  // BD ADD:
+  FML_WARN_UNUSED_RESULT
+  bool PrepareForRunningFromDynamicartKernel(std::shared_ptr<const fml::Mapping> kernel, bool last_piece = true);
+  bool LoadKernelFromDynamicartKernel(std::shared_ptr<const fml::Mapping> mapping, bool last_piece);
+  // END
+
   //----------------------------------------------------------------------------
   /// @brief      Returns the ID for an isolate which is used to query the
   ///             service protocol.
@@ -384,6 +390,7 @@ class DartIsolate : public UIDartState {
   fml::RefPtr<fml::TaskRunner> GetMessageHandlingTaskRunner() const;
 
  private:
+
   class AutoFireClosure {
    public:
     AutoFireClosure(const fml::closure& closure);

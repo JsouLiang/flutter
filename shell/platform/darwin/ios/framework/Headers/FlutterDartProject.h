@@ -136,6 +136,12 @@ FLUTTER_EXPORT
 // 默认不开启，在引擎启动前设置生效
 + (void)setThreadHighQoS:(BOOL)enabled;
 
+/**
+ * Package settings
+ */
+- (void)setDillPath:(NSString*)path;    // 动态App压缩包路径
+- (void)setEnginePath:(NSString*)path;  // 动态Engine文件夹路径
+
 // END
 
 @end

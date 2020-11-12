@@ -36,6 +36,7 @@ static NSString* const kFLTAssetsPath = @"FLTAssetsPath";
 static NSString* const kFlutterAssets = @"flutter_assets";
 static FlutterCompressSizeModeMonitor kFlutterCompressSizeModeMonitor = nil;
 static BOOL highQoS = false;
+static NSString* const kHostManifestJson = @"host_manifest.json";
 // END
 
 static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
@@ -193,6 +194,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     _settings = DefaultSettingsForProcess(bundle);
 
     // BD ADD: START
+    [self checkIsDynamicHost];
     [[FlutterCompressSizeModeManager sharedInstance]
         updateSettingsIfNeeded:_settings
                        monitor:kFlutterCompressSizeModeMonitor];
@@ -376,6 +378,46 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 
 + (void)setThreadHighQoS:(BOOL)enabled {
   highQoS = enabled;
+}
+
+- (void)setDillPath:(NSString*)path {
+  if (!(path && [path isKindOfClass:[NSString class]] && path.length > 0)) {
+    return;
+  }
+//  if (flutter::DartVM::IsRunningDynamicCode()) {
+  _settings.package_dill_path = path.UTF8String;
+//  }
+}
+
+- (void)setEnginePath:(NSString*)path {
+  if (!(path && [path isKindOfClass:[NSString class]] && path.length > 0)) {
+    return;
+  }
+
+  if (flutter::DartVM::IsRunningDynamicCode()) {
+    _settings.icu_data_path = [path stringByAppendingPathComponent:@"icudtl.dat"].UTF8String;
+    _settings.assets_path = [path stringByAppendingPathComponent:@"flutter_assets"].UTF8String;
+    _settings.isolate_snapshot_data_path =
+            [path stringByAppendingPathComponent:@"isolate_snapshot_data"].UTF8String;
+    _settings.vm_snapshot_data_path =
+            [path stringByAppendingPathComponent:@"vm_snapshot_data"].UTF8String;
+  }
+}
+
+- (void)checkIsDynamicHost {
+
+  NSBundle *bundle = [NSBundle bundleWithIdentifier:[FlutterDartProject defaultBundleIdentifier]];
+  NSString *flutterBundlePath;
+  if (bundle) {
+    flutterBundlePath = bundle.bundlePath;
+  }
+  else {
+    bundle = [NSBundle mainBundle];
+    flutterBundlePath = [bundle.bundlePath stringByAppendingPathComponent:@"Frameworks/App.framework"];
+  }
+  NSString *hostManifestPath = [flutterBundlePath stringByAppendingPathComponent:kHostManifestJson];
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+  _settings.dynamicart_host = [fileManager fileExistsAtPath:hostManifestPath];
 }
 // END
 

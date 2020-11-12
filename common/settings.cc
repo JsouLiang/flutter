@@ -60,6 +60,8 @@ std::string Settings::ToString() const {
   stream << "frame_rasterized_callback set: " << !!frame_rasterized_callback
          << std::endl;
   stream << "old_gen_heap_size: " << old_gen_heap_size << std::endl;
+  // BD ADD
+  stream << "package_dill_path: " << package_dill_path << std::endl;
   return stream.str();
 }
 

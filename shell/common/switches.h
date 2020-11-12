@@ -198,6 +198,7 @@ DEF_SWITCH(
     "in the flutter_tester.")
 
 // BD ADD: START
+DEF_SWITCH(PackageDillPath, "package_dill_path", "Package Assets Path")
 DEF_SWITCH(LimitSkiaWorker,
      "limit-skia-worker",
      "Limit Skia worker thread count")
@@ -205,6 +206,7 @@ DEF_SWITCH(DisablePreload,
      "disable-preload",
      "Disable preload DartVM and SkFontMgr")
 DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
+DEF_SWITCH(DynamicartHost, "dynamicart-host", "indicate is a dynamicart host")
 // END
 DEF_SWITCHES_END
 

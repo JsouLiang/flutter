@@ -47,8 +47,11 @@ class AndroidShellHolder {
   void ExitApp(fml::closure closure);
   // END
 
+  // BD ADD: START
+  void UpdateSettings(const std::string& package_dill_path);
+
  private:
-  const flutter::Settings settings_;
+  flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   ThreadHost thread_host_;
