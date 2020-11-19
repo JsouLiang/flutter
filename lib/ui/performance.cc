@@ -88,7 +88,8 @@ void Performance::GetGpuCacheUsageKB(int64_t* grTotalMem,
     size_t totalBytes = 0;
     size_t resourceBytes = 0;
     size_t purgeableBytes = 0;
-#ifndef OS_MACOSX
+
+#if defined(OS_IOS) || defined(OS_ANROID)
     rasterizer_->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
 #endif
     *grTotalMem = totalBytes >> 10;
@@ -99,7 +100,7 @@ void Performance::GetGpuCacheUsageKB(int64_t* grTotalMem,
 
 void Performance::GetIOGpuCacheUsageKB(int64_t* grTotalMem,
                                      int64_t* grResMem, int64_t* grPurgeableMem) {
-#ifndef OS_MACOSX
+#if defined(OS_IOS) || defined(OS_ANROID)
   if (iOManager_ && iOManager_.get() && iOManager_->GetResourceContext()) {
     size_t totalBytes = 0;
     size_t resourceBytes = 0;
