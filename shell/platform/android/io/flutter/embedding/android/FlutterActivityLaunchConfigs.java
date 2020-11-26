@@ -4,7 +4,8 @@
 
 package io.flutter.embedding.android;
 
-class FlutterActivityLaunchConfigs {
+// BD update, change to public, google has maked it public in 20
+public class FlutterActivityLaunchConfigs {
   // Meta-data arguments, processed from manifest XML.
   static final String DART_ENTRYPOINT_META_DATA_KEY = "io.flutter.Entrypoint";
   static final String INITIAL_ROUTE_META_DATA_KEY = "io.flutter.InitialRoute";
