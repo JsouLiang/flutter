@@ -24,7 +24,7 @@ std::string PersistentCache::cache_base_path_;
 std::mutex PersistentCache::instance_mutex_;
 std::unique_ptr<PersistentCache> PersistentCache::gPersistentCache;
 
-std::string PersistentCache::SkKeyToFilePath(const SkData& data) {
+static std::string SkKeyToFilePath(const SkData& data) {
   if (data.data() == nullptr || data.size() == 0) {
     return "";
   }
