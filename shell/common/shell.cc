@@ -478,11 +478,6 @@ Shell::Shell(DartVMRef vm, TaskRunners task_runners, Settings settings)
       task_runners_.GetIOTaskRunner(),
       std::bind(&Shell::OnServiceProtocolGetSkSLs, this, std::placeholders::_1,
                 std::placeholders::_2)};
-  service_protocol_handlers_
-      [ServiceProtocol::kEstimateRasterCacheMemoryExtensionName] = {
-          task_runners_.GetGPUTaskRunner(),
-          std::bind(&Shell::OnServiceProtocolEstimateRasterCacheMemory, this,
-                    std::placeholders::_1, std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -1857,22 +1852,6 @@ bool Shell::OnServiceProtocolGetSkSLs(
   }
   response.AddMember("SkSLs", shaders_json, response.GetAllocator());
   return true;
-}
-
-bool Shell::OnServiceProtocolEstimateRasterCacheMemory(
-        const flutter::ServiceProtocol::Handler::ServiceProtocolMap &params, rapidjson::Document &response) {
-    FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
-    const auto& raster_cache = rasterizer_->compositor_context()->raster_cache();
-    response.SetObject();
-    response.AddMember("type", "EstimateRasterCacheMemory",
-                        response.GetAllocator());
-    response.AddMember<uint64_t>("layerBytes",
-                                  raster_cache.EstimateLayerCacheByteSize(),
-                                  response.GetAllocator());
-    response.AddMember<uint64_t>("pictureBytes",
-                                  raster_cache.EstimatePictureCacheByteSize(),
-                                  response.GetAllocator());
-    return true;
 }
 
 // Service protocol handler
