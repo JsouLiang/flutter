@@ -29,7 +29,6 @@
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 // BD ADD:
 #include "flutter/lib/ui/boost.h"
-#include "flutter/lib/ui/performance.h"
 
 namespace flutter {
 
@@ -883,8 +882,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   }
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
-  // BD ADD:
-  int64_t read_isolate_snapshot_start_timestamp = Performance::CurrentTimestamp();
   Dart_Isolate isolate = Dart_CreateIsolateGroup(
       advisory_script_uri,         //
       advisory_script_entrypoint,  //
@@ -895,8 +892,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
       embedder_isolate.get(),  // isolate_group
       error);
 
-  // BD ADD:
-  Performance::GetInstance()->TraceApmStartAndEnd("read_isolate_snapshort", read_isolate_snapshot_start_timestamp);
   if (isolate == nullptr) {
     FML_DLOG(ERROR) << *error;
     return {nullptr, {}};
