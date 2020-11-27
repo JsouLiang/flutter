@@ -6,7 +6,7 @@
 using namespace std;
 
 namespace flutter {
-
+static std::mutex mtx;
 Performance::Performance():
       dart_image_memory_usage(0),
       apm_map() {}
@@ -21,11 +21,13 @@ int64_t Performance::CurrentTimestamp() {
 }
 
 void Performance::TraceApmStartAndEnd(const string& event, int64_t start) {
+    std::lock_guard<std::mutex> lck (mtx);
     apm_map[event + "_start"] = start;
     apm_map[event + "_end"] = CurrentTimestamp();
 }
 
 vector<int64_t> Performance::GetEngineInitApmInfo() {
+    std::lock_guard<std::mutex> lck (mtx);
     vector<int64_t> engine_init_apm_info = {
             apm_map["init_task_start"],
             apm_map["init_task_end"],
