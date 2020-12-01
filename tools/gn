@@ -112,13 +112,13 @@ def to_gn_args(args):
     elif args.enable_lite_share_skia:
         gn_args['lite_suffix'] = 'lites'
 
-    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia or args.dynamicart:
+    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia:
         print("enable lite mode.")
         gn_args['dart_disable_boringssl'] = True
         gn_args['dart_enable_opt_oz'] = True
         gn_args['skia_enable_ccpr'] = False
         gn_args['skialite_disable_sksl_codegenerators'] = True
-        if args.enable_lite or args.enable_lite_share_skia or args.dynamicart:
+        if args.enable_lite or args.enable_lite_share_skia:
             # Use crop icudtl.dat
             gn_args['icu_use_lite_data_file'] = True
             # Crop harfbuzz, remove support for complex text and apple advanced type.
