@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,8 +67,10 @@ public class FlutterLoader {
     private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
     private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
 
-    // BD ADD
+    // BD ADD: START
     private static final String DEBUG_FLUTTER_LIBS_DIR = "flutter_libs";
+    private static final String DEBUG_FLUTTER_ASSET_DIR = "flutter_assets";
+    // END
 
     // Mutable because default values can be overridden via config properties
     private String aotSharedLibraryName = DEFAULT_AOT_SHARED_LIBRARY_NAME;
@@ -260,7 +263,11 @@ public class FlutterLoader {
                 for (String file : files) {
                     if (TextUtils.equals(file, DEFAULT_AOT_SHARED_LIBRARY_NAME)) {
                         hasAppSo = true;
-                        break;
+                    }
+                    if (TextUtils.equals(file, DEBUG_FLUTTER_ASSET_DIR)) {
+                        shellArgs.add("--extra-asset-dir=" + debugLibDir.getAbsolutePath()
+                                + File.separator + DEBUG_FLUTTER_ASSET_DIR);
+                        Log.i(TAG, "DebugMode: use copied " + DEBUG_FLUTTER_ASSET_DIR);
                     }
                 }
                 if (hasAppSo) {
@@ -453,7 +460,7 @@ public class FlutterLoader {
             File[] filesIndest = destDir.listFiles();
             if (filesIndest != null && filesIndest.length > 0) {
                 for (File file : filesIndest) {
-                    boolean success = file.delete();
+                    boolean success = PathUtils.delete(file);
                     Log.i(TAG, "DebugMode: delete old " + file.getName() + " " + success);
                 }
             }
@@ -463,12 +470,20 @@ public class FlutterLoader {
 
         // Do copy
         for (File file : sourceFiles) {
-            boolean success = PathUtils.copyFile(applicationContext, file.getAbsolutePath(),
-                    destDir.getAbsolutePath() + File.separator + file.getName(), true);
+            boolean success = false;
+            if (file.isDirectory()) {
+                success = PathUtils.copyFolder(file,
+                        new File(destDir.getAbsolutePath() + File.separator
+                                + DEBUG_FLUTTER_ASSET_DIR + File.separator + file.getName()));
+                PathUtils.delete(file);
+            } else {
+                success = PathUtils.copyFile(file.getAbsolutePath(),
+                        destDir.getAbsolutePath() + File.separator + file.getName(), true);
+            }
             if (!success) {
                 throw new RuntimeException("Copy debug files Failed");
             } else {
-                Log.i(TAG, "DebugMode: copy new" + file.getName() + " success");
+                Log.i(TAG, "DebugMode: copy " + file.getName() + " success");
             }
         }
     }

@@ -185,7 +185,7 @@ struct Settings {
   // BD ADD: START
   std::string package_dill_path; // 本次启动所使用的动态包路径
   std::string zip_assets_file_path;
-  std::string zip_assets_directory;
+  std::string zip_assets_directory; // 对于Android来说，作用是Hook系统的AssetManager来寻找资源
   bool high_qos = false;
   bool limit_skia_worker = false;
   bool disable_preload = false;

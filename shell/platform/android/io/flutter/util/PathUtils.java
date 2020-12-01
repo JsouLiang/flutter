@@ -10,6 +10,9 @@ import android.os.Build;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 // END
 
 public final class PathUtils {
@@ -35,7 +38,7 @@ public final class PathUtils {
     /**
      * BD ADD
      */
-    public static boolean copyFile(Context context, String origFilePath, String destFilePath, boolean deleteOriginFile) {
+    public static boolean copyFile(String origFilePath, String destFilePath, boolean deleteOriginFile) {
         boolean copyIsFinish = false;
         try {
             File destDir = new File(destFilePath.substring(0, destFilePath.lastIndexOf("/")));
@@ -65,5 +68,87 @@ public final class PathUtils {
             e.printStackTrace();
         }
         return copyIsFinish;
+    }
+
+    /**
+     * BD ADD
+     * 拷贝整个文件夹
+     * @param src
+     * @param dest
+     */
+    public static boolean copyFolder(File src, File dest) {
+        if (src.isDirectory()) {
+            if (!dest.exists()) {
+                dest.mkdirs();
+            }
+            String files[] = src.list();
+            for (String file : files) {
+                File srcFile = new File(src, file);
+                File destFile = new File(dest, file);
+                // 递归复制
+                if (!copyFolder(srcFile, destFile)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = new FileInputStream(src);
+                out = new FileOutputStream(dest);
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+
+                while ((length = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, length);
+                }
+                return true;
+            } catch (IOException e) {
+                return false;
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                    }
+                }
+
+            }
+        }
+    }
+
+    /**
+     * BD ADD
+     * @param file
+     * @return
+     */
+    public static boolean delete(File file) {
+        if (file.isFile()) {
+            return file.delete();
+        }
+
+        if (file.isDirectory()) {
+            File[] childFiles = file.listFiles();
+            if (childFiles == null || childFiles.length == 0) {
+                return file.delete();
+            }
+
+            for (int i = 0; i < childFiles.length; i++) {
+                if (!delete(childFiles[i])) {
+                    return false;
+                }
+            }
+            return file.delete();
+        }
+        return false;
     }
 }

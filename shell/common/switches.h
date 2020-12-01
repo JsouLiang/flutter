@@ -181,6 +181,7 @@ DEF_SWITCH(DisablePreload,
      "disable-preload",
      "Disable preload DartVM and SkFontMgr")
 DEF_SWITCH(DynamicartHost, "dynamicart-host", "indicate is a dynamicart host")
+DEF_SWITCH(ExtraAssetDir, "extra-asset-dir", "Extra Asset Path")
 // END
 DEF_SWITCHES_END
 
