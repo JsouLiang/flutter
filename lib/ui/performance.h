@@ -38,6 +38,9 @@ class Performance {
   std::vector<int64_t> GetEngineInitApmInfo();
   static int64_t CurrentTimestamp();
 
+  void SetExitStatus(bool isExitApp);
+  bool IsExitApp();
+
  private:
   Performance();
 
@@ -45,6 +48,7 @@ class Performance {
   fml::WeakPtr<flutter::Rasterizer> rasterizer_;
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
   std::map<string, int64_t> apm_map; // Map
+  std::atomic_bool isExitApp_ = {false};
 };
 
 }

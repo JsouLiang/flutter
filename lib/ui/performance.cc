@@ -119,5 +119,15 @@ void Performance::SetRasterizerAndIOManager(fml::WeakPtr<flutter::Rasterizer> ra
   fml::WeakPtr<flutter::ShellIOManager> ioManager) {
   rasterizer_ = std::move(rasterizer);
   iOManager_ = std::move(ioManager);
+  isExitApp_ = false;
 }
+
+void Performance::SetExitStatus(bool isExitApp) {
+  isExitApp_ = isExitApp;
+}
+
+bool Performance::IsExitApp() {
+  return isExitApp_;
+}
+
 }

@@ -1943,6 +1943,7 @@ std::shared_ptr<fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch() const {
 
 // BD ADD: QiuXinyue
 void Shell::ExitApp(fml::closure closure) {
+  Performance::GetInstance()->SetExitStatus(true);
   // 步骤1：通知Flutter退出App
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
