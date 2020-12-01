@@ -360,6 +360,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.HasOption(FlagForSwitch(Switch::LimitSkiaWorker));
   settings.disable_preload =
       command_line.HasOption(FlagForSwitch(Switch::DisablePreload));
+  command_line.GetOptionValue(FlagForSwitch(Switch::ExtraAssetDir),
+                              &settings.zip_assets_directory);
   if (command_line.HasOption(FlagForSwitch(Switch::DisableLeakVM))) {
       settings.leak_vm = false;
   }
