@@ -207,6 +207,7 @@ DEF_SWITCH(DisablePreload,
      "Disable preload DartVM and SkFontMgr")
 DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
 DEF_SWITCH(DynamicartHost, "dynamicart-host", "indicate is a dynamicart host")
+DEF_SWITCH(ExtraAssetDir, "extra-asset-dir", "Extra Asset Path")
 // END
 DEF_SWITCHES_END
 

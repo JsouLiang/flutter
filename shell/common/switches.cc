@@ -355,6 +355,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.HasOption(FlagForSwitch(Switch::DisablePreload));
   settings.dynamicart_host =
           command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
+  command_line.GetOptionValue(FlagForSwitch(Switch::ExtraAssetDir),
+                              &settings.zip_assets_directory);
   if (command_line.HasOption(FlagForSwitch(Switch::DisableLeakVM))) {
       settings.leak_vm = false;
   }

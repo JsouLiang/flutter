@@ -203,7 +203,7 @@ struct Settings {
   std::string assets_path;
   // BD ADD: START
   std::string zip_assets_file_path;
-  std::string zip_assets_directory;
+  std::string zip_assets_directory; // 对于Android来说，作用是Hook系统的AssetManager来寻找资源
   bool limit_skia_worker = false;
   bool disable_preload = false;
   bool high_qos = false;

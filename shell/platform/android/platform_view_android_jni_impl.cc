@@ -564,6 +564,13 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
       fml::jni::JavaStringToString(env, jBundlePath))  // apk asset dir
   );
 
+  // BD ADD: START
+  if (!ANDROID_SHELL_HOLDER->GetSettings().zip_assets_directory.empty()) {
+    asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
+            fml::OpenDirectory(ANDROID_SHELL_HOLDER->GetSettings().zip_assets_directory.c_str(), false,
+                               fml::FilePermission::kRead)));
+  }
+  // END
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
   // BD ADD: START
   // Running in Dynamicart mode. 注意：仅Android调用
