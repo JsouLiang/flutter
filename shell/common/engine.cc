@@ -275,18 +275,6 @@ void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
       viewport_metrics_.physical_depth != metrics.physical_depth;
   viewport_metrics_ = metrics;
   runtime_controller_->SetViewportMetrics(viewport_metrics_);
-
-  // BD ADD: START
-  if (dimensions_changed && viewport_metrics_.physical_height == kUnsetWidth
-      && viewport_metrics_.physical_width == kUnsetWidth
-      && viewport_metrics_.physical_depth == kUnsetDepth
-      && metrics.physical_height == 0
-      && metrics.physical_width == 0
-      && metrics.physical_depth == kUnsetDepth) {
-    dimensions_changed = false;
-  }
-  // END
-
   if (animator_) {
     if (dimensions_changed)
       animator_->SetDimensionChangePending();
