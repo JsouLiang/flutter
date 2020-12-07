@@ -157,6 +157,13 @@ void _runMainZoned(Function startMainIsolateFunction,
 
 void _reportUnhandledException(String error, String stackTrace) native 'PlatformConfiguration_reportUnhandledException';
 
+// BD ADD: START
+class MessageHooks {
+  static void Function(Function)? hookBeforeEngineInvoke;
+  static void Function(Function)? hookAfterEngineInvoke;
+}
+// END
+
 /// Invokes [callback] inside the given [zone].
 void _invoke(void Function()? callback, Zone zone) {
   if (callback == null) {
@@ -164,6 +171,19 @@ void _invoke(void Function()? callback, Zone zone) {
   }
 
   assert(zone != null);
+
+  // BD ADD: START
+  if (MessageHooks.hookBeforeEngineInvoke != null && MessageHooks.hookAfterEngineInvoke != null) {
+    void Function() profileCallback(void callback()) {
+      return () {
+        MessageHooks.hookBeforeEngineInvoke?.call(callback);
+        callback();
+        MessageHooks.hookAfterEngineInvoke?.call(callback);
+      };
+    }
+    callback = profileCallback(callback);
+  }
+  // END
 
   if (identical(zone, Zone.current)) {
     callback();
@@ -184,6 +204,19 @@ void _invoke1<A>(void Function(A a)? callback, Zone zone, A arg) {
 
   assert(zone != null);
 
+  // BD ADD: START
+  if (MessageHooks.hookBeforeEngineInvoke != null && MessageHooks.hookAfterEngineInvoke != null) {
+    void Function(A a) profileCallback(void callback(A a)) {
+      return (A a) {
+        MessageHooks.hookBeforeEngineInvoke?.call(callback);
+        callback(a);
+        MessageHooks.hookAfterEngineInvoke?.call(callback);
+      };
+    }
+    callback = profileCallback(callback);
+  }
+  // END
+
   if (identical(zone, Zone.current)) {
     callback(arg);
   } else {
@@ -203,11 +236,26 @@ void _invoke2<A1, A2>(void Function(A1 a1, A2 a2)? callback, Zone zone, A1 arg1,
 
   assert(zone != null);
 
+ // BD ADD: START
+  if (MessageHooks.hookBeforeEngineInvoke != null && MessageHooks.hookAfterEngineInvoke != null) {
+    void Function(A1 a1, A2 a2) profileCallback(void callback(A1 a1, A2 a2)) {
+      return (A1 a1, A2 a2) {
+        MessageHooks.hookBeforeEngineInvoke?.call(callback);
+        callback(a1, a2);
+        MessageHooks.hookAfterEngineInvoke?.call(callback);
+      };
+    }
+    callback = profileCallback(callback);
+  }
+  // END
+
   if (identical(zone, Zone.current)) {
     callback(arg1, arg2);
   } else {
     zone.runGuarded(() {
-      callback(arg1, arg2);
+      // BD MOD:
+      // callback(arg1, arg2);
+      callback?.call(arg1, arg2);
     });
   }
 }
