@@ -740,6 +740,14 @@ public class FlutterView extends FrameLayout {
     }
   }
 
+  // BD ADD: START
+  //fix SurfaceView Window Leaks when engine multiplexing. Will be called by bd_vessel
+  public void setVisibility(int visibility) {
+    if(renderSurface != null) {
+      renderSurface.setVisibility(visibility);
+    }
+  }
+  // END
   /**
    * Disconnects this {@code FlutterView} from a previously attached {@link FlutterEngine}.
    *
