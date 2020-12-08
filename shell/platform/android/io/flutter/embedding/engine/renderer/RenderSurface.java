@@ -52,4 +52,9 @@ public interface RenderSurface {
    * connected {@code FlutterRenderer}.
    */
   void detachFromRenderer();
+
+  // BD ADD: START
+  //fix SurfaceView Window Leaks when engine multiplexing. Will be called by flutterview
+  void setVisibility(int visibility);
+  // END
 }
