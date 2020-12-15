@@ -48,6 +48,8 @@
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil;
+// BD ADD:
+- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil preLoad:(BOOL)preLoad;
 
 @end
 

@@ -330,8 +330,10 @@ class Shell final : public PlatformView::Delegate,
    */
   void ScheduleBackgroundFrame();
 
-  // BD ADD:
+  // BD ADD: START
   static int64_t GetEngineMainEnterMicros();
+  bool IsInShellNotBlockAndPosting() override;
+  // END
 
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
@@ -427,7 +429,6 @@ class Shell final : public PlatformView::Delegate,
 
   bool SetupEngine(std::unique_ptr<Engine> engine);
 
-  bool IsInShellNotBlockAndPosting() override;
   // END
 
   DartVM* GetDartVM();
