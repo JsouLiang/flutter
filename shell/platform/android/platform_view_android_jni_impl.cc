@@ -240,8 +240,12 @@ public:
                codec, jObject, jCodec, androidImageLoader]() {
               JNIEnv *env = fml::jni::AttachCurrentThread();
               codec->skImage = uploadTexture(env, jObject, context);
-              std::unique_ptr<NativeExportCodec> codec2(codec);
-              codecCallback(std::move(codec2));
+              if (codec->skImage){
+                std::unique_ptr<NativeExportCodec> codec2(codec);
+                codecCallback(std::move(codec2));
+              } else {
+                codecCallback(nullptr);
+              }
               task_runners.GetPlatformTaskRunner()->PostTask([jCodec] {
                 JNIEnv *env = fml::jni::AttachCurrentThread();
                   env->DeleteGlobalRef(jCodec);
