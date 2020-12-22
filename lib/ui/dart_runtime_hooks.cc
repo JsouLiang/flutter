@@ -65,6 +65,7 @@ namespace flutter {
   V(FinishBoost, 1)             \
   V(PreloadFontFamilies, 2)     \
   V(DisableMips, 1)             \
+  V(WarmUpZeroSizeOnce, 1)             \
   V(Performance_heapInfo, 0)    \
   V(Performance_getEngineInitApmInfo, 0)   \
   V(Performance_imageMemoryUsage, 0)       \
@@ -403,6 +404,11 @@ void ForceGC(Dart_NativeArguments args) {
 void DisableMips(Dart_NativeArguments args) {
   bool disable = (bool)DartConverter<bool >::FromDart(Dart_GetNativeArgument(args, 0));
   Boost::Current()->DisableMips(disable);
+}
+
+void WarmUpZeroSizeOnce(Dart_NativeArguments args) {
+  bool warmUpForOnce = (bool)DartConverter<bool >::FromDart(Dart_GetNativeArgument(args, 0));
+  Boost::Current()->WarmUpZeroSizeOnce(warmUpForOnce);
 }
 
 void Performance_heapInfo(Dart_NativeArguments args) {

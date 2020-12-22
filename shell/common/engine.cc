@@ -456,8 +456,15 @@ void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
 
   SkISize frame_size = SkISize::Make(viewport_metrics_.physical_width,
                                      viewport_metrics_.physical_height);
-  if (frame_size.isEmpty())
-    return;
+  // BD MOD: START
+  // if (frame_size.isEmpty())
+  if (frame_size.isEmpty()) {
+    if (Boost::Current()->PerformWarmUpZeroSize()) {
+      frame_size = SkISize::Make(10,10);
+    } else {
+      return;
+    }
+  }
 
   layer_tree->set_frame_size(frame_size);
   layer_tree->set_device_pixel_ratio(viewport_metrics_.device_pixel_ratio);

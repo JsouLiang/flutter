@@ -71,6 +71,9 @@ class Boost {
   void DisableMips(bool disable);
   bool IsDisableMips();
 
+  void WarmUpZeroSizeOnce(bool warmUpOnce);
+  bool PerformWarmUpZeroSize();
+
  private:
   Boost();
   ~Boost();
@@ -100,7 +103,7 @@ class Boost {
   int64_t notify_idle_deadline_;
 
   atomic_bool disable_mipmaps_;
-  
+  atomic_bool warmUpOnce_;
   FML_DISALLOW_COPY_AND_ASSIGN(Boost);
 };
 
