@@ -219,8 +219,12 @@ public:
         int* frameDurations = nullptr;
         jobject frameDurationsObj = env->GetObjectField(jCodec, env->GetFieldID(clazz, "frameDurations", "[I"));
         if (frameDurationsObj) {
-          jintArray *frameDurationsJni = reinterpret_cast<jintArray*>(&frameDurationsObj);
-          frameDurations = env->GetIntArrayElements(*frameDurationsJni, NULL);
+          jintArray * frameDurationsSrc = reinterpret_cast<jintArray*>(&frameDurationsObj);
+          jsize frameDurationsSize = env->GetArrayLength(*frameDurationsSrc);
+          if (frameDurationsSize > 0){
+            frameDurations = static_cast<int*>(malloc(sizeof(int) * frameDurationsSize));
+            env->GetIntArrayRegion(*frameDurationsSrc, 0, frameDurationsSize, frameDurations);
+          }
         }
 
         NativeExportCodec *codec = new NativeExportCodec();
