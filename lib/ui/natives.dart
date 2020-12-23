@@ -100,6 +100,8 @@ void forceGC() native 'ForceGC';
 
 void disableMips(bool disable) native 'DisableMips';
 
+void warmUpZeroSizeOnce(bool enable) native 'WarmUpZeroSizeOnce';
+
 void startStackTraceSamples() native 'Performance_startStackTraceSamples';
 
 void stopStackTraceSamples() native 'Performance_stopStackTraceSamples';
