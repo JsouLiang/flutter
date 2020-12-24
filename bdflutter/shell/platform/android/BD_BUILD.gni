@@ -7,6 +7,8 @@ bd_flutter_android_path = "//flutter/bdflutter/shell/platform/android"
 android_external_image_loader_sources = [
   "$bd_flutter_android_path/android_external_image_loader.h",
   "$bd_flutter_android_path/android_external_image_loader.cc",
+  "$bd_flutter_android_path/android_native_export_codec.h",
+  "$bd_flutter_android_path/android_native_export_codec.cc",
 ]
 
 android_image_loader_java_sources = [
