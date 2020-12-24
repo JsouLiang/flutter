@@ -29,13 +29,13 @@ class NativeExportCodec {
 public:
     int frameCount_;
     int repetitionCount_;
-    int* frameDurations;
     int width;
     int height;
     sk_sp<SkImage> skImage;
-    const std::string *key;
+    int* frameDurations = nullptr;
+    const std::string *key = nullptr;
 #if OS_ANDROID
-    jobject codec;
+    jobject codec = nullptr;
 #endif
 
 };

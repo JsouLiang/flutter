@@ -19,6 +19,8 @@ NativeExportCodec::~NativeExportCodec() {
     JNIEnv *env = fml::jni::AttachCurrentThread();
     env->DeleteGlobalRef(codec);
   }
+  free(frameDurations);
+  delete key;
 #endif
 }
 
