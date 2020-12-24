@@ -5,7 +5,6 @@
 #ifndef NATIVE_EXPORT_CODEC_H_
 #define NATIVE_EXPORT_CODEC_H_
 
-#include <third_party/android_tools/ndk/sysroot/usr/include/jni.h>
 #include <third_party/skia/include/core/SkImage.h>
 
 
@@ -29,14 +28,11 @@ class NativeExportCodec {
 public:
     int frameCount_;
     int repetitionCount_;
-    int* frameDurations;
     int width;
     int height;
     sk_sp<SkImage> skImage;
-    const std::string *key;
-#if OS_ANDROID
-    jobject codec;
-#endif
+    int* frameDurations = nullptr;
+    const std::string *key = nullptr;
 
 };
 

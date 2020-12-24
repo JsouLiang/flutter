@@ -36,6 +36,7 @@
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 // BD ADD:
+#include "flutter/bdflutter/shell/platform/android/android_native_export_codec.h"
 #include "flutter/fml/make_copyable.h"
 
 #define ANDROID_SHELL_HOLDER \
@@ -210,34 +211,11 @@ public:
                                                                androidImageLoader = androidImageLoader,
                                                                codecCallback = std::move(codecCallback)] {
         JNIEnv *env = fml::jni::AttachCurrentThread();
-        jclass clazz = env->GetObjectClass(jCodec);
-        jint width = env->GetIntField(jCodec, env->GetFieldID(clazz, "width", "I"));
-        jint height = env->GetIntField(jCodec, env->GetFieldID(clazz, "height", "I"));
-        jint frameCount = env->GetIntField(jCodec, env->GetFieldID(clazz, "frameCount", "I"));
-        jint repeatCount = env->GetIntField(jCodec, env->GetFieldID(clazz, "repeatCount", "I"));
-        jobject jObject = env->GetObjectField(jCodec, env->GetFieldID(clazz, "codec", "Ljava/lang/Object;"));
-        int* frameDurations = nullptr;
-        jobject frameDurationsObj = env->GetObjectField(jCodec, env->GetFieldID(clazz, "frameDurations", "[I"));
-        if (frameDurationsObj) {
-          jintArray * frameDurationsSrc = reinterpret_cast<jintArray*>(&frameDurationsObj);
-          jsize frameDurationsSize = env->GetArrayLength(*frameDurationsSrc);
-          if (frameDurationsSize > 0){
-            frameDurations = static_cast<int*>(malloc(sizeof(int) * frameDurationsSize));
-            env->GetIntArrayRegion(*frameDurationsSrc, 0, frameDurationsSize, frameDurations);
-          }
-        }
-
-        NativeExportCodec *codec = new NativeExportCodec();
-        codec->frameDurations = frameDurations;
-        codec->repetitionCount_ = repeatCount;
-        codec->frameCount_ = frameCount;
-        codec->width = width;
-        codec->height = height;
-        codec->key = new std::string(cKey);
+        AndroidNativeExportCodec *codec = new AndroidNativeExportCodec(env, cKey, jCodec);
         auto context = loaderContentRef.resourceContext;
         auto task_runners = loaderContentRef.task_runners;
         if (codec->frameCount_ == -1) {
-          jObject = env->NewGlobalRef(jObject);
+          jobject jObject = env->NewGlobalRef(codec->codec);
           loaderContentRef.task_runners.GetIOTaskRunner()->PostTask(
             [cKey, task_runners, context,
               codecCallback = std::move(codecCallback),
@@ -266,13 +244,13 @@ public:
               });
             });
         } else {
-          codec->codec = env->NewGlobalRef(jObject);
+          codec->codec = env->NewGlobalRef(codec->codec);
           std::unique_ptr<NativeExportCodec> codec2(codec);
           codecCallback(std::move(codec2));
-          task_runners.GetPlatformTaskRunner()->PostTask([cKey, task_runners, jObject, jCodec, androidImageLoader] {
+          task_runners.GetPlatformTaskRunner()->PostTask([cKey, task_runners, jCodec, androidImageLoader] {
             JNIEnv *env = fml::jni::AttachCurrentThread();
             env->DeleteGlobalRef(jCodec);
-            task_runners.GetUITaskRunner()->PostTask([task_runners, cKey, jObject, androidImageLoader] {
+            task_runners.GetUITaskRunner()->PostTask([task_runners, cKey, androidImageLoader] {
               JNIEnv *env = fml::jni::AttachCurrentThread();
               env->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
                                   fml::jni::StringToJavaString(env, cKey).obj());
@@ -461,7 +439,8 @@ void CallJavaImageLoaderGetNextFrame(jobject android_image_loader, ImageLoaderCo
   g_image_load_contexts[key] = loadContext;
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
-  env->CallVoidMethod(android_image_loader, g_image_loader_class_load_gif, reinterpret_cast<jint>(currentFrame), codec->codec, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
+  AndroidNativeExportCodec *androidCodec = static_cast<AndroidNativeExportCodec *>(codec.get());
+  env->CallVoidMethod(android_image_loader, g_image_loader_class_load_gif, reinterpret_cast<jint>(currentFrame), androidCodec->codec, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
   env->DeleteLocalRef(callObject);
 }
 
