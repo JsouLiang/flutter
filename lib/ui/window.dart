@@ -1242,6 +1242,14 @@ class Window {
   /// For asynchronous communication between the embedder and isolate, a
   /// platform channel may be used.
   ByteData? getPersistentIsolateData() native 'PlatformConfiguration_getPersistentIsolateData';
+
+  // BD ADD: START
+  // improve compatibility with ByteFlutter 1.12
+  VoidCallback? get exitApp => performance.exitApp;
+  set exitApp(VoidCallback? callback) {
+    performance.exitApp = callback;
+  }
+  // END
 }
 
 /// Additional accessibility features that may be enabled by the platform.
