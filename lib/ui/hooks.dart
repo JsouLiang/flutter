@@ -248,10 +248,10 @@ void _invoke2<A1, A2>(void Function(A1 a1, A2 a2)? callback, Zone zone, A1 arg1,
 
  // BD ADD: START
   if (MessageHooks.hookBeforeEngineInvoke != null && MessageHooks.hookAfterEngineInvoke != null) {
-    void Function(A1 a1, A2 a2, A3 a3) profileCallback(void callback(A1 a1, A2 a2, A3 a3)) {
-      return (A1 a1, A2 a2, A3 a3) {
+    void Function(A1 a1, A2 a2) profileCallback(void callback(A1 a1, A2 a2)) {
+      return (A1 a1, A2 a2) {
         MessageHooks.hookBeforeEngineInvoke?.call(callback);
-        callback(a1, a2, a3);
+        callback(a1, a2);
         MessageHooks.hookAfterEngineInvoke?.call(callback);
       };
     }
