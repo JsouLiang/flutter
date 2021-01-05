@@ -275,16 +275,20 @@ shared_library("create_flutter_framework_dylib") {
     "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
     # BD ADD: START LiuXia
     "-Wl,-rename_section,__TEXT,__text,__BD_TEXT,__text",
+    "-Wl,-rename_section,__TEXT,__textcoal_nt,__BD_TEXT,__text",
+    "-Wl,-rename_section,__TEXT,__StaticInit,__BD_TEXT,__text",
     "-Wl,-rename_section,__TEXT,__stubs,__BD_TEXT,__stubs",
-    "-Wl,-rename_section,__TEXT,__stub_helper,__BD_TEXT,__stub_helper",
-    "-Wl,-rename_section,__TEXT,__const,__BD_TEXT,__const",
     "-Wl,-rename_section,__TEXT,__cstring,__BD_TEXT,__cstring",
-    "-Wl,-rename_section,__TEXT,__gcc_except_tab,__BD_TEXT,__gcc_except_tab",
+    "-Wl,-rename_section,__TEXT,__picsymbolstub4,__BD_TEXT,__picsymbolstub4",
+    "-Wl,-rename_section,__TEXT,__stub_helper,__BD_TEXT,__stub_helper",
     "-Wl,-rename_section,__TEXT,__objc_classname,__BD_TEXT,__objc_classname",
     "-Wl,-rename_section,__TEXT,__objc_methname,__BD_TEXT,__objc_methname",
-    "-Wl,-rename_section,__TEXT,__objc_methtype,__BD_TEXT,__objc_methtype",
     "-Wl,-rename_section,__TEXT,__ustring,__BD_TEXT,__ustring",
-    "-Wl,-segprot,__BD_TEXT,rx,rx"
+    "-Wl,-segprot,__BD_TEXT,rx,rx",
+    "-Wl,-rename_section,__TEXT,__const,__COMPRESS,__const",
+    "-Wl,-rename_section,__TEXT,__objc_methtype,__COMPRESS,__objc_methtype",
+    "-Wl,-rename_section,__TEXT,__gcc_except_tab,__COMPRESS,__gcc_except_tab",
+    "-Wl,-segprot,__COMPRESS,r,r"
     # END
    ]
 
