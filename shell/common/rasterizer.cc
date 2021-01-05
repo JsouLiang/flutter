@@ -748,4 +748,18 @@ Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 
 Rasterizer::Screenshot::~Screenshot() = default;
 
+// BD ADD: START
+void Rasterizer::getResourceCacheBytes(size_t* totalBytes, size_t* resourceBytes, size_t* purgeableBytes) const {
+  if (!surface_) {
+    return;
+  }
+  GrDirectContext* context = surface_->GetContext();
+  if (context) {
+  #if THIRD_PARTY_SKIA_BD
+    context->getResourceCacheBytes(totalBytes, resourceBytes, purgeableBytes);
+  #endif
+  }
+}
+// END
+
 }  // namespace flutter

@@ -413,6 +413,17 @@ class Rasterizer final : public SnapshotDelegate {
   ///
   std::optional<size_t> GetResourceCacheMaxBytes() const;
 
+  // BD ADD: START
+  ///
+  /// Gets the current GPU resource cache usage.
+  ///
+  ///  @param totalBytes totalBytes = resourceBytes + purgeableBytes.
+  ///  @param resourceBytes current GPU resource cache usage.
+  ///  @param the number of bytes in the cache consumed by purgeable (e.g. unlocked) resources
+  ///
+  void getResourceCacheBytes(size_t* totalBytes, size_t* resourceBytes, size_t* purgeableBytes) const;
+  // END
+
   //----------------------------------------------------------------------------
   /// @brief      Enables the thread merger if the external view embedder
   ///             supports dynamic thread merging.

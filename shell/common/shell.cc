@@ -32,6 +32,9 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/tonic/common/log.h"
 
+// BD ADD:
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
+
 namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
@@ -267,6 +270,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     }
     latch.Wait();
   }
+  Performance::GetInstance()->SetRasterizerAndIOManager(
+    shell->weak_rasterizer_, shell->io_manager_->GetWeakPtr());
   // END
   return shell;
 }
@@ -2244,6 +2249,7 @@ void Shell::ScheduleBackgroundFrame() {
 }
 
 void Shell::ExitApp(fml::closure closure) {
+  Performance::GetInstance()->SetExitStatus(true);
   // 1：notify flutter to exit app
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),

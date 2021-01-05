@@ -113,7 +113,11 @@ def to_gn_args(args):
     elif args.enable_lite_share_skia:
         gn_args['lite_suffix'] = 'lites'
 
-    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia:
+    # enable calculate memory of skia in profile & debug mode
+    if runtime_mode in ['profile', 'debug']:
+        gn_args['skialite_enable_calculate_malloc_memory'] = True
+
+    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia or args.dynamicart:
         print("enable lite mode.")
         gn_args['dart_disable_boringssl'] = True
         gn_args['dart_enable_opt_oz'] = True
