@@ -196,7 +196,9 @@ public class FlutterEngine {
         new PlatformViewsController(),
         dartVmArgs,
         automaticallyRegisterPlugins,
-        waitForRestorationData);
+        waitForRestorationData,
+        // BD ADD:
+        false);
   }
 
   /**
@@ -212,6 +214,26 @@ public class FlutterEngine {
       @NonNull FlutterJNI flutterJNI) {
     this(context, flutterLoader, flutterJNI, null, true);
   }
+
+  // BD ADD: START
+  public FlutterEngine(
+        @NonNull Context context,
+        @NonNull FlutterLoader flutterLoader,
+        @NonNull FlutterJNI flutterJNI,
+        boolean isPreload
+  ) {
+    this(
+        context,                      // Context context
+        flutterLoader,                // FlutterLoader flutterLoader
+        flutterJNI,                   // FlutterJNI flutterJNI
+        new PlatformViewsController(),// PlatformViewsController platformViewsController
+        null,                         // dartVmArgs
+        false,                        // automaticallyRegisterPlugins
+        false,                        // waitForRestorationData
+        isPreload
+        );
+  }
+  // END
 
   /**
    * Same as {@link #FlutterEngine(Context, FlutterLoader, FlutterJNI)}, plus Dart VM flags in
@@ -252,6 +274,8 @@ public class FlutterEngine {
         platformViewsController,
         dartVmArgs,
         automaticallyRegisterPlugins,
+        false,
+        // BD ADD:
         false);
   }
 
@@ -263,7 +287,10 @@ public class FlutterEngine {
       @NonNull PlatformViewsController platformViewsController,
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins,
-      boolean waitForRestorationData) {
+      boolean waitForRestorationData,
+      // BD ADD:
+      boolean isPreload
+      ) {
     this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
     this.dartExecutor.onAttachedToJNI();
 
@@ -291,7 +318,9 @@ public class FlutterEngine {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
-    attachToJni();
+    // BD MOD:
+    // attachToJni();
+    attachToJni(isPreload);
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
     // possible.
@@ -313,10 +342,14 @@ public class FlutterEngine {
     }
   }
 
-  private void attachToJni() {
+  // BD MOD:
+  // private void attachToJni() {
+  private void attachToJni(boolean isPreload) {
     Log.v(TAG, "Attaching to JNI.");
     // TODO(mattcarroll): update native call to not take in "isBackgroundView"
-    flutterJNI.attachToNative(false);
+    // BD MOD:
+    // flutterJNI.attachToNative(false, isPreload);
+    flutterJNI.attachToNative(false, isPreload);
 
     if (!isAttachedToJni()) {
       throw new RuntimeException("FlutterEngine failed to attach to its native Object reference.");

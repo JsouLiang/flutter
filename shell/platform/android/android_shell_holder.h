@@ -24,6 +24,11 @@ class AndroidShellHolder {
   AndroidShellHolder(flutter::Settings settings,
                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
                      bool is_background_view);
+  // BD ADD: START
+  AndroidShellHolder(flutter::Settings settings,
+                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                     bool is_background_view, bool preLoad);
+  // END
 
   ~AndroidShellHolder();
 
@@ -63,6 +68,11 @@ class AndroidShellHolder {
   static void ThreadDestructCallback(void* value);
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidShellHolder);
+
+  // BD ADD:
+  void InitAndroidShellHolder(std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    bool is_background_view, bool preLoad);
+  // END
 };
 
 }  // namespace flutter

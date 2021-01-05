@@ -77,5 +77,11 @@ ExternalViewEmbedder* ShellTestPlatformViewGL::GetExternalViewEmbedder() {
   return shell_test_external_view_embedder_.get();
 }
 
+// BD ADD: START
+// |GPUSurfaceGLDelegate|
+bool ShellTestPlatformViewGL::IsValid() const {
+  return true;
+}
+// END
 }  // namespace testing
 }  // namespace flutter

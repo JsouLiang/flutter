@@ -54,6 +54,12 @@
 - (void)notifyLowMemory;
 - (flutter::PlatformViewIOS*)iosPlatformView;
 
+// BD ADD:
+- (BOOL)createShell:(NSString*)entrypoint
+         libraryURI:(NSString*)libraryOrNil
+       initialRoute:(NSString*)initialRoute
+            preLoad:(BOOL)preLoad;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
