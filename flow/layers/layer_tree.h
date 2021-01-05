@@ -45,6 +45,10 @@ class LayerTree {
 
   const SkISize& frame_size() const { return frame_size_; }
   float device_pixel_ratio() const { return device_pixel_ratio_; }
+  // BD ADD: START
+  void set_frame_size(SkISize size) { frame_size_ = size; }
+  void set_device_pixel_ratio(float ratio_) { device_pixel_ratio_ = ratio_; }
+  // END
 
   const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
   PaintRegionMap& paint_region_map() { return paint_region_map_; }
@@ -71,7 +75,9 @@ class LayerTree {
  private:
   std::shared_ptr<Layer> root_layer_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
-  const float device_pixel_ratio_;  // Logical / Physical pixels ratio.
+  // BD MOD:
+  // const float device_pixel_ratio_;  // Logical / Physical pixels ratio.
+  float device_pixel_ratio_;  // Logical / Physical pixels ratio.
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
