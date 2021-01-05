@@ -76,6 +76,26 @@ class Performance {
     _onNotifyIdle = callback;
     _onNotifyIdleZone = Zone.current;
   }
+
+  /// Get bitmap cache image info
+  List getSkGraphicCacheMemoryUsage() native 'Performance_skGraphicCacheMemoryUsage';
+
+  /// Get Gpu cache memory.
+  Future<List> getGrResourceCacheMemInfo() {
+    return _futurize(
+          (_Callback<List> callback) => _getGrResourceCacheMemInfo(callback),
+    );
+  }
+
+  String _getGrResourceCacheMemInfo(_Callback<List> callback) native 'Performance_getGpuCacheUsageKBInfo';
+
+  /// Get total ext memory info, contains gpu bitmap image memory and so on.
+  Future<List> getTotalExtMemInfo() {
+    return _futurize(
+          (_Callback<List> callback) => _getTotalExtMemInfo(callback),
+    );
+  }
+  String _getTotalExtMemInfo(_Callback<List> callback) native 'Performance_getTotalExtMemInfo';
 }
 
 /// The [Performance] singleton.
