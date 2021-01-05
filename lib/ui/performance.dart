@@ -96,6 +96,8 @@ class Performance {
     );
   }
   String _getTotalExtMemInfo(_Callback<List> callback) native 'Performance_getTotalExtMemInfo';
+
+  void warmUpZeroSizeOnce(bool enable) native 'Performance_warmUpZeroSizeOnce';
 }
 
 /// The [Performance] singleton.
