@@ -491,12 +491,16 @@ static jmethodID g_mutators_stack_push_cliprrect_method = nullptr;
 static jlong AttachJNI(JNIEnv* env,
                        jclass clazz,
                        jobject flutterJNI,
-                       jboolean is_background_view) {
+                       jboolean is_background_view,
+                       // BD ADD:
+                       jboolean is_preload) {
   fml::jni::JavaObjectWeakGlobalRef java_object(env, flutterJNI);
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
       std::make_shared<PlatformViewAndroidJNIImpl>(java_object);
   auto shell_holder = std::make_unique<AndroidShellHolder>(
-      FlutterMain::Get().GetSettings(), jni_facade, is_background_view);
+      // BD MOD:
+      // FlutterMain::Get().GetSettings(), jni_facade, is_background_view);
+       FlutterMain::Get().GetSettings(), jni_facade, is_background_view, is_preload);
   if (shell_holder->IsValid()) {
     return reinterpret_cast<jlong>(shell_holder.release());
   } else {
@@ -1150,7 +1154,9 @@ bool RegisterApi(JNIEnv* env) {
       // Start of methods from FlutterJNI
       {
           .name = "nativeAttach",
-          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;Z)J",
+          // BD MOD:
+          // .signature = "(Lio/flutter/embedding/engine/FlutterJNI;Z)J",
+          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;ZZ)J",
           .fnPtr = reinterpret_cast<void*>(&AttachJNI),
       },
       // BD ADD: START

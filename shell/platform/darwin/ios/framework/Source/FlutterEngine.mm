@@ -111,19 +111,26 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
 }
 
+// BD MOD: START
+//- (instancetype)initWithName:(NSString*)labelPrefix
+//                     project:(FlutterDartProject*)project
+//      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   return [self initWithName:labelPrefix
                      project:project
       allowHeadlessExecution:allowHeadlessExecution
-          restorationEnabled:NO];
+          restorationEnabled:NO
+                     preLoad:NO];
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
-          restorationEnabled:(BOOL)restorationEnabled {
+          restorationEnabled:(BOOL)restorationEnabled
+                     preLoad:(BOOL)preLoad {
+// END
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
@@ -550,7 +557,9 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)maybeSetupPlatformViewChannels {
-  if (_shell && self.shell.IsSetup()) {
+  // BD MOD:
+  // if (_shell && self.shell.IsSetup()) {
+  if (_shell && (self.shell.IsSetup() || self.shell.IsInShellNotBlockAndPosting())) {
     FlutterPlatformPlugin* platformPlugin = _platformPlugin.get();
     [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [platformPlugin handleMethodCall:call result:result];
@@ -649,8 +658,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (BOOL)createShell:(NSString*)entrypoint
+  libraryURI:(NSString*)libraryURI
+  initialRoute:(NSString*)initialRoute {
+  return [self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute preLoad:false];
+}
+
+- (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
-       initialRoute:(NSString*)initialRoute {
+       initialRoute:(NSString*)initialRoute
+            preLoad:(BOOL)preLoad {
   if (_shell != nullptr) {
     FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
     return NO;
@@ -692,15 +708,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self setupQualityOfService:task_runners];
   
   // Create the shell. This is a blocking operation.
-  std::unique_ptr<flutter::Shell> shell =
-      flutter::Shell::Create(std::move(task_runners),  // task runners
-                             std::move(platformData),  // window data
-                             std::move(settings),      // settings
-                             on_create_platform_view,  // platform view creation
-                             on_create_rasterizer      // rasterzier creation
-      );
+  _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
+                                  std::move(platformData),  // window data
+                                  std::move(settings),      // settings
+                                  on_create_platform_view,  // platform view creation
+                                  on_create_rasterizer,      // rasterzier creation
+                                  // BD ADD:
+                                  preLoad
+  );
 
-  if (shell == nullptr) {
+  if (_shell == nullptr) {
+    // BD MOD: START
+    // FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
+    //                   << entrypoint.UTF8String;
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
@@ -731,7 +751,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                       libraryURI:libraryURI
                     initialRoute:FlutterDefaultInitialRoute];
 }
-
+// BD ADD: START
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI preLoad:(BOOL)preLoad {
+  return [self runWithEntrypoint:entrypoint
+                      libraryURI:libraryURI
+                    initialRoute:FlutterDefaultInitialRoute
+                         preLoad:preLoad];
+}
+// END
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   return [self runWithEntrypoint:entrypoint libraryURI:nil initialRoute:FlutterDefaultInitialRoute];
 }
@@ -739,11 +766,18 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint initialRoute:(NSString*)initialRoute {
   return [self runWithEntrypoint:entrypoint libraryURI:nil initialRoute:initialRoute];
 }
-
+// BD ADD: START
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint
                libraryURI:(NSString*)libraryURI
              initialRoute:(NSString*)initialRoute {
-  if ([self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute]) {
+  return [self runWithEntrypoint:entrypoint libraryURI:nil initialRoute:initialRoute preLoad:NO];
+}
+// END
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint
+               libraryURI:(NSString*)libraryURI
+             initialRoute:(NSString*)initialRoute
+                  preLoad:(BOOL)preLoad {
+  if ([self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute preLoad:preLoad]) {
     [self launchEngine:entrypoint libraryURI:libraryURI];
   }
 
@@ -888,7 +922,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSParameterAssert(channel);
-  NSAssert(_shell && _shell->IsSetup(),
+  // BD MOD:
+  // NSAssert(_shell && _shell->IsSetup(),
+  NSAssert(_shell && (_shell->IsSetup() || _shell->IsInShellNotBlockAndPosting()),
            @"Sending a message before the FlutterEngine has been run.");
   // BD ADD: START
   if (_shell == nullptr) {
@@ -914,7 +950,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                           binaryMessageHandler:
                                               (FlutterBinaryMessageHandler)handler {
   NSParameterAssert(channel);
-  if (_shell && _shell->IsSetup()) {
+  // BD MOD
+  // if (_shell && _shell->IsSetup()) {
+  if (_shell && (_shell->IsSetup() || _shell->IsInShellNotBlockAndPosting())) {
     // BD ADD: START
     if (self.iosPlatformView == nullptr) {
       return flutter::ConnectionCollection::MakeErrorConnection(-1);
@@ -930,7 +968,9 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)cleanupConnection:(FlutterBinaryMessengerConnection)connection {
-  if (_shell && _shell->IsSetup()) {
+  // BD MOD:
+  // if (_shell && _shell->IsSetup()) {
+  if (_shell && (_shell->IsSetup() || _shell->IsInShellNotBlockAndPosting())) {
     std::string channel = _connections->CleanupConnection(connection);
     if (!channel.empty()) {
       self.iosPlatformView->GetPlatformMessageRouter().SetMessageHandler(channel.c_str(), nil);

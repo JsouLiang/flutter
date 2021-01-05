@@ -190,6 +190,16 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
+  //  BD ADD: START
+  if (IsInShellNotBlockAndPosting()) {
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(), [&latch] {
+      latch.Signal();
+    });
+    latch.Wait();
+  }
+  // END
+
   PlatformView::NotifyDestroyed();
 
   if (android_surface_) {

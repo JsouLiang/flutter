@@ -600,6 +600,10 @@ std::vector<double> Engine::GetFps(int thread_type, int fps_type, bool do_clear)
 void Engine::NotifyLowMemoryWarning() {
   runtime_controller_->NotifyLowMemoryWarning();
 }
+
+bool Engine::IsViewportMetricsValid() {
+  return viewport_metrics_.physical_width != 0;
+}
 // END
 
 }  // namespace flutter

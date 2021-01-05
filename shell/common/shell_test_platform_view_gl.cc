@@ -79,5 +79,11 @@ ShellTestPlatformViewGL::GetGLProcResolver() const {
   };
 }
 
+// BD ADD: START
+// |GPUSurfaceGLDelegate|
+bool ShellTestPlatformViewGL::IsValid() const {
+  return true;
+}
+// END
 }  // namespace testing
 }  // namespace flutter

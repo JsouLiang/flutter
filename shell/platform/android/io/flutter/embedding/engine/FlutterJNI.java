@@ -316,19 +316,38 @@ public class FlutterJNI {
    *
    * <p>This method must not be invoked if {@code FlutterJNI} is already attached to native.
    */
+  // BD ADD: START
   @UiThread
   public void attachToNative(boolean isBackgroundView) {
+    attachToNative(isBackgroundView, false);
+  }
+  // END
+
+  @UiThread
+  // BD MOD:
+  // public void attachToNative(boolean isBackgroundView) {
+  public void attachToNative(boolean isBackgroundView, boolean isPreload) {
     ensureRunningOnMainThread();
     ensureNotAttachedToNative();
-    nativeShellHolderId = performNativeAttach(this, isBackgroundView);
+
+    // BD MOD:
+    //nativeShellHolderId = performNativeAttach(this, isBackgroundView);
+    nativeShellHolderId = performNativeAttach(this, isBackgroundView, isPreload);
   }
 
   @VisibleForTesting
-  public long performNativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView) {
-    return nativeAttach(flutterJNI, isBackgroundView);
+  // BD MOD: START
+  // public long performNativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView) {
+  //  return nativeAttach(flutterJNI, isBackgroundView);
+  // }
+  public long performNativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView, boolean isPreload) {
+    return nativeAttach(flutterJNI, isBackgroundView, isPreload);
   }
+  // END
 
-  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView);
+  // BD MOD:
+  // private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView);
+  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView, boolean isPreload);
 
   /**
    * Spawns a new FlutterJNI instance from the current instance.

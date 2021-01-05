@@ -892,6 +892,9 @@ class Engine final : public RuntimeDelegate,
     return runtime_controller_.get();
   }
 
+  // BD ADD:
+  bool IsViewportMetricsValid();
+
  private:
   Engine::Delegate& delegate_;
   const Settings settings_;
@@ -963,15 +966,14 @@ class Engine final : public RuntimeDelegate,
 
   friend class testing::ShellTest;
 
-  // BD ADD:
+  // BD ADD: START
   // |RuntimeDelegate|
   void AddNextFrameCallback(fml::closure callback) override ;
 
-  // BD ADD:
   int64_t GetEngineMainEnterMicros() override;
   
-  // BD ADD:
   std::vector<double> GetFps(int thread_type, int fps_type, bool do_clear) override;
+  // END
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };

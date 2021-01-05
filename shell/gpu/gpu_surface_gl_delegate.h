@@ -38,6 +38,8 @@ class GPUSurfaceGLDelegate {
   // The ID of the main window bound framebuffer. Typically FBO0.
   virtual intptr_t GLContextFBO(GLFrameInfo frame_info) const = 0;
 
+  // BD ADD:
+  virtual bool IsValid() const = 0;
   // The rendering subsystem assumes that the ID of the main window bound
   // framebuffer remains constant throughout. If this assumption in incorrect,
   // embedders are required to return true from this method. In such cases,

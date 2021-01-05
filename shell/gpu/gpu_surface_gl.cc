@@ -131,7 +131,9 @@ GPUSurfaceGL::~GPUSurfaceGL() {
 
 // |Surface|
 bool GPUSurfaceGL::IsValid() {
-  return valid_;
+  // BD MOD:
+  // return valid_;
+  return valid_ && delegate_ && delegate_->IsValid();
 }
 
 static SkColorType FirstSupportedColorType(GrDirectContext* context,

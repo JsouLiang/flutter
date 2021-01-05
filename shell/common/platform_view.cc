@@ -166,6 +166,11 @@ PlatformView::ComputePlatformResolvedLocales(
       std::make_unique<std::vector<std::string>>();
   return out;
 }
+// BD ADD: START
+bool PlatformView::IsInShellNotBlockAndPosting() {
+    return delegate_.IsInShellNotBlockAndPosting();
+}
+// END
 
 void PlatformView::RequestDartDeferredLibrary(intptr_t loading_unit_id) {}
 

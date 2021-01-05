@@ -208,7 +208,9 @@ public class FlutterEngine {
         new PlatformViewsController(),
         dartVmArgs,
         automaticallyRegisterPlugins,
-        waitForRestorationData);
+        waitForRestorationData,
+        // BD ADD:
+        false);
   }
 
   /**
@@ -224,6 +226,26 @@ public class FlutterEngine {
       @NonNull FlutterJNI flutterJNI) {
     this(context, flutterLoader, flutterJNI, null, true);
   }
+
+  // BD ADD: START
+  public FlutterEngine(
+        @NonNull Context context,
+        @NonNull FlutterLoader flutterLoader,
+        @NonNull FlutterJNI flutterJNI,
+        boolean isPreload
+  ) {
+    this(
+        context,                      // Context context
+        flutterLoader,                // FlutterLoader flutterLoader
+        flutterJNI,                   // FlutterJNI flutterJNI
+        new PlatformViewsController(),// PlatformViewsController platformViewsController
+        null,                         // dartVmArgs
+        false,                        // automaticallyRegisterPlugins
+        false,                        // waitForRestorationData
+        isPreload
+        );
+  }
+  // END
 
   /**
    * Same as {@link #FlutterEngine(Context, FlutterLoader, FlutterJNI)}, plus Dart VM flags in
@@ -264,6 +286,8 @@ public class FlutterEngine {
         platformViewsController,
         dartVmArgs,
         automaticallyRegisterPlugins,
+        false,
+        // BD ADD:
         false);
   }
 
@@ -275,7 +299,9 @@ public class FlutterEngine {
       @NonNull PlatformViewsController platformViewsController,
       @Nullable String[] dartVmArgs,
       boolean automaticallyRegisterPlugins,
-      boolean waitForRestorationData) {
+      boolean waitForRestorationData,
+      // BD ADD:
+      boolean isPreload) {
     AssetManager assetManager;
     try {
       assetManager = context.createPackageContext(context.getPackageName(), 0).getAssets();
@@ -326,7 +352,9 @@ public class FlutterEngine {
     // is already attached to a native shell. In that case, the Java FlutterEngine is created around
     // an existing shell.
     if (!flutterJNI.isAttached()) {
-      attachToJni();
+      // BD MOD:
+      // attachToJni();
+      attachToJni(isPreload);
     }
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
@@ -351,10 +379,14 @@ public class FlutterEngine {
     }
   }
 
-  private void attachToJni() {
+  // BD MOD:
+  // private void attachToJni() {
+  private void attachToJni(boolean isPreload) {
     Log.v(TAG, "Attaching to JNI.");
     // TODO(mattcarroll): update native call to not take in "isBackgroundView"
-    flutterJNI.attachToNative(false);
+    // BD MOD:
+    // flutterJNI.attachToNative(false, isPreload);
+    flutterJNI.attachToNative(false, isPreload);
 
     if (!isAttachedToJni()) {
       throw new RuntimeException("FlutterEngine failed to attach to its native Object reference.");
