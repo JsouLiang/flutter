@@ -140,6 +140,41 @@ def to_gn_args(args):
     if args.enable_unittests:
         gn_args['enable_unittests'] = args.enable_unittests
 
+    # BD ADD: START
+    if args.enable_lite:
+        gn_args['lite_suffix'] = 'lite'
+    elif args.enable_lite_global:
+        gn_args['lite_suffix'] = 'liteg'
+    elif args.enable_lite_share_skia:
+        gn_args['lite_suffix'] = 'lites'
+
+    # enable calculate memory of skia in profile & debug mode
+    if runtime_mode in ['profile', 'debug']:
+        gn_args['skialite_enable_calculate_malloc_memory'] = True
+
+    if args.enable_lite or args.enable_lite_global or args.enable_lite_share_skia or args.dynamicart:
+        print("enable lite mode.")
+        gn_args['dart_disable_boringssl'] = True
+        gn_args['dart_enable_opt_oz'] = True
+        gn_args['skia_enable_ccpr'] = False
+        gn_args['skialite_disable_pathop_apis'] = True
+        gn_args['skialite_disable_sksl_codegenerators'] = True
+        if args.enable_lite or args.enable_lite_share_skia:
+            # Use crop icudtl.dat
+            gn_args['icu_use_lite_data_file'] = True
+            # Crop harfbuzz, remove support for complex text and apple advanced type.
+            gn_args['hb_disable_aat'] = True
+            gn_args['hb_disable_all_lang'] = True
+
+            # enable share skia
+            if args.enable_lite_share_skia and args.runtime_mode == 'release' and args.target_os == 'ios':
+                gn_args['is_skia_lite_build'] = True
+                gn_args['is_skia_component_build'] = True
+                gn_args['skialite_use_component_name_skialite'] = False
+                gn_args['skialite_enable_test'] = False
+                gn_args['skialite_only_lite_apis'] = True
+    # END
+
     # Skia GN args.
     gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
     gn_args['skia_use_dng_sdk'] = False    # RAW image handling.
