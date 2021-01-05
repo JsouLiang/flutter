@@ -164,7 +164,9 @@ class Shell final : public PlatformView::Delegate,
       const PlatformData platform_data,
       Settings settings,
       CreateCallback<PlatformView> on_create_platform_view,
-      CreateCallback<Rasterizer> on_create_rasterizer);
+      CreateCallback<Rasterizer> on_create_rasterizer,
+      // BD ADD:
+      bool preLoad);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings. The
@@ -208,7 +210,9 @@ class Shell final : public PlatformView::Delegate,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const CreateCallback<PlatformView>& on_create_platform_view,
       const CreateCallback<Rasterizer>& on_create_rasterizer,
-      DartVMRef vm);
+      DartVMRef vm,
+      // BD ADD:
+      bool preLoad);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the shell. This is a synchronous operation and
@@ -370,6 +374,8 @@ class Shell final : public PlatformView::Delegate,
    */
   void ExitApp(fml::closure closure);
   
+  // BD ADD:
+  bool IsInShellNotBlockAndPosting() override;
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
   std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override;
@@ -410,7 +416,12 @@ class Shell final : public PlatformView::Delegate,
                                                         // pair
                      >
       service_protocol_handlers_;
-  bool is_setup_ = false;
+  // BD MOD: START
+  // bool is_setup_ = false;
+  std::atomic<bool> is_setup_{false};
+  std::atomic<bool> is_engine_setup_{false};
+  std::atomic<bool> is_without_engine_setup_{false};
+  // END
   uint64_t next_pointer_flow_id_ = 0;
 
   bool first_frame_rasterized_ = false;
@@ -438,6 +449,11 @@ class Shell final : public PlatformView::Delegate,
   // and read from the raster thread.
   std::atomic<float> display_refresh_rate_ = 0.0f;
 
+  // BD ADD: START
+  bool is_preload_ = false;
+  bool is_createView_post_ = false;
+  // END
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
@@ -450,12 +466,23 @@ class Shell final : public PlatformView::Delegate,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer);
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      // BD ADD:
+      bool preLoad);
 
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,
              std::unique_ptr<Rasterizer> rasterizer,
              std::unique_ptr<ShellIOManager> io_manager);
+
+  // BD ADD: START
+  bool SetupWithoutEngine(std::unique_ptr<PlatformView> platform_view,
+                          std::unique_ptr<Rasterizer> rasterizer,
+                          std::unique_ptr<ShellIOManager> io_manager);
+
+  bool SetupEngine(std::unique_ptr<Engine> engine);
+
+  // END
 
   void ReportTimings();
 
@@ -637,6 +664,9 @@ class Shell final : public PlatformView::Delegate,
   std::vector<double> GetFps(int thread_type,
                 int fps_type = kAvgFpsType,
                 bool do_clear = false) override;
+
+  // BD ADD:
+  void SetPreloadState(bool preload);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);
 };

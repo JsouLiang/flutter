@@ -28,11 +28,17 @@ static PlatformData GetDefaultPlatformData() {
   return platform_data;
 }
 
-AndroidShellHolder::AndroidShellHolder(
-    flutter::Settings settings,
+// BD MOD: START
+//AndroidShellHolder::AndroidShellHolder(
+//    flutter::Settings settings,
+//    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+//    bool is_background_view)
+//    : settings_(std::move(settings)), jni_facade_(jni_facade) {
+
+void AndroidShellHolder::InitAndroidShellHolder(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool is_background_view)
-    : settings_(std::move(settings)), jni_facade_(jni_facade) {
+    bool is_background_view, bool preLoad) {
+// END
 
 // BD ADD: START
 #if defined(SUPPORT_SYSTRACE)
@@ -146,13 +152,34 @@ AndroidShellHolder::AndroidShellHolder(
                     GetDefaultPlatformData(),  // window data
                     settings_,                 // settings
                     on_create_platform_view,   // platform view create callback
-                    on_create_rasterizer       // rasterizer create callback
+                    on_create_rasterizer,       // rasterizer create callback
+                    // BD ADD:
+                    preLoad
       );
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
   is_valid_ = shell_ != nullptr;
 }
+
+// BD ADD: START
+AndroidShellHolder::AndroidShellHolder(
+    flutter::Settings settings,
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    bool is_background_view)
+    : settings_(std::move(settings)), jni_facade_(jni_facade) {
+    InitAndroidShellHolder(jni_facade, is_background_view, false);
+}
+
+
+AndroidShellHolder::AndroidShellHolder(
+  flutter::Settings settings,
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+  bool is_background_view, bool preLoad)
+  : settings_(std::move(settings)), jni_facade_(jni_facade) {
+  InitAndroidShellHolder(jni_facade, is_background_view, preLoad);
+}
+// END
 
 AndroidShellHolder::~AndroidShellHolder() {
   shell_.reset();

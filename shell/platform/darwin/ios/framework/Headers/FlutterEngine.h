@@ -138,7 +138,14 @@ FLUTTER_EXPORT
  */
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
-      allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_DESIGNATED_INITIALIZER;
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution;
+
+// BD ADD: START
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(nullable FlutterDartProject*)project
+  allowHeadlessExecution:(BOOL)allowHeadlessExecution
+  preLoad:(BOOL)preLoad;
+// END
 
 + (instancetype)new NS_UNAVAILABLE;
 
@@ -205,6 +212,9 @@ FLUTTER_EXPORT
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)uri;
+
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)uri preLoad:(BOOL)preLoad;
+
 
 /**
  * Destroy running context for an engine.

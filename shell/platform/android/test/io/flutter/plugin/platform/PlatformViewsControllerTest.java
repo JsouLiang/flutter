@@ -591,7 +591,9 @@ public class PlatformViewsControllerTest {
     }
 
     @Implementation
-    public long performNativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView) {
+    // BD MOD:
+    // public long performNativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView) {
+    public long performNativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView, boolean isPreload) {
       return 1;
     }
 

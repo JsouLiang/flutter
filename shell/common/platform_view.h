@@ -237,6 +237,9 @@ class PlatformView {
      */
     virtual void OnPlatformViewRegisterImageLoader(
         std::shared_ptr<flutter::ImageLoader> imageLoader) = 0;
+
+    // BD ADD:
+    virtual bool IsInShellNotBlockAndPosting() = 0;
   };
 
   //----------------------------------------------------------------------------
@@ -571,8 +574,11 @@ class PlatformView {
   ///
   void MarkTextureFrameAvailable(int64_t texture_id);
   
-  // BD ADD:
+  // BD ADD: START
   void RegisterImageLoader(std::shared_ptr<flutter::ImageLoader> imageLoader);
+
+  bool IsInShellNotBlockAndPosting();
+  // END
 
   //--------------------------------------------------------------------------
   /// @brief      Directly invokes platform-specific APIs to compute the

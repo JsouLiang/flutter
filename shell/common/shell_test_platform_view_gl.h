@@ -27,6 +27,10 @@ class ShellTestPlatformViewGL : public ShellTestPlatformView,
 
   virtual void SimulateVSync() override;
 
+  // BD ADD: START
+  // |GPUSurfaceGLDelegate|
+  bool IsValid() const override;
+  // END
  private:
   TestGLSurface gl_surface_;
 
