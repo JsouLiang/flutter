@@ -204,6 +204,21 @@ void Performance::TraceApmStartAndEnd(const string& event, int64_t start) {
   apm_map[event + "_end"] = CurrentTimestamp();
 }
 
+void Performance::WarmUpZeroSizeOnce(bool warmUpOnce) {
+  warmUpOnce_ = warmUpOnce;
+}
+
+bool Performance::PerformWarmUpZeroSize() {
+  bool result = warmUpOnce_;
+  warmUpOnce_ = false;
+  return result;
+}
+
+void Performance_warmUpZeroSizeOnce(Dart_NativeArguments args) {
+  bool warmUpForOnce = (bool)DartConverter<bool >::FromDart(Dart_GetNativeArgument(args, 1));
+  Performance::GetInstance()->WarmUpZeroSizeOnce(warmUpForOnce);
+}
+
 vector<int64_t> Performance::GetEngineInitApmInfo() {
   std::lock_guard<std::mutex> lck (mtx);
   vector<int64_t> engine_init_apm_info = {
@@ -487,6 +502,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_getTotalExtMemInfo", Performance_getTotalExtMemInfo, 2, true},
       {"Performance_skGraphicCacheMemoryUsage", Performance_skGraphicCacheMemoryUsage, 1, true},
       {"Performance_getGpuCacheUsageKBInfo", Performance_getGpuCacheUsageKBInfo, 2, true},
+      {"Performance_warmUpZeroSizeOnce", Performance_warmUpZeroSizeOnce, 2, true},
   });
 }
 

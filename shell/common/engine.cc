@@ -25,6 +25,8 @@
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
 
 namespace flutter {
 
@@ -468,7 +470,26 @@ void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   // Ensure frame dimensions are sane.
   if (layer_tree->frame_size().isEmpty() ||
       layer_tree->device_pixel_ratio() <= 0.0f) {
-    return;
+#if FLUTTER_RUNTIME_MODE_DEBUG || FLUTTER_RUNTIME_MODE_PROFILE
+    FML_LOG(ERROR) << "Engine::Render layer_tree isEmpty or ratio is zero";
+#endif
+    // BD MOD: START
+    // return;
+    if (Performance::GetInstance()->PerformWarmUpZeroSize()) {
+#if FLUTTER_RUNTIME_MODE_DEBUG || FLUTTER_RUNTIME_MODE_PROFILE
+      FML_LOG(ERROR) << "Engine::Render PerformWarmUpZeroSize";
+#endif
+      if (layer_tree->frame_size().isEmpty())
+        layer_tree->set_frame_size(SkISize::Make(10,10));
+      if (layer_tree->device_pixel_ratio() <= 0.0f)
+        layer_tree->set_device_pixel_ratio(1.0);
+    } else {
+#if FLUTTER_RUNTIME_MODE_DEBUG || FLUTTER_RUNTIME_MODE_PROFILE
+      FML_LOG(ERROR) << "Engine::Render layer_tree isEmpty or ratio is zero & return";
+#endif
+      return;
+    }
+    // END
   }
 
   animator_->Render(std::move(layer_tree));

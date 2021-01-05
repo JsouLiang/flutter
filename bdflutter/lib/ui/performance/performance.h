@@ -52,6 +52,9 @@ class Performance {
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
+  void WarmUpZeroSizeOnce(bool warmUpOnce);
+  bool PerformWarmUpZeroSize();
+
  private:
   Performance();
 
@@ -63,6 +66,7 @@ class Performance {
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
   std::map<std::string, int64_t> apm_map; // Map
   std::atomic_bool isExitApp_ = {false};
+  std::atomic_bool warmUpOnce_;
 
 };
 
