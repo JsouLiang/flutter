@@ -76,11 +76,11 @@ size_t CanvasImage::ComputeByteSize() const {
 // BD ADD: START
 void CanvasImage::RetainDartWrappableReference() const {
   RefCountedDartWrappable::RetainDartWrappableReference();
-  Performance::GetInstance()->AddImageMemoryUsage(ComputeByteSize());
+  Performance::GetInstance()->AddImageMemoryUsage(ComputeByteSize() >> 10);
 }
 
 void CanvasImage::ReleaseDartWrappableReference() const {
-  Performance::GetInstance()->SubImageMemoryUsage(ComputeByteSize());
+  Performance::GetInstance()->SubImageMemoryUsage(ComputeByteSize() >> 10);
   RefCountedDartWrappable::ReleaseDartWrappableReference();
 }
 // END
