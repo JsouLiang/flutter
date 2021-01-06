@@ -290,8 +290,8 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
       library_.value(), "_updateWindowMetrics",
       {
           tonic::ToDart(metrics.device_pixel_ratio),
-          tonic::ToDart(metrics.physical_width == kUnsetWidth ? 0 : metrics.physical_width),
-          tonic::ToDart(metrics.physical_height == kUnsetWidth ? 0 : metrics.physical_height),
+          tonic::ToDart(metrics.physical_width),
+          tonic::ToDart(metrics.physical_height),
           tonic::ToDart(metrics.physical_depth),
           tonic::ToDart(metrics.physical_padding_top),
           tonic::ToDart(metrics.physical_padding_right),

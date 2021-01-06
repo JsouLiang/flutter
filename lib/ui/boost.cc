@@ -279,4 +279,13 @@ bool Boost::IsDisableMips(){
   return disable_mipmaps_ ;
 }
 
+void Boost::WarmUpZeroSizeOnce(bool warmUpOnce) {
+  warmUpOnce_ = warmUpOnce;
+}
+
+bool Boost::PerformWarmUpZeroSize() {
+  bool result = warmUpOnce_;
+  warmUpOnce_ = false;
+  return result;
+}
 }  // namespace flutter

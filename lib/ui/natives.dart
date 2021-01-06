@@ -100,6 +100,8 @@ void forceGC() native 'ForceGC';
 
 void disableMips(bool disable) native 'DisableMips';
 
+void warmUpZeroSizeOnce(bool enable) native 'WarmUpZeroSizeOnce';
+
 void startStackTraceSamples() native 'Performance_startStackTraceSamples';
 
 void stopStackTraceSamples() native 'Performance_stopStackTraceSamples';
@@ -112,6 +114,27 @@ String getHeapInfo() native 'Performance_heapInfo';
 
 /// Memory usage of decoded image in dart heap external, in KB
 int getImageMemoryUsage() native 'Performance_imageMemoryUsage';
+
+/// Get bitmap cache image info
+List getSkGraphicCacheMemoryUsage() native 'Performance_skGraphicCacheMemoryUsage';
+
+/// Get Gpu cache memory.
+Future<List> getGrResourceCacheMemInfo() {
+  return _futurize(
+        (_Callback<List> callback) => _getGrResourceCacheMemInfo(callback),
+  );
+}
+
+String _getGrResourceCacheMemInfo(_Callback<List> callback) native 'Performance_getGpuCacheUsageKBInfo';
+
+/// Get total ext memory info, contains gpu bitmap image memory and so on.
+Future<List> getTotalExtMemInfo() {
+  return _futurize(
+        (_Callback<List> callback) => _getTotalExtMemInfo(callback),
+  );
+}
+
+String _getTotalExtMemInfo(_Callback<List> callback) native 'Performance_getTotalExtMemInfo';
 
 dynamic reflectLibrary(String libraryUrl) native 'Reflect_reflectLibrary';
 

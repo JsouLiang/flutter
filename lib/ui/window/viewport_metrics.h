@@ -14,8 +14,6 @@ namespace flutter {
 // avoids the need to special case logic that wants to check the max depth on
 // the Dart side.
 static const double kUnsetDepth = 1.7976931348623157e+308;
-// BD ADD:
-static const double kUnsetWidth = 1.23456;
 
 struct ViewportMetrics {
   ViewportMetrics();
@@ -56,12 +54,8 @@ struct ViewportMetrics {
   ViewportMetrics(const ViewportMetrics& other);
 
   double device_pixel_ratio = 1.0;
-  // BD MOD: START
-  // double physical_width = 0;
-  // double physical_height = 0;
-  double physical_width = kUnsetWidth;
-  double physical_height = kUnsetWidth;
-  // END
+  double physical_width = 0;
+  double physical_height = 0;
   double physical_depth = kUnsetDepth;
   double physical_padding_top = 0;
   double physical_padding_right = 0;

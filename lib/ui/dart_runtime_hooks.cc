@@ -31,6 +31,7 @@
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 // BD ADD:
 #include "flutter/lib/ui/boost.h"
+#include <flutter/fml/make_copyable.h>
 
 #if defined(OS_ANDROID)
 #include <android/log.h>
@@ -64,12 +65,17 @@ namespace flutter {
   V(FinishBoost, 1)             \
   V(PreloadFontFamilies, 2)     \
   V(DisableMips, 1)             \
+  V(WarmUpZeroSizeOnce, 1)             \
   V(Performance_heapInfo, 0)    \
+  V(Performance_getEngineInitApmInfo, 0)   \
   V(Performance_imageMemoryUsage, 0)       \
   V(Performance_startStackTraceSamples, 0) \
   V(Performance_stopStackTraceSamples, 0)  \
   V(Performance_getStackTraceSamples, 1)   \
   V(Performance_requestHeapSnapshot, 1)    \
+  V(Performance_getTotalExtMemInfo, 1)     \
+  V(Performance_skGraphicCacheMemoryUsage, 0) \
+  V(Performance_getGpuCacheUsageKBInfo, 1) \
   V(Reflect_reflectLibrary, 1)             \
   V(Reflect_libraryInvoke, 5)              \
   V(Reflect_reflectClass, 2)               \
@@ -400,13 +406,177 @@ void DisableMips(Dart_NativeArguments args) {
   Boost::Current()->DisableMips(disable);
 }
 
+void WarmUpZeroSizeOnce(Dart_NativeArguments args) {
+  bool warmUpForOnce = (bool)DartConverter<bool >::FromDart(Dart_GetNativeArgument(args, 0));
+  Boost::Current()->WarmUpZeroSizeOnce(warmUpForOnce);
+}
+
 void Performance_heapInfo(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, Dart_HeapInfo());
+}
+
+void Performance_getEngineInitApmInfo(Dart_NativeArguments args) {
+    vector<int64_t> info = Performance::GetInstance()->GetEngineInitApmInfo();
+    Dart_Handle result = Dart_NewList(info.size());
+    for (size_t index = 0; index < info.size(); ++index) {
+        Dart_ListSetAt(result, index, Dart_NewInteger(info[index]));
+    }
+    Dart_SetReturnValue(args, result);
 }
 
 void Performance_imageMemoryUsage(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, DartConverter<int64_t>::ToDart(
                           Performance::GetInstance()->GetImageMemoryUsageKB()));
+}
+
+void Performance_skGraphicCacheMemoryUsage(Dart_NativeArguments args) {
+  int64_t bitmapMem = 0;
+  int64_t fontMem = 0;
+  int64_t imageFilter = 0;
+  int64_t mallocSize = 0;
+  Performance::GetInstance()->GetSkGraphicMemUsageKB(&bitmapMem, &fontMem, &imageFilter, &mallocSize);
+  Dart_Handle data_handle = Dart_NewList(4);
+  Dart_ListSetAt(data_handle, 0, Dart_NewInteger(bitmapMem));
+  Dart_ListSetAt(data_handle, 1, Dart_NewInteger(fontMem));
+  Dart_ListSetAt(data_handle, 2, Dart_NewInteger(imageFilter));
+  Dart_ListSetAt(data_handle, 3, Dart_NewInteger(mallocSize));
+  Dart_SetReturnValue(args, data_handle);
+}
+
+void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
+  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 0);
+  if (!Dart_IsClosure(callback_handle)) {
+    Dart_SetReturnValue(args, ToDart("Callback must be a function"));
+    return;
+  }
+  if (Performance::GetInstance()->IsExitApp()) {
+    return;
+  }
+  auto* dart_state = UIDartState::Current();
+
+  const auto& task_runners = dart_state->GetTaskRunners();
+  task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
+    [callback = std::make_unique<tonic::DartPersistentValue>(
+      tonic::DartState::Current(), callback_handle),
+      ui_task_runner = task_runners.GetUITaskRunner(),
+      gpu_task_runner = task_runners.GetGPUTaskRunner()]() mutable {
+        int64_t iOGrTotalMem = 0;
+        int64_t iOGrResMem = 0;
+        int64_t iOGrPurgeableMem = 0;
+        Performance::GetInstance()->GetIOGpuCacheUsageKB(&iOGrTotalMem, &iOGrResMem, &iOGrPurgeableMem);
+        if (!gpu_task_runner.get() || Performance::GetInstance()->IsExitApp()) {
+          ui_task_runner->PostTask(fml::MakeCopyable(
+            [callback = std::move(callback)]() { callback->Clear(); }));
+          return;
+        }
+        gpu_task_runner->PostTask(fml::MakeCopyable(
+          [callback = std::move(callback), ui_task_runner, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem]() mutable {
+            if (ui_task_runner.get()) {
+              if (Performance::GetInstance()->IsExitApp()) {
+                ui_task_runner->PostTask(fml::MakeCopyable(
+                  [callback = std::move(callback)]() { callback->Clear(); }));
+                return;
+              }
+              int64_t grTotalMem = 0;
+              int64_t grResMem = 0;
+              int64_t grPurgeableMem = 0;
+              Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
+              ui_task_runner->PostTask(fml::MakeCopyable(
+                [callback = std::move(callback), grTotalMem, grResMem, grPurgeableMem, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem]() {
+                  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
+                  if (!dart_state || !dart_state.get() || Performance::GetInstance()->IsExitApp()) {
+                    callback->Clear();
+                    return;
+                  }
+                  tonic::DartState::Scope scope(dart_state);
+                  Dart_Handle data_handle = Dart_NewList(6);
+                  Dart_ListSetAt(data_handle, 0, Dart_NewInteger(grTotalMem));
+                  Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grResMem));
+                  Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grPurgeableMem));
+                  Dart_ListSetAt(data_handle, 3, Dart_NewInteger(iOGrTotalMem));
+                  Dart_ListSetAt(data_handle, 4, Dart_NewInteger(iOGrResMem));
+                  Dart_ListSetAt(data_handle, 5, Dart_NewInteger(iOGrPurgeableMem));
+                  tonic::DartInvoke(callback->value(), {data_handle});
+                }));
+            }
+          }));
+    }));
+}
+
+void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
+  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 0);
+  if (!Dart_IsClosure(callback_handle)) {
+    Dart_SetReturnValue(args, ToDart("Callback must be a function"));
+    return;
+  }
+  Performance* performance = Performance::GetInstance();
+  if (performance->IsExitApp()) {
+    return;
+  }
+  auto* dart_state = UIDartState::Current();
+
+  const auto& task_runners = dart_state->GetTaskRunners();
+  int64_t imageMem = performance->GetImageMemoryUsageKB();
+  int64_t bitmapMem = 0;
+  int64_t fontMem = 0;
+  int64_t imageFilter = 0;
+  int64_t mallocSize = 0;
+  performance->GetSkGraphicMemUsageKB(&bitmapMem, &fontMem, &imageFilter, &mallocSize);
+
+  task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
+    [callback = std::make_unique<tonic::DartPersistentValue>(
+      tonic::DartState::Current(), callback_handle),
+      ui_task_runner = task_runners.GetUITaskRunner(),
+      gpu_task_runner = task_runners.GetGPUTaskRunner(), imageMem, bitmapMem, fontMem, imageFilter, mallocSize]() mutable {
+        if (!gpu_task_runner.get() || Performance::GetInstance()->IsExitApp()) {
+          ui_task_runner->PostTask(fml::MakeCopyable(
+            [callback = std::move(callback)]() { callback->Clear(); }));
+          return;
+        }
+        int64_t iOGrTotalMem = 0;
+        int64_t iOGrResMem = 0;
+        int64_t iOGrPurgeableMem = 0;
+        Performance::GetInstance()->GetIOGpuCacheUsageKB(&iOGrTotalMem, &iOGrResMem, &iOGrPurgeableMem);
+        gpu_task_runner->PostTask(fml::MakeCopyable(
+          [callback = std::move(callback),
+            ui_task_runner, imageMem, bitmapMem, fontMem, imageFilter, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem, mallocSize
+          ]() mutable {
+            if (ui_task_runner.get()) {
+              if (Performance::GetInstance()->IsExitApp()) {
+                ui_task_runner->PostTask(fml::MakeCopyable(
+                  [callback = std::move(callback)]() { callback->Clear(); }));
+                return;
+              }
+              int64_t grTotalMem = 0;
+              int64_t grResMem = 0;
+              int64_t grPurgeableMem = 0;
+              Performance::GetInstance()->GetGpuCacheUsageKB(&grTotalMem, &grResMem, &grPurgeableMem);
+              ui_task_runner->PostTask(fml::MakeCopyable(
+                [callback = std::move(callback), imageMem, bitmapMem, fontMem, imageFilter, grTotalMem,
+                 grResMem, grPurgeableMem, iOGrTotalMem, iOGrResMem, iOGrPurgeableMem, mallocSize]() {
+                  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
+                  if (!dart_state || !dart_state.get() || Performance::GetInstance()->IsExitApp()) {
+                    callback->Clear();
+                    return;
+                  }
+                  tonic::DartState::Scope scope(dart_state);
+                  Dart_Handle data_handle = Dart_NewList(11);
+                  Dart_ListSetAt(data_handle, 0, Dart_NewInteger(imageMem));
+                  Dart_ListSetAt(data_handle, 1, Dart_NewInteger(grTotalMem));
+                  Dart_ListSetAt(data_handle, 2, Dart_NewInteger(grResMem));
+                  Dart_ListSetAt(data_handle, 3, Dart_NewInteger(grPurgeableMem));
+                  Dart_ListSetAt(data_handle, 4, Dart_NewInteger(iOGrTotalMem));
+                  Dart_ListSetAt(data_handle, 5, Dart_NewInteger(iOGrResMem));
+                  Dart_ListSetAt(data_handle, 6, Dart_NewInteger(iOGrPurgeableMem));
+                  Dart_ListSetAt(data_handle, 7, Dart_NewInteger(bitmapMem));
+                  Dart_ListSetAt(data_handle, 8, Dart_NewInteger(fontMem));
+                  Dart_ListSetAt(data_handle, 9, Dart_NewInteger(imageFilter));
+                  Dart_ListSetAt(data_handle, 10, Dart_NewInteger(mallocSize));
+                  tonic::DartInvoke(callback->value(), {data_handle});
+                }));
+            }
+          }));
+    }));
 }
 
 void Performance_startStackTraceSamples(Dart_NativeArguments args) {

@@ -109,8 +109,12 @@ FLUTTER_EXPORT
  */
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
-      allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_DESIGNATED_INITIALIZER;
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution;
 
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(nullable FlutterDartProject*)project
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution
+                     preLoad:(BOOL)preLoad;
 /**
  * The default initializer is not available for this object.
  * Callers must use `-[FlutterEngine initWithName:project:]`.
@@ -163,6 +167,9 @@ FLUTTER_EXPORT
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)uri;
 
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)libraryURI preLoad:(BOOL)preLoad;
+
+
 /**
  * Destroy running context for an engine.
  *
@@ -198,6 +205,12 @@ FLUTTER_EXPORT
  * built (which may be some time after the frame has been rendered).
  */
 - (void)ensureSemanticsEnabled;
+
+// BD ADD: START
++ (NSArray*)getEngineInitApmInfos;
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
+// BD ADD: END
 
 /**
  * Sets the `FlutterViewController` for this instance.  The FlutterEngine must be

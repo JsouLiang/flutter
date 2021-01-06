@@ -30,9 +30,12 @@
 #include "rapidjson/writer.h"
 // BD ADD:
 #include "flutter/lib/ui/boost.h"
+#include "flutter/lib/ui/performance.h"
+// END
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
+#include "flutter/lib/ui/performance.h"
 
 namespace flutter {
 
@@ -72,20 +75,32 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                         shell = shell.get()    //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
+        // BD ADD:
+        int64_t rasterizer_init_start_timestamp = Performance::CurrentTimestamp();
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
         snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
+        // BD ADD:
+        Performance::GetInstance()->TraceApmStartAndEnd("rasterizer_init", rasterizer_init_start_timestamp);
       });
 
   // Create the platform view on the platform thread (this thread).
+  // BD ADD:
+  int64_t platform_view_create_start_timestamp = Performance::CurrentTimestamp();
   auto platform_view = on_create_platform_view(*shell.get());
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("platform_view_init", platform_view_create_start_timestamp);
   if (!platform_view || !platform_view->GetWeakPtr()) {
     return nullptr;
   }
 
   // Ask the platform view for the vsync waiter. This will be used by the engine
   // to create the animator.
+  // BD ADD:
+  int64_t vsync_waiter_create_start_timestamp = Performance::CurrentTimestamp();
   auto vsync_waiter = platform_view->CreateVSyncWaiter();
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("vsync_waiter", vsync_waiter_create_start_timestamp);
   if (!vsync_waiter) {
     return nullptr;
   }
@@ -118,12 +133,16 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch()  //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
+        // BD ADD:
+        int64_t io_manager_create_timestamp = Performance::CurrentTimestamp();
         auto io_manager = std::make_unique<ShellIOManager>(
             platform_view.getUnsafe()->CreateResourceContext(),
             is_backgrounded_sync_switch, io_task_runner);
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(std::move(io_manager));
+        // BD ADD:
+        Performance::GetInstance()->TraceApmStartAndEnd("shell_io_manger", io_manager_create_timestamp);
       });
 
   // Send dispatcher_maker to the engine constructor because shell won't have
@@ -150,8 +169,16 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          &latch,
                          dispatcher_maker = std::move(dispatcher_maker)
   ]() mutable {
+
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
+        // BD ADD: START
+        auto weak_io_manager = weak_io_manager_future.get();
+        auto unref_queue = unref_queue_future.get();
+        auto snapshot_delegate = snapshot_delegate_future.get();
+
+        int64_t ui_animator_pre_start_timestamp = Performance::CurrentTimestamp();
+        // BD ADD: END
 
         // The animator is owned by the UI thread but it gets its vsync pulses
         // from the platform.
@@ -172,9 +199,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         //     snapshot_delegate_future.get()  //
         //     ));
         if (preLoad) {
-          auto weak_io_manager = weak_io_manager_future.get();
-          auto unref_queue = unref_queue_future.get();
-          auto snapshot_delegate = snapshot_delegate_future.get();
           latch.Signal();
           auto engine = std::make_unique<Engine>(
             *shell,                         //
@@ -198,11 +222,13 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                task_runners,                   //
                shell->GetSettings(),           //
                std::move(animator),            //
-               weak_io_manager_future.get(),   //
-               unref_queue_future.get(),       //
-               snapshot_delegate_future.get()  //
+               weak_io_manager,   //
+               unref_queue,       //
+               snapshot_delegate  //
                ));
         }
+        Performance::GetInstance()->TraceApmStartAndEnd("ui_animator", ui_animator_pre_start_timestamp);
+        // BD MOD: END
       }));
 
   // BD MOD: START
@@ -213,6 +239,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // ) {
   //   return nullptr;
   // }
+  // BD ADD:
+  int64_t shell_wait_start_timestamp = Performance::CurrentTimestamp();
   if (!preLoad) {
      if (!shell->Setup(std::move(platform_view),  //
                        engine_future.get(),       //
@@ -231,6 +259,10 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     }
     latch.Wait();
   }
+  Performance::GetInstance()->SetRasterizerAndIOManager(
+    shell->weak_rasterizer_, shell->io_manager_->GetWeakPtr());
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("shell_wait", shell_wait_start_timestamp);
   // END
   return shell;
 }
@@ -254,6 +286,8 @@ int64_t Shell::GetEngineMainEnterMicros() {
 // that cause shell initialization failures will still lead to some of their
 // settings being applied.
 static void PerformInitializationTasks(const Settings& settings) {
+    // BD ADD:
+    int64_t logIcuInitStartTimestamp = Performance::CurrentTimestamp();
   {
     fml::LogSettings log_settings;
     log_settings.min_log_level =
@@ -262,7 +296,10 @@ static void PerformInitializationTasks(const Settings& settings) {
   }
 
   static std::once_flag gShellSettingsInitialization = {};
-  std::call_once(gShellSettingsInitialization, [&settings] {
+    // BD MOD: Start
+    // std::call_once(gShellSettingsInitialization, [&settings] {
+  std::call_once(gShellSettingsInitialization, [&settings, &logIcuInitStartTimestamp] {
+    // BD MOD: END
     RecordStartupTimestamp();
 
     tonic::SetLogHandler(
@@ -287,7 +324,10 @@ static void PerformInitializationTasks(const Settings& settings) {
         FML_DLOG(WARNING) << "Skipping ICU initialization in the shell.";
       }
     }
+
   });
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("log_icu_init", logIcuInitStartTimestamp);
 }
 
 // BD ADD: START
@@ -316,8 +356,11 @@ std::unique_ptr<Shell> Shell::Create(
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
   TRACE_EVENT0("flutter", "Shell::Create");
-
+  // BD ADD:
+  int64_t dartvmCreateStartTimestamp = Performance::CurrentTimestamp();
   auto vm = DartVMRef::Create(settings);
+  // BD ADD:
+  Performance::GetInstance()->TraceApmStartAndEnd("dartvm_create", dartvmCreateStartTimestamp);
   FML_CHECK(vm) << "Must be able to initialize the VM.";
 
   auto vm_data = vm->GetVMData();
@@ -1900,6 +1943,7 @@ std::shared_ptr<fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch() const {
 
 // BD ADD: QiuXinyue
 void Shell::ExitApp(fml::closure closure) {
+  Performance::GetInstance()->SetExitStatus(true);
   // 步骤1：通知Flutter退出App
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),

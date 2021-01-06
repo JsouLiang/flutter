@@ -598,4 +598,16 @@ Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 
 Rasterizer::Screenshot::~Screenshot() = default;
 
+// BD ADD: START
+void Rasterizer::getResourceCacheBytes(size_t* totalBytes, size_t* resourceBytes, size_t* purgeableBytes) const {
+    if (!surface_) {
+      return;
+    }
+    GrContext* context = surface_->GetContext();
+    if (context) {
+      context->getResourceCacheBytes(totalBytes, resourceBytes, purgeableBytes);
+    }
+}
+// END
+
 }  // namespace flutter

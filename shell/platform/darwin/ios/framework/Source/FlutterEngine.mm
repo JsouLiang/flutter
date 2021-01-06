@@ -17,6 +17,8 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/darwin/common/command_line.h"
+// BD ADD:
+#include "flutter/lib/ui/performance.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterObservatoryPublisher.h"
@@ -77,6 +79,21 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   FlutterBinaryMessengerRelay* _binaryMessenger;
 }
 
+// BD ADD: START
++ (NSArray *)getEngineInitApmInfos {
+    std::vector<int64_t> infos = flutter::Performance::GetInstance()->GetEngineInitApmInfo();
+    NSMutableArray *result = [NSMutableArray array];
+    for (size_t index = 0; index < infos.size(); index++) {
+        [result addObject:[NSNumber numberWithLongLong:infos[index]]];
+    }
+    return result;
+}
+
++ (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp {
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd(static_cast<string>([event UTF8String]), [timestamp longLongValue]);
+}
+// BD ADD: END
+
 - (instancetype)initWithName:(NSString*)labelPrefix {
   return [self initWithName:labelPrefix project:nil allowHeadlessExecution:YES];
 }
@@ -85,9 +102,21 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
 }
 
+// BD MOD: START
+//- (instancetype)initWithName:(NSString*)labelPrefix
+//                     project:(FlutterDartProject*)project
+//      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
+  return [self initWithName:labelPrefix project:project allowHeadlessExecution:allowHeadlessExecution preLoad:NO];
+}
+
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)project
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution
+                     preLoad:(BOOL)preLoad {
+// END
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
@@ -367,7 +396,9 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)maybeSetupPlatformViewChannels {
-  if (_shell && self.shell.IsSetup()) {
+  // BD MOD:
+  // if (_shell && self.shell.IsSetup()) {
+  if (_shell && (self.shell.IsSetup() || self.shell.IsInShellNotBlockAndPosting())) {
     [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [_platformPlugin.get() handleMethodCall:call result:result];
     }];
@@ -390,16 +421,31 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 }
 
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil {
+  // BD ADD:
+  int64_t start_timestamp = flutter::Performance::CurrentTimestamp();
   // Launch the Dart application with the inferred run configuration.
   self.shell.RunEngine([_dartProject.get() runConfigurationForEntrypoint:entrypoint
                                                             libraryOrNil:libraryOrNil]);
+  // BD ADD:
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("execute_dart_entry", start_timestamp);
 }
 
+// BD MOD: START
+// - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+  return [self createShell:entrypoint libraryURI:libraryURI preLoad:false];
+}
+
+- (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI preLoad:(BOOL)preLoad {
+// END
   if (_shell != nullptr) {
     FML_LOG(WARNING) << "This FlutterEngine was already invoked.";
     return NO;
   }
+  // BD ADD:
+  // to report ber_shell_create cost, need a start time, use android apm native_init event, see android code
+  // start time arg ignore
+  flutter::Performance::GetInstance()->TraceApmStartAndEnd("native_init", 0);
 
   static size_t shellCount = 1;
 
@@ -464,7 +510,9 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
                                     std::move(settings),      // settings
                                     on_create_platform_view,  // platform view creation
-                                    on_create_rasterizer      // rasterzier creation
+                                    on_create_rasterizer,      // rasterzier creation
+                                    // BD ADD:
+                                    preLoad
     );
   } else {
     flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
@@ -481,7 +529,9 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
                                     std::move(settings),      // settings
                                     on_create_platform_view,  // platform view creation
-                                    on_create_rasterizer      // rasterzier creation
+                                    on_create_rasterizer,      // rasterzier creation
+                                    // BD ADD:
+                                    preLoad
     );
   }
 
@@ -504,14 +554,23 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 - (BOOL)run {
   return [self runWithEntrypoint:FlutterDefaultDartEntrypoint libraryURI:nil];
 }
-
-- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
-  if ([self createShell:entrypoint libraryURI:libraryURI]) {
+// BD MOD: START
+// - (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+//  if ([self createShell:entrypoint libraryURI:libraryURI]) {
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI preLoad:(BOOL)preLoad {
+  if ([self createShell:entrypoint libraryURI:libraryURI preLoad:preLoad]) {
+// END
     [self launchEngine:entrypoint libraryURI:libraryURI];
   }
 
   return _shell != nullptr;
 }
+
+// BD ADD: START
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {
+    return [self runWithEntrypoint:entrypoint libraryURI:libraryURI preLoad:NO];
+}
+// END
 
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   return [self runWithEntrypoint:entrypoint libraryURI:nil];
@@ -610,7 +669,9 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSParameterAssert(channel);
-  NSAssert(_shell && _shell->IsSetup(),
+  // BD MOD:
+  // NSAssert(_shell && _shell->IsSetup(),
+  NSAssert(_shell && (_shell->IsSetup() || _shell->IsInShellNotBlockAndPosting()),
            @"Sending a message before the FlutterEngine has been run.");
   fml::RefPtr<flutter::PlatformMessageResponseDarwin> response =
       (callback == nil) ? nullptr
@@ -630,7 +691,9 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
 - (void)setMessageHandlerOnChannel:(NSString*)channel
               binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
   NSParameterAssert(channel);
-  NSAssert(_shell && _shell->IsSetup(),
+  // BD MOD:
+  // NSAssert(_shell && _shell->IsSetup(),
+  NSAssert(_shell && (_shell->IsSetup() || _shell->IsInShellNotBlockAndPosting()),
            @"Setting a message handler before the FlutterEngine has been run.");
   self.iosPlatformView->GetPlatformMessageRouter().SetMessageHandler(channel.UTF8String, handler);
 }
