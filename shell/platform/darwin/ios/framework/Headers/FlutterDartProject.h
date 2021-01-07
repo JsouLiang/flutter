@@ -142,6 +142,17 @@ FLUTTER_EXPORT
 - (void)setDillPath:(NSString*)path;    // 动态App压缩包路径
 - (void)setEnginePath:(NSString*)path;  // 动态Engine文件夹路径
 
+/**
+* Returns absolute path for the given asset which originates from the specified package.
+* The returned path may be in main bundle or in document(when compress-size enabled).
+*
+* @param asset The name of the asset. The name can be hierarchical.
+* @param package The name of the package from which the asset originates.
+* @param bundle The bundle to use when doing the lookup.
+* @return the absolute path for the given asset.
+*/
++ (NSString *)flutterAssetAbsolutePath:(NSString*)asset fromPackage:(NSString*)package fromBundle:(nullable NSBundle*)bundle;
+
 // END
 
 @end

@@ -10,10 +10,17 @@ import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -44,6 +51,11 @@ public class FlutterLoader {
   private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
   private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
   private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
+
+  // BD ADD: START
+  private static final String DEBUG_FLUTTER_LIBS_DIR = "flutter_libs";
+  private static final String DEBUG_FLUTTER_ASSET_DIR = "flutter_assets";
+  // END
 
   private static FlutterLoader instance;
 
@@ -146,7 +158,13 @@ public class FlutterLoader {
             if (FlutterInjector.instance().shouldLoadNative()) {
               // BD MOD: START
               //System.loadLibrary("flutter");
-              if (settings != null && settings.getSoLoader() != null) {
+              if (settings != null && settings.isDebugModeEnable()) {
+                  copyDebugFiles(appContext);
+                  File libsDir = appContext.getDir(DEBUG_FLUTTER_LIBS_DIR, Context.MODE_PRIVATE);
+                  String soPath = libsDir.getAbsolutePath() + File.separator + DEFAULT_LIBRARY;
+                  System.load(soPath);
+                  Log.i(TAG, "DebugMode: use copied " + DEFAULT_LIBRARY);
+              } else if (settings != null && settings.getSoLoader() != null) {
                 settings.getSoLoader().loadLibrary(appContext, "flutter");
               } else {
                 System.loadLibrary("flutter");
@@ -217,20 +235,57 @@ public class FlutterLoader {
         nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
       }
       // END
-
-      shellArgs.add(
-          "--icu-native-lib-path="
-              // BD MOD:
-              //+ flutterApplicationInfo.nativeLibraryDir
-              + nativeLibraryDir
-              + File.separator
-              + DEFAULT_LIBRARY);
+      // BD MOD: START
+      // shellArgs.add(
+      //           "--icu-native-lib-path="
+      //               flutterApplicationInfo.nativeLibraryDir
+      //               + File.separator
+      //               + DEFAULT_LIBRARY);
+      if (!settings.isDebugModeEnable()) {
+          shellArgs.add(
+                    "--icu-native-lib-path="
+                        + nativeLibraryDir
+                        + File.separator
+                        + DEFAULT_LIBRARY);
+      }
+      // END
       if (args != null) {
         Collections.addAll(shellArgs, args);
       }
 
       String kernelPath = null;
-      if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
+      // BD MOD: START
+      // if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE)
+      if (settings.isDebugModeEnable()) {
+          File debugLibDir = applicationContext.getDir(DEBUG_FLUTTER_LIBS_DIR, Context.MODE_PRIVATE);
+          shellArgs.add("--icu-native-lib-path=" + debugLibDir.getAbsolutePath() + File.separator + DEFAULT_LIBRARY);
+          String[] files = debugLibDir.list();
+          boolean hasAppSo = false;
+          for (String file : files) {
+              if (TextUtils.equals(file, flutterApplicationInfo.aotSharedLibraryName)) {
+                  hasAppSo = true;
+                  break;
+              }
+              if (TextUtils.equals(file, DEBUG_FLUTTER_ASSET_DIR)) {
+                  shellArgs.add("--extra-asset-dir=" + debugLibDir.getAbsolutePath()
+                          + File.separator + DEBUG_FLUTTER_ASSET_DIR);
+                  Log.i(TAG, "DebugMode: use copied " + DEBUG_FLUTTER_ASSET_DIR);
+              }
+          }
+          if (hasAppSo) {
+              shellArgs.add("--" + AOT_SHARED_LIBRARY_NAME + "=" + debugLibDir.getAbsolutePath()
+                      + File.separator + flutterApplicationInfo.aotSharedLibraryName);
+              Log.i(TAG, "DebugMode: use copied " + flutterApplicationInfo.aotSharedLibraryName);
+          } else {
+              String snapshotAssetPath = debugLibDir.getAbsolutePath();
+              kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
+              Log.i(TAG, "DebugMode: use copied " + DEFAULT_KERNEL_BLOB);
+              shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
+              shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.vmSnapshotData);
+              shellArgs.add("--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
+          }
+      } else if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
+      // END
         String snapshotAssetPath =
             result.dataDirPath + File.separator + flutterApplicationInfo.flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
@@ -423,6 +478,60 @@ public class FlutterLoader {
     return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
   }
 
+  /**
+   * BD ADD
+   */
+  private void copyDebugFiles(@NonNull Context applicationContext) {
+      Log.i(TAG, "DebugMode: start copy files..");
+
+      // Check source
+      File sourceDir = new File(applicationContext.getExternalFilesDir(null).getAbsolutePath()
+              + File.separator + "flutter_debug");
+      if (!sourceDir.exists()) {
+          sourceDir.mkdirs();
+          Log.i(TAG, "DebugMode: " + sourceDir.getAbsolutePath() + " not exists");
+          return;
+      }
+      File[] sourceFiles = sourceDir.listFiles();
+      if (sourceFiles == null || sourceFiles.length == 0) {
+          Log.i(TAG, "DebugMode: " + sourceDir.getAbsolutePath() + " has no content");
+          return;
+      }
+
+      // Create dest dir
+      File destDir = applicationContext.getDir(DEBUG_FLUTTER_LIBS_DIR, Context.MODE_PRIVATE);
+      if (destDir.exists()) {
+          File[] filesIndest = destDir.listFiles();
+          if (filesIndest != null && filesIndest.length > 0) {
+              for (File file : filesIndest) {
+                  boolean success = PathUtils.delete(file);
+                  Log.i(TAG, "DebugMode: delete old " + file.getName() + " " + success);
+              }
+          }
+      } else {
+          destDir.mkdirs();
+      }
+
+      // Do copy
+      for (File file : sourceFiles) {
+          boolean success = false;
+          if (file.isDirectory()) {
+              success = PathUtils.copyFolder(file,
+                      new File(destDir.getAbsolutePath() + File.separator
+                              + DEBUG_FLUTTER_ASSET_DIR + File.separator + file.getName()));
+              PathUtils.delete(file);
+          } else {
+              success = PathUtils.copyFile(file.getAbsolutePath(),
+                      destDir.getAbsolutePath() + File.separator + file.getName(), true);
+          }
+          if (!success) {
+              throw new RuntimeException("Copy debug files Failed");
+          } else {
+              Log.i(TAG, "DebugMode: copy " + file.getName() + " success");
+          }
+      }
+  }
+
   public interface InitExceptionCallback {
       void onRetryException(Throwable t);
       void onInitException(Throwable t);
@@ -437,6 +546,7 @@ public class FlutterLoader {
     private boolean disableLeakVM = false;
     private Runnable onInitResources;
     private InitExceptionCallback initExceptionCallback;
+    private boolean enableDebugMode = false;
 
     public boolean isDisableLeakVM() {
         return disableLeakVM;
@@ -481,6 +591,14 @@ public class FlutterLoader {
 
     public void setMonitorCallback(MonitorCallback monitorCallback) {
       this.monitorCallback = monitorCallback;
+    }
+
+    public boolean isDebugModeEnable() {
+        return enableDebugMode;
+    }
+
+    public void setEnableDebugMode(boolean enableDebugMode) {
+        this.enableDebugMode = enableDebugMode;
     }
     // END
 
