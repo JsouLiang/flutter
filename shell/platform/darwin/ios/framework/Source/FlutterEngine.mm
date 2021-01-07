@@ -578,12 +578,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (BOOL)createShell:(NSString*)entrypoint
-  libraryURI:(NSString*)libraryURI
-  initialRoute:(NSString*)initialRoute {
-  return [self createShell:entrypoint libraryURI:libraryURI initialRoute:initialRoute preLoad:false];
-}
-
-- (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute
             preLoad:(BOOL)preLoad {
