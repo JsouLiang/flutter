@@ -47,7 +47,7 @@ class Performance {
   std::atomic_int64_t dart_image_memory_usage;  // KB
   fml::WeakPtr<flutter::Rasterizer> rasterizer_;
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
-  std::map<string, int64_t> apm_map; // Map
+  std::vector<int64_t> engine_launch_infos; // Map
   std::atomic_bool isExitApp_ = {false};
 };
 
