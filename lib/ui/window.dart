@@ -1249,6 +1249,9 @@ class Window {
   set exitApp(VoidCallback? callback) {
     performance.exitApp = callback;
   }
+
+  void addNextFrameCallback(VoidCallback callback) => performance.addNextFrameCallback(callback);
+
   // END
 }
 
