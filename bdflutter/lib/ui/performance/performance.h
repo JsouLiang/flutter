@@ -64,7 +64,7 @@ class Performance {
 
   fml::TaskRunnerAffineWeakPtr<flutter::Rasterizer> rasterizer_;
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
-  std::map<std::string, int64_t> apm_map; // Map
+  std::vector<int64_t> engine_launch_infos; // Map
   std::atomic_bool isExitApp_ = {false};
   std::atomic_bool warmUpOnce_;
 

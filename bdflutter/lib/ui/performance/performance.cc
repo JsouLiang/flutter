@@ -18,8 +18,28 @@ using tonic::ToDart;
 
 namespace flutter {
 static std::mutex mtx;
+
+std::map<string, int> event_dict = {
+        {"init_task", 0},
+        {"native_init", 1},
+        {"ber_shell_create", 2},
+        {"log_icu_init", 3},
+        {"dartvm_create", 4},
+        {"platform_view_init", 5},
+        {"vsync_waiter", 6},
+        {"rasterizer_init", 7},
+        {"shell_io_manger", 8},
+        {"ui_animator_pre", 9},
+        {"read_isolate_snapshort", 10},
+        {"ui_animator_after", 11},
+        {"shell_wait", 12},
+        {"plugin_registry", 13},
+        {"execute_dart_entry", 14},
+};
+
 Performance::Performance():
-    dart_image_memory_usage(0) {}
+    dart_image_memory_usage(0),
+    engine_launch_infos(30) {}
 
 int64_t Performance::GetImageMemoryUsageKB() {
   int64_t sizeInKB = dart_image_memory_usage.load(std::memory_order_relaxed);
@@ -200,8 +220,16 @@ int64_t Performance::CurrentTimestamp() {
 
 void Performance::TraceApmStartAndEnd(const string& event, int64_t start) {
   std::lock_guard<std::mutex> lck (mtx);
-  apm_map[event + "_start"] = start;
-  apm_map[event + "_end"] = CurrentTimestamp();
+  if (event == "ui_animator") {
+        int index = event_dict.find(event + "_pre")->second;
+        engine_launch_infos[index * 2] = start;
+        index = event_dict.find(event + "_after")->second;
+        engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
+  } else {
+        int index = event_dict.find(event)->second;
+        engine_launch_infos[index * 2] = start;
+        engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
+  }
 }
 
 void Performance::WarmUpZeroSizeOnce(bool warmUpOnce) {
@@ -221,38 +249,11 @@ void Performance_warmUpZeroSizeOnce(Dart_NativeArguments args) {
 
 vector<int64_t> Performance::GetEngineInitApmInfo() {
   std::lock_guard<std::mutex> lck (mtx);
-  vector<int64_t> engine_init_apm_info = {
-    apm_map["init_task_start"],
-    apm_map["init_task_end"],
-    apm_map["native_init_start"],
-    apm_map["native_init_end"],
-    apm_map["native_init_end"], // ber_shell_create_start
-    apm_map["log_icu_init_start"],  // ber_shell_create_end
-    apm_map["log_icu_init_start"],
-    apm_map["log_icu_init_end"],
-    apm_map["dartvm_create_start"],
-    apm_map["dartvm_create_end"],
-    apm_map["platform_view_init_start"],
-    apm_map["platform_view_init_end"],
-    apm_map["vsync_waiter_start"],
-    apm_map["vsync_waiter_end"],
-    apm_map["rasterizer_init_start"],
-    apm_map["rasterizer_init_end"],
-    apm_map["shell_io_manger_start"],
-    apm_map["shell_io_manger_end"],
-    apm_map["ui_animator_start"],
-    apm_map["read_isolate_snapshort_start"], // animator_pre_end
-    apm_map["read_isolate_snapshort_start"],
-    apm_map["read_isolate_snapshort_end"],
-    apm_map["read_isolate_snapshort_end"], // animator_after_start
-    apm_map["ui_animator_end"],
-    apm_map["shell_wait_start"],
-    apm_map["shell_wait_end"],
-    apm_map["plugin_registry_start"],
-    apm_map["plugin_registry_end"],
-    apm_map["execute_dart_entry_start"],
-    apm_map["execute_dart_entry_end"],
-  };
+  vector<int64_t> engine_init_apm_info(engine_launch_infos);
+  engine_init_apm_info[4] = engine_launch_infos[3];  // ber_shell_create_start = native_init_end
+  engine_init_apm_info[5] = engine_launch_infos[6];  // ber_shell_create_end = log_icu_init_start
+  engine_init_apm_info[19] = engine_launch_infos[20];  // animator_pre_end = read_isolate_snapshort_start
+  engine_init_apm_info[22] = engine_launch_infos[21];  // animator_after_start = read_isolate_snapshort_end
   return engine_init_apm_info;
 }
 
