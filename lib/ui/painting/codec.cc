@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/codec.h"
 
 #include <variant>
+#include <flutter/lib/ui/performance.h>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/logging.h"
@@ -301,6 +302,9 @@ static void InvokeGetNativeInitCodecCallback(
  *
  */
 void GetNativeImage(Dart_NativeArguments args) {
+#ifdef OS_ANDROID
+  Performance::GetInstance()->SetOldImageInterface(true);
+#endif
   static size_t trace_counter = 1;
   const size_t trace_id = trace_counter++;
   TRACE_FLOW_BEGIN("flutter", kGetNativeImageTraceTag, trace_id);

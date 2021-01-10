@@ -28,6 +28,7 @@
 #include "flutter/shell/platform/android/flutter_main.h"
 // BD ADD:
 #include "flutter/fml/make_copyable.h"
+#include <flutter/lib/ui/performance.h>
 
 #define ANDROID_SHELL_HOLDER \
   (reinterpret_cast<AndroidShellHolder*>(shell_holder))
@@ -938,6 +939,12 @@ static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
                                      jobject jcaller,
                                      jstring key,
                                      jobject jCodec) {
+  if (Performance::GetInstance()->IsOldImageInterface()) {
+    jclass clazz = env->GetObjectClass(jCodec);
+    jobject jObject = env->GetObjectField(jCodec, env->GetFieldID(clazz, "codec", "Ljava/lang/Object;"));
+    ExternalImageLoadSuccess(env, jcaller, key, jObject);
+    return;
+  }
   auto cKey = fml::jni::JavaStringToString(env, key);
   auto loadContext = g_image_load_contexts[cKey];
   if (loadContext == nullptr) {
@@ -1383,7 +1390,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_image_loader_class_load_gif = env->GetMethodID(g_image_loader_class->obj(), "getNextFrame", "(ILjava/lang/Object;Lio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
-  if (g_image_loader_class_load == nullptr) {
+  if (g_image_loader_class_load_gif == nullptr) {
     FML_LOG(ERROR) << "Could not locate AndroidImageLoader load method";
     return false;
   }
