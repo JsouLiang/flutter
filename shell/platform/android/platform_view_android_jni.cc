@@ -232,14 +232,17 @@ class AndroidImageLoadContext {
 public:
 
     ImageLoaderContext loaderContext;
+    bool isOldInterface;
 
     AndroidImageLoadContext(std::function<void(sk_sp<SkImage> image)> _callback, ImageLoaderContext _loaderContext, jobject _imageLoader):
     loaderContext(_loaderContext),
+    isOldInterface(true),
     androidImageLoader(_imageLoader),
     callback(std::move(_callback)){}
 
     AndroidImageLoadContext(std::function<void(std::unique_ptr<NativeExportCodec> codec)> _callback, ImageLoaderContext _loaderContext, jobject _imageLoader):
     loaderContext(_loaderContext),
+    isOldInterface(false),
     androidImageLoader(_imageLoader),
     codecCallback(std::move(_callback)){}
 
@@ -943,6 +946,12 @@ static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
   if (loadContext == nullptr) {
     return;
   }
+  if (loadContext->isOldInterface) {
+    jclass clazz = env->GetObjectClass(jCodec);
+    jobject jObject = env->GetObjectField(jCodec, env->GetFieldID(clazz, "codec", "Ljava/lang/Object;"));
+    ExternalImageLoadSuccess(env, jcaller, key, jObject);
+    return;
+  }
   loadContext->onLoadForCodecSuccess(env, cKey, env->NewGlobalRef(jCodec));
 
   auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
@@ -1383,7 +1392,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   }
 
   g_image_loader_class_load_gif = env->GetMethodID(g_image_loader_class->obj(), "getNextFrame", "(ILjava/lang/Object;Lio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
-  if (g_image_loader_class_load == nullptr) {
+  if (g_image_loader_class_load_gif == nullptr) {
     FML_LOG(ERROR) << "Could not locate AndroidImageLoader load method";
     return false;
   }
