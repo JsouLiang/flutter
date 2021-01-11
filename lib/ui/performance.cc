@@ -130,12 +130,4 @@ bool Performance::IsExitApp() {
   return isExitApp_;
 }
 
-bool Performance::IsOldImageInterface() {
-  return is_old_image_interface;
-}
-
-void Performance::SetOldImageInterface(bool isOld) {
-  is_old_image_interface = isOld;
-}
-
 }

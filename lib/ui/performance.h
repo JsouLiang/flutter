@@ -40,8 +40,6 @@ class Performance {
 
   void SetExitStatus(bool isExitApp);
   bool IsExitApp();
-  bool IsOldImageInterface();
-  void SetOldImageInterface(bool isOld);
 
  private:
   Performance();
@@ -51,7 +49,6 @@ class Performance {
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
   std::vector<int64_t> engine_launch_infos; // Map
   std::atomic_bool isExitApp_ = {false};
-  std::atomic_bool is_old_image_interface = {false};
 };
 
 }
