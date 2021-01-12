@@ -243,7 +243,6 @@ public class FlutterLoader {
         try {
             long now = SystemClock.elapsedRealtime();
             // BD ADD:
-            new FlutterLoaderPatch(this, applicationContext, DEFAULT_FLUTTER_ASSETS_DIR).onInitialize();
             sInitTask.get();
             if (settings.monitorCallback != null) {
                 settings.monitorCallback.onMonitor("InitTask.get", SystemClock.elapsedRealtime() - now);

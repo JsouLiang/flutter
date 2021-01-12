@@ -246,7 +246,6 @@ android_java_sources = [
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
   # BD ADD: START
-  "io/flutter/embedding/engine/loader/FlutterLoaderPatch.java",
   "io/flutter/view/AndroidImageLoader.java",
   "io/flutter/view/NativeLoadCallback.java",
   "io/flutter/view/NativeCodec.java",
@@ -264,12 +263,6 @@ android_support_jars = [
   "//third_party/android_support/android_arch_lifecycle_runtime.jar",
   "//third_party/android_support/android_arch_lifecycle_viewmodel.jar",
 ]
-
-# BD ADD START:
-external_jars = [
-  "libs/npth-3.1.5.jar",
-]
-# END
 
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
@@ -293,8 +286,6 @@ action("flutter_shell_java") {
     android_sdk_jar,
   ]
   inputs += android_support_jars
-  # BD ADD:
-  inputs += external_jars
 
   _rebased_current_path = rebase_path(".")
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
@@ -302,9 +293,7 @@ action("flutter_shell_java") {
   _rebased_depfile = rebase_path(depfile, root_build_dir)
   _rebased_android_sdk_jar = rebase_path(android_sdk_jar, root_build_dir)
   _rebased_classpath = [ _rebased_android_sdk_jar ] +
-                       rebase_path(android_support_jars, root_build_dir) +
-                       # BD ADD
-                       rebase_path(external_jars, root_build_dir)
+                       rebase_path(android_support_jars, root_build_dir)
 
   args = [
     "--depfile=$_rebased_depfile",
