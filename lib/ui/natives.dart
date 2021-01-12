@@ -136,6 +136,9 @@ Future<List> getTotalExtMemInfo() {
 
 String _getTotalExtMemInfo(_Callback<List> callback) native 'Performance_getTotalExtMemInfo';
 
+/// Get Engine Init APM info
+List<dynamic> getEngineInitApmInfo() native 'Performance_getEngineInitApmInfo';
+
 dynamic reflectLibrary(String libraryUrl) native 'Reflect_reflectLibrary';
 
 dynamic libraryInvoke(dynamic lib, int invokeType, String functionName, List arguments, List names) native 'Reflect_libraryInvoke';
