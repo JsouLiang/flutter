@@ -1023,6 +1023,10 @@ static void ExternalImageCodecLoadFail(JNIEnv *env,
   if (loadContext == nullptr) {
     return;
   }
+  if (loadContext->isOldInterface) {
+    ExternalImageLoadFail(env, jcaller, key);
+    return;
+  }
   loadContext->onCodecLoadFail(env, cKey);
 
   auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
