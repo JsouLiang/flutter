@@ -97,6 +97,14 @@ static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
+// BD ADD: START
+#ifdef SUPPORT_SYSTRACE_DIRECT
+static const char* kDartReleaseSystrace[]{
+  "--support_service=true",
+};
+#endif
+// END
+
 static const char* kDartSystraceTraceBufferArgs[]{
     "--timeline_recorder=systrace",
 };
@@ -405,6 +413,15 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     args.push_back(old_gen_heap_size_args.c_str());
   }
 
+// BD ADD: START
+#ifdef SUPPORT_SYSTRACE_DIRECT
+  PushBackAll(&args, kDartSystraceTraceBufferArgs,
+              fml::size(kDartSystraceTraceBufferArgs));
+  PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
+  PushBackAll(&args, kDartReleaseSystrace,
+              fml::size(kDartReleaseSystrace));
+#endif
+// END
   for (size_t i = 0; i < settings_.dart_flags.size(); i++) {
     args.push_back(settings_.dart_flags[i].c_str());
   }

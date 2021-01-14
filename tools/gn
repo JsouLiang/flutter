@@ -152,6 +152,10 @@ def to_gn_args(args):
                 gn_args['skialite_only_lite_apis'] = True
     # END
 
+    if args.enable_systrace:
+        gn_args['dart_enable_timeline_direct'] = True
+        gn_args['flutter_enable_systrace_direct'] = True
+
     # Skia GN args.
     gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
     gn_args['skia_use_dng_sdk'] = False    # RAW image handling.

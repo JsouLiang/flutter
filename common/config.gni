@@ -28,6 +28,7 @@ declare_args() {
   icu_use_lite_data_file = false
   lite_suffix = ""
   mac_10_15 = false
+  flutter_enable_systrace_direct = false
   # END
 }
 
@@ -70,3 +71,9 @@ if (is_ios || is_mac) {
   ]
   flutter_cflags_objcc = flutter_cflags_objc
 }
+
+# BD ADD: START
+if (flutter_enable_systrace_direct) {
+  feature_defines_list += [ "SUPPORT_SYSTRACE_DIRECT" ]
+}
+# END
