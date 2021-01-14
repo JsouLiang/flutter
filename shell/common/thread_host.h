@@ -20,6 +20,8 @@ struct ThreadHost {
     RASTER = 1 << 2,
     IO = 1 << 3,
     Profiler = 1 << 4,
+    // BD ADD:
+    CHANNEL = 1 << 5,
   };
 
   std::string name_prefix;
@@ -28,6 +30,8 @@ struct ThreadHost {
   std::unique_ptr<fml::Thread> raster_thread;
   std::unique_ptr<fml::Thread> io_thread;
   std::unique_ptr<fml::Thread> profiler_thread;
+  // BD ADD:
+  std::unique_ptr<fml::Thread> channel_thread;
 
   ThreadHost();
 

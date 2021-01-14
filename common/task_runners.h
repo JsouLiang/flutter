@@ -20,6 +20,15 @@ class TaskRunners {
               fml::RefPtr<fml::TaskRunner> ui,
               fml::RefPtr<fml::TaskRunner> io);
 
+  // BD ADD: START
+  TaskRunners(std::string label,
+              fml::RefPtr<fml::TaskRunner> platform,
+              fml::RefPtr<fml::TaskRunner> gpu,
+              fml::RefPtr<fml::TaskRunner> ui,
+              fml::RefPtr<fml::TaskRunner> io,
+              fml::RefPtr<fml::TaskRunner> channel);
+  // END
+
   TaskRunners(const TaskRunners& other);
 
   ~TaskRunners();
@@ -34,6 +43,12 @@ class TaskRunners {
 
   fml::RefPtr<fml::TaskRunner> GetRasterTaskRunner() const;
 
+  // BD ADD: START
+  fml::RefPtr<fml::TaskRunner> GetChannelTaskRunner() const;
+
+  bool IsChannelThreadValid() const;
+  // END
+
   bool IsValid() const;
 
  private:
@@ -42,6 +57,8 @@ class TaskRunners {
   fml::RefPtr<fml::TaskRunner> raster_;
   fml::RefPtr<fml::TaskRunner> ui_;
   fml::RefPtr<fml::TaskRunner> io_;
+  // BD ADD:
+  fml::RefPtr<fml::TaskRunner> channel_;
 };
 
 }  // namespace flutter

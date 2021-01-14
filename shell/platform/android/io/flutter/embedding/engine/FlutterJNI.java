@@ -173,6 +173,9 @@ public class FlutterJNI {
   // The initial value of 0.0 indicates unknown refresh rate.
   private static float refreshRateFPS = 0.0f;
 
+  // BD ADD:
+  private boolean ensureHandleChannelOnMainThread = true;
+
   // This is set from native code via JNI.
   @Nullable private static String observatoryUri;
 
@@ -223,6 +226,12 @@ public class FlutterJNI {
   }
 
   private static boolean setRefreshRateFPSCalled = false;
+
+  // BD ADD: START
+  public void setEnsureHandleChannelOnMainThread(boolean ensure) {
+    ensureHandleChannelOnMainThread = ensure;
+  }
+  // END
 
   // TODO(mattcarroll): add javadocs
   public static void setAsyncWaitForVsyncDelegate(@Nullable AsyncWaitForVsyncDelegate delegate) {
@@ -323,6 +332,15 @@ public class FlutterJNI {
   }
   // END
 
+  // BD ADD: START
+  @UiThread
+  public void attachToNative(boolean isBackgroundView, int flag) {
+    ensureRunningOnMainThread();
+    ensureNotAttachedToNative();
+    nativeShellHolderId = nativeAttach(this, isBackgroundView, flag);
+  }
+  // END
+
   @UiThread
   // BD MOD:
   // public void attachToNative(boolean isBackgroundView) {
@@ -341,13 +359,13 @@ public class FlutterJNI {
   //  return nativeAttach(flutterJNI, isBackgroundView);
   // }
   public long performNativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView, boolean isPreload) {
-    return nativeAttach(flutterJNI, isBackgroundView, isPreload);
+    return nativeAttach(flutterJNI, isBackgroundView, isPreload ? FlutterEngine.FLAG_ENGINE_PRELOAD : 0);
   }
   // END
 
   // BD MOD:
   // private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView);
-  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView, boolean isPreload);
+  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView, int flag);
 
   /**
    * Spawns a new FlutterJNI instance from the current instance.
@@ -968,7 +986,12 @@ public class FlutterJNI {
   // TODO(mattcarroll): differentiate between channel responses and platform responses.
   @UiThread
   public void invokePlatformMessageEmptyResponseCallback(int responseId) {
-    ensureRunningOnMainThread();
+    // BD MOD: START
+    //  ensureRunningOnMainThread();
+    if (ensureHandleChannelOnMainThread) {
+        ensureRunningOnMainThread();
+    }
+    // END
     if (isAttached()) {
       nativeInvokePlatformMessageEmptyResponseCallback(nativeShellHolderId, responseId);
     } else {
@@ -987,7 +1010,12 @@ public class FlutterJNI {
   @UiThread
   public void invokePlatformMessageResponseCallback(
       int responseId, @Nullable ByteBuffer message, int position) {
-    ensureRunningOnMainThread();
+    // BD MOD: START
+    //  ensureRunningOnMainThread();
+    if (ensureHandleChannelOnMainThread) {
+      ensureRunningOnMainThread();
+    }
+    // END
     if (isAttached()) {
       nativeInvokePlatformMessageResponseCallback(
           nativeShellHolderId, responseId, message, position);

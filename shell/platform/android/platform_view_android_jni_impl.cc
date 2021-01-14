@@ -493,14 +493,14 @@ static jlong AttachJNI(JNIEnv* env,
                        jobject flutterJNI,
                        jboolean is_background_view,
                        // BD ADD:
-                       jboolean is_preload) {
+                       jint flag) {
   fml::jni::JavaObjectWeakGlobalRef java_object(env, flutterJNI);
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
       std::make_shared<PlatformViewAndroidJNIImpl>(java_object);
   auto shell_holder = std::make_unique<AndroidShellHolder>(
       // BD MOD:
       // FlutterMain::Get().GetSettings(), jni_facade, is_background_view);
-       FlutterMain::Get().GetSettings(), jni_facade, is_background_view, is_preload);
+       FlutterMain::Get().GetSettings(), jni_facade, is_background_view, flag);
   if (shell_holder->IsValid()) {
     return reinterpret_cast<jlong>(shell_holder.release());
   } else {
@@ -1029,22 +1029,55 @@ static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jint responseId,
                                                   jobject message,
                                                   jint position) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()
-      ->InvokePlatformMessageResponseCallback(env,         //
-                                              responseId,  //
-                                              message,     //
-                                              position     //
+  // BD MOD: START
+//  ANDROID_SHELL_HOLDER->GetPlatformView()
+//      ->InvokePlatformMessageResponseCallback(env,         //
+//                                              responseId,  //
+//                                              message,     //
+//                                              position     //
+//      );
+  if (ANDROID_SHELL_HOLDER->GetMultiChannelEnabled()) {
+    PlatformViewAndroid* view = ANDROID_SHELL_HOLDER->GetRawPlatformView();
+    if (view) {
+      view->InvokePlatformMessageResponseCallback(env,         //
+                                                  responseId,  //
+                                                  message,     //
+                                                  position     //
       );
+    }
+  } else {
+    ANDROID_SHELL_HOLDER->GetPlatformView()
+        ->InvokePlatformMessageResponseCallback(env,         //
+                                                responseId,  //
+                                                message,     //
+                                                position     //
+        );
+  }
+  // END
 }
 
 static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
                                                        jobject jcaller,
                                                        jlong shell_holder,
                                                        jint responseId) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()
-      ->InvokePlatformMessageEmptyResponseCallback(env,        //
-                                                   responseId  //
-      );
+  // BD MOD: START
+//  ANDROID_SHELL_HOLDER->GetPlatformView()
+//      ->InvokePlatformMessageEmptyResponseCallback(env,        //
+//                                                   responseId  //
+//      );
+  if (ANDROID_SHELL_HOLDER->GetMultiChannelEnabled()) {
+    PlatformViewAndroid* view = ANDROID_SHELL_HOLDER->GetRawPlatformView();
+    if (view) {
+      view->InvokePlatformMessageEmptyResponseCallback(env, responseId);
+    }
+  } else {
+    ANDROID_SHELL_HOLDER->GetPlatformView()
+        ->InvokePlatformMessageEmptyResponseCallback(env,        //
+                                                     responseId  //
+        );
+
+  }
+  // END
 }
 
 static void NotifyLowMemoryWarning(JNIEnv* env,
@@ -1160,7 +1193,7 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeAttach",
           // BD MOD:
           // .signature = "(Lio/flutter/embedding/engine/FlutterJNI;Z)J",
-          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;ZZ)J",
+          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;ZI)J",
           .fnPtr = reinterpret_cast<void*>(&AttachJNI),
       },
       // BD ADD: START

@@ -45,7 +45,7 @@ class AndroidShellHolder {
   // BD ADD: START
   AndroidShellHolder(flutter::Settings settings,
                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                     bool is_background_view, bool preLoad);
+                     bool is_background_view, int flag);
   // END
 
   ~AndroidShellHolder();
@@ -94,6 +94,9 @@ class AndroidShellHolder {
 
   fml::WeakPtr<PlatformViewAndroid> GetPlatformView();
 
+  // BD ADD:
+  PlatformViewAndroid* GetRawPlatformView();
+
   Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
                                     bool base64_encode);
 
@@ -105,6 +108,14 @@ class AndroidShellHolder {
   void ScheduleFrameNow();
 
   void ExitApp(fml::closure closure);
+  
+
+  bool GetMultiChannelEnabled() {
+    return shell_->GetMultiChannelEnabled();
+  }
+
+  const int FLAG_ENGINE_PRELOAD = 1;
+  const int FLAG_ENGINE_MULTI_CHANNEL = 1 << 2;
   // END
 
  private:
@@ -144,7 +155,7 @@ class AndroidShellHolder {
   // BD ADD:
   void InitAndroidShellHolder(flutter::Settings settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool is_background_view, bool preLoad);
+    bool is_background_view, int flag);
   // END
 };
 

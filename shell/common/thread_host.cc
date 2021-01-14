@@ -38,6 +38,11 @@ ThreadHost::ThreadHost(std::string name_prefix_arg, uint64_t mask)
   if (mask & ThreadHost::Type::Profiler) {
     profiler_thread = std::make_unique<fml::Thread>(name_prefix + ".profiler");
   }
+  // BD ADD: START
+  if (mask & ThreadHost::Type::CHANNEL) {
+    channel_thread = std::make_unique<fml::Thread>(name_prefix + ".channel");
+  }
+  // END
 }
 
 ThreadHost::~ThreadHost() = default;

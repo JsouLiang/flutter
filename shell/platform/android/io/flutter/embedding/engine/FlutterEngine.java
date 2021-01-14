@@ -101,8 +101,11 @@ public class FlutterEngine {
   // Platform Views.
   @NonNull private final PlatformViewsController platformViewsController;
 
-  // BD ADD:
-  private final boolean disableAccessibility;
+  // BD ADD: START
+  static final int FLAG_ENGINE_PRELOAD = 1;
+  static final int FLAG_ENGINE_DISABLE_ACCESSIBILITY = 1 << 1;
+  static final int FLAG_ENGINE_MULTI_CHANNEL = 1 << 2;
+  // END
 
   // Engine Lifecycle.
   @NonNull private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
@@ -313,7 +316,29 @@ public class FlutterEngine {
       boolean isPreload,
       boolean disableAccessibility
       // END
-      ) {
+  ) {
+    this(
+        context,
+        flutterLoader,
+        flutterJNI,
+        platformViewsController,
+        dartVmArgs,
+        automaticallyRegisterPlugins,
+        waitForRestorationData,
+        (isPreload ? FLAG_ENGINE_PRELOAD : 0)|(disableAccessibility ? FLAG_ENGINE_DISABLE_ACCESSIBILITY : 0));
+  }
+
+  public FlutterEngine(
+      @NonNull Context context,
+      @Nullable FlutterLoader flutterLoader,
+      @NonNull FlutterJNI flutterJNI,
+      @NonNull PlatformViewsController platformViewsController,
+      @Nullable String[] dartVmArgs,
+      boolean automaticallyRegisterPlugins,
+      boolean waitForRestorationData,
+      int flag
+  ) {
+  // END
     AssetManager assetManager;
     try {
       assetManager = context.createPackageContext(context.getPackageName(), 0).getAssets();
@@ -328,7 +353,7 @@ public class FlutterEngine {
 
     // BD MOD: START
     // accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
-    if (!disableAccessibility) {
+    if ((flag & FLAG_ENGINE_DISABLE_ACCESSIBILITY) == 0) {
       accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
     }
     // END
@@ -363,7 +388,14 @@ public class FlutterEngine {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setLocalizationPlugin(localizationPlugin);
+
     flutterJNI.setDeferredComponentManager(FlutterInjector.instance().deferredComponentManager());
+
+    // BD ADD: START
+    if ((flag & FLAG_ENGINE_MULTI_CHANNEL) != 0) {
+      flutterJNI.setEnsureHandleChannelOnMainThread(false);
+    }
+    // END
 
     // It should typically be a fresh, unattached JNI. But on a spawned engine, the JNI instance
     // is already attached to a native shell. In that case, the Java FlutterEngine is created around
@@ -371,10 +403,8 @@ public class FlutterEngine {
     if (!flutterJNI.isAttached()) {
       // BD MOD:
       // attachToJni();
-      attachToJni(isPreload);
+      attachToJni(flag);
     }
-    // BD ADD:
-    this.disableAccessibility = disableAccessibility;
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if
     // possible.
@@ -400,12 +430,12 @@ public class FlutterEngine {
 
   // BD MOD:
   // private void attachToJni() {
-  private void attachToJni(boolean isPreload) {
+  private void attachToJni(int flag) {
     Log.v(TAG, "Attaching to JNI.");
     // TODO(mattcarroll): update native call to not take in "isBackgroundView"
     // BD MOD:
-    // flutterJNI.attachToNative(false, isPreload);
-    flutterJNI.attachToNative(false, isPreload);
+    // flutterJNI.attachToNative(false);
+    flutterJNI.attachToNative(false, flag);
 
     if (!isAttachedToJni()) {
       throw new RuntimeException("FlutterEngine failed to attach to its native Object reference.");

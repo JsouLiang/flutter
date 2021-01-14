@@ -419,6 +419,12 @@ class Shell final : public PlatformView::Delegate,
   ///
   double GetMainDisplayRefreshRate();
 
+  // BD ADD: START
+  void SetMultiChannelEnabled(bool enable);
+
+  bool GetMultiChannelEnabled();
+  // END
+
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
@@ -454,6 +460,7 @@ class Shell final : public PlatformView::Delegate,
   std::atomic<bool> is_setup_{false};
   std::atomic<bool> is_engine_setup_{false};
   std::atomic<bool> is_without_engine_setup_{false};
+  std::atomic<bool> multi_channel_enabled_{false};
   // END
   bool is_added_to_service_protocol_ = false;
 

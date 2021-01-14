@@ -519,7 +519,9 @@ Shell::~Shell() {
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
 
-  fml::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch;
+  fml::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch,
+      // BD ADD:
+      channel_latch;
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetUITaskRunner(),
@@ -552,6 +554,18 @@ Shell::~Shell() {
       }));
 
   io_latch.Wait();
+
+  // BD ADD: START
+  // Wait for channel thread to handle all tasks
+  if (task_runners_.IsChannelThreadValid()) {
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetChannelTaskRunner(),
+        fml::MakeCopyable([&channel_latch]() mutable {
+          channel_latch.Signal();
+        }));
+    channel_latch.Wait();
+  }
+  // END
 
   // The platform view must go last because it may be holding onto platform side
   // counterparts to resources owned by subsystems running on other threads. For
@@ -1602,12 +1616,37 @@ void Shell::OnEngineHandlePlatformMessage(
     return;
   }
 
-  task_runners_.GetPlatformTaskRunner()->PostTask(
-      [view = platform_view_->GetWeakPtr(), message = std::move(message)]() {
-        if (view) {
-          view->HandlePlatformMessage(std::move(message));
-        }
-      });
+  // BD MOD: START
+  // task_runners_.GetPlatformTaskRunner()->PostTask(
+  //     [view = platform_view_->GetWeakPtr(), message = std::move(message)]() {
+  //       if (view) {
+  //         view->HandlePlatformMessage(std::move(message));
+  //       }
+  //     });
+  if (message->runInUiThread() && multi_channel_enabled_) {
+    // Handle immediately in the current thread (flutter ui thread), avoiding thread switching, similar to JAVA JNI or dart::ffi
+    if (platform_view_) {
+      platform_view_->HandlePlatformMessage(std::move(message));
+    }
+  } else if (message->runInChannelThread()
+             && multi_channel_enabled_ && task_runners_.IsChannelThreadValid()) {
+      fml::TaskRunner::RunNowOrPostTask(
+          task_runners_.GetChannelTaskRunner(),
+          fml::MakeCopyable([message = std::move(message),
+                                view = platform_view_.get()]() mutable {
+            if (view) {
+              view->HandlePlatformMessage(std::move(message));
+            }
+          }));
+  } else {
+    task_runners_.GetPlatformTaskRunner()->PostTask(
+        [view = platform_view_->GetWeakPtr(), message = std::move(message)]() {
+          if (view) {
+            view->HandlePlatformMessage(std::move(message));
+          }
+        });
+  }
+  // END
 }
 
 void Shell::HandleEngineSkiaMessage(fml::RefPtr<PlatformMessage> message) {
@@ -2373,5 +2412,13 @@ void Shell::SetPreloadState(bool preload) {
 bool Shell::IsInShellNotBlockAndPosting() {
   return is_preload_ && !is_setup_;
 }
+
+void Shell::SetMultiChannelEnabled(bool enable) {
+  multi_channel_enabled_ = enable;
+}
+
+bool Shell::GetMultiChannelEnabled() {
+  return multi_channel_enabled_;
+};
 // END
 }  // namespace flutter

@@ -137,6 +137,9 @@ class PlatformViewAndroid final : public PlatformView {
   std::unique_ptr<AndroidSurface> android_surface_;
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
+
+  // BD ADD:
+  std::mutex responses_mutex_;
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
       pending_responses_;
 

@@ -19,6 +19,21 @@ TaskRunners::TaskRunners(std::string label,
       ui_(std::move(ui)),
       io_(std::move(io)) {}
 
+// BD ADD: START
+TaskRunners::TaskRunners(std::string label,
+                         fml::RefPtr<fml::TaskRunner> platform,
+                         fml::RefPtr<fml::TaskRunner> raster,
+                         fml::RefPtr<fml::TaskRunner> ui,
+                         fml::RefPtr<fml::TaskRunner> io,
+                         fml::RefPtr<fml::TaskRunner> channel)
+    : label_(std::move(label)),
+      platform_(std::move(platform)),
+      raster_(std::move(raster)),
+      ui_(std::move(ui)),
+      io_(std::move(io)),
+      channel_(std::move(channel)) {}
+// END
+
 TaskRunners::TaskRunners(const TaskRunners& other) = default;
 
 TaskRunners::~TaskRunners() = default;
@@ -42,6 +57,16 @@ fml::RefPtr<fml::TaskRunner> TaskRunners::GetIOTaskRunner() const {
 fml::RefPtr<fml::TaskRunner> TaskRunners::GetRasterTaskRunner() const {
   return raster_;
 }
+
+// BD ADD: START
+fml::RefPtr<fml::TaskRunner> TaskRunners::GetChannelTaskRunner() const {
+  return channel_;
+}
+
+bool TaskRunners::IsChannelThreadValid() const {
+  return channel_ && true;
+}
+// END
 
 bool TaskRunners::IsValid() const {
   return platform_ && raster_ && ui_ && io_;

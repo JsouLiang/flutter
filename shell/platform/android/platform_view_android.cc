@@ -270,15 +270,26 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
     jint java_response_position) {
   if (!response_id)
     return;
+
+  // BD ADD:
+  responses_mutex_.lock();
+
   auto it = pending_responses_.find(response_id);
-  if (it == pending_responses_.end())
+  if (it == pending_responses_.end()) {
+    // BD ADD:
+    responses_mutex_.unlock();
     return;
+  }
   uint8_t* response_data =
       static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
   std::vector<uint8_t> response = std::vector<uint8_t>(
       response_data, response_data + java_response_position);
   auto message_response = std::move(it->second);
   pending_responses_.erase(it);
+
+  // BD ADD:
+  responses_mutex_.unlock();
+
   message_response->Complete(
       std::make_unique<fml::DataMapping>(std::move(response)));
 }
@@ -288,11 +299,22 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
     jint response_id) {
   if (!response_id)
     return;
+
+  // BD ADD:
+  responses_mutex_.lock();
+
   auto it = pending_responses_.find(response_id);
-  if (it == pending_responses_.end())
+  if (it == pending_responses_.end()) {
+    // BD ADD:
+    responses_mutex_.unlock();
     return;
+  }
   auto message_response = std::move(it->second);
   pending_responses_.erase(it);
+
+  // BD ADD:
+  responses_mutex_.unlock();
+
   message_response->CompleteEmpty();
 }
 
@@ -301,8 +323,12 @@ void PlatformViewAndroid::HandlePlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   int response_id = 0;
   if (auto response = message->response()) {
+    // BD ADD:
+    responses_mutex_.lock();
     response_id = next_response_id_++;
     pending_responses_[response_id] = response;
+    // BD ADD:
+    responses_mutex_.unlock();
   }
   // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
   jni_facade_->FlutterViewHandlePlatformMessage(message, response_id);

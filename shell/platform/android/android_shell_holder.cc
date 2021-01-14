@@ -44,7 +44,7 @@ static PlatformData GetDefaultPlatformData() {
 void AndroidShellHolder::InitAndroidShellHolder(
     flutter::Settings settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool is_background_view, bool preLoad) {
+    bool is_background_view, int flag) {
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 // END
@@ -55,12 +55,26 @@ void AndroidShellHolder::InitAndroidShellHolder(
 #endif
 // END
   thread_host_ = std::make_shared<ThreadHost>();
+
+  // BD ADD: START
+  FML_DLOG(ERROR) << "BDFlutter: InitAndroidShellHolder flag=" << flag;
+  bool preLoad = (flag & FLAG_ENGINE_PRELOAD) != 0;
+  bool enable_multi_channel = (flag & FLAG_ENGINE_MULTI_CHANNEL) != 0;
+  // In background view mode, multi channel should not be enabled
+  if (is_background_view) enable_multi_channel = false;
+  // END
+
   if (is_background_view) {
     *thread_host_ = {thread_label, ThreadHost::Type::UI};
   } else {
-    *thread_host_ = {thread_label, ThreadHost::Type::UI |
-                                       ThreadHost::Type::RASTER |
-                                       ThreadHost::Type::IO};
+    if (enable_multi_channel) {
+      *thread_host_ = {thread_label, ThreadHost::Type::UI | ThreadHost::Type::RASTER |
+                                    ThreadHost::Type::IO | ThreadHost::Type::CHANNEL};
+  // END
+    } else {
+      *thread_host_ = {thread_label, ThreadHost::Type::UI | ThreadHost::Type::RASTER |
+                                        ThreadHost::Type::IO};
+    }
   }
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
@@ -98,6 +112,8 @@ void AndroidShellHolder::InitAndroidShellHolder(
   fml::RefPtr<fml::TaskRunner> raster_runner;
   fml::RefPtr<fml::TaskRunner> ui_runner;
   fml::RefPtr<fml::TaskRunner> io_runner;
+  // BD ADD:
+  fml::RefPtr<fml::TaskRunner> channel_runner;
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
   if (is_background_view) {
@@ -109,13 +125,20 @@ void AndroidShellHolder::InitAndroidShellHolder(
     raster_runner = thread_host_->raster_thread->GetTaskRunner();
     ui_runner = thread_host_->ui_thread->GetTaskRunner();
     io_runner = thread_host_->io_thread->GetTaskRunner();
+    // BD ADD: START
+    if (enable_multi_channel) {
+      channel_runner = thread_host_->channel_thread->GetTaskRunner();
+    }
+    // END
   }
 
   flutter::TaskRunners task_runners(thread_label,     // label
                                     platform_runner,  // platform
                                     raster_runner,    // raster
                                     ui_runner,        // ui
-                                    io_runner         // io
+                                    io_runner,        // io
+                                    // BD ADD:
+                                    channel_runner    // channel
   );
 
   // BD ADD: ADD IsValid Check
@@ -143,6 +166,16 @@ void AndroidShellHolder::InitAndroidShellHolder(
     });
   }
 
+  // BD ADD: START
+  if (task_runners.IsChannelThreadValid()) {
+    task_runners.GetChannelTaskRunner()->PostTask([]() {
+      if (::setpriority(PRIO_PROCESS, gettid(), -10) != 0) {
+        FML_LOG(ERROR) << "Failed to set Channel task runner priority";
+      }
+    });
+  }
+  // END
+
   shell_ =
       Shell::Create(task_runners,              // task runners
                     GetDefaultPlatformData(),  // window data
@@ -152,6 +185,9 @@ void AndroidShellHolder::InitAndroidShellHolder(
                     // BD ADD:
                     preLoad
       );
+
+  // BD ADD:
+  shell_->SetMultiChannelEnabled(enable_multi_channel);
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
@@ -183,16 +219,16 @@ AndroidShellHolder::AndroidShellHolder(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     bool is_background_view)
     : settings_(std::move(settings)), jni_facade_(jni_facade) {
-    InitAndroidShellHolder(settings, jni_facade, is_background_view, false);
+    InitAndroidShellHolder(settings, jni_facade, is_background_view, 0);
 }
 
 
 AndroidShellHolder::AndroidShellHolder(
   flutter::Settings settings,
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-  bool is_background_view, bool preLoad)
+  bool is_background_view, int flag)
   : settings_(std::move(settings)), jni_facade_(jni_facade) {
-  InitAndroidShellHolder(settings, jni_facade, is_background_view, preLoad);
+  InitAndroidShellHolder(settings, jni_facade, is_background_view, flag);
 }
 // END
 AndroidShellHolder::~AndroidShellHolder() {
@@ -337,6 +373,12 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
   }
   return config;
 }
+
+// BD ADD: START
+PlatformViewAndroid* AndroidShellHolder::GetRawPlatformView() {
+  return platform_view_.getUnsafe();
+}
+// END
 
 // BD ADD: START
 void AndroidShellHolder::ScheduleBackgroundFrame() {
