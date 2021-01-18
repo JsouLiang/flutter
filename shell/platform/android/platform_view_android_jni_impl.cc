@@ -742,7 +742,7 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
     return nullptr;
   }
 
-  jstring argb = env->NewStringUTF("RGB_565");
+  jstring argb = env->NewStringUTF("ARGB_8888");
   if (argb == nullptr) {
     return nullptr;
   }
