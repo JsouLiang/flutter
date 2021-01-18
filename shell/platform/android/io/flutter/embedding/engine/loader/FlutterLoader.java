@@ -29,6 +29,7 @@ import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.util.PathUtils;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -49,6 +50,7 @@ public class FlutterLoader {
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
   private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
+  private static final String DEFAULT_OPTI_PROPS = "optimize.properties";
   private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
   private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
@@ -202,6 +204,23 @@ public class FlutterLoader {
   }
 
   /**
+   * Read the optimization flags from optimization.properties
+   */
+  private void readOptimizationFlag(List<String> shellArgs, String path) throws Exception {
+    Properties props = new Properties();
+    FileInputStream file = new FileInputStream(path);
+    props.load(file);
+
+    Iterator<String> iterator = props.stringPropertyNames().iterator();
+    while (iterator.hasNext()) {
+      String key = iterator.next();
+      String value = props.getProperty(key);
+      shellArgs.add("--" + key + "=" + value);
+      // System.out.println("===== optimization flag is: " + key + "=" + value);
+    }
+  }
+
+  /**
    * Blocks until initialization of the native system has completed.
    *
    * <p>Calling this method multiple times has no effect.
@@ -310,12 +329,18 @@ public class FlutterLoader {
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
       }
-      
+
       String hostManifestJson = PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir + File.separator + DEFAULT_HOST_MANIFEST_JSON;
-      if(new File(hostManifestJson).exists()){
+      if(new File(hostManifestJson).exists()) {
           shellArgs.add("--dynamicart-host");
       }
 
+      // BD ADD: START
+      String optiProps = PathUtils.getDataDirectory(applicationContext) + File.separator + DEFAULT_OPTI_PROPS;
+      if (new File(optiProps).exists()) {
+          readOptimizationFlag(shellArgs, optiProps);
+      }
+      // END
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
       if (!flutterApplicationInfo.clearTextPermitted) {
         shellArgs.add("--disallow-insecure-connections");
@@ -435,7 +460,8 @@ public class FlutterLoader {
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
           .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
-          .addResource(fullAssetPathFrom(DEFAULT_HOST_MANIFEST_JSON));
+          .addResource(fullAssetPathFrom(DEFAULT_HOST_MANIFEST_JSON))
+          .addResource(fullAssetPathFrom2(DEFAULT_OPTI_PROPS));
 
       resourceExtractor.start();
     }
@@ -475,7 +501,12 @@ public class FlutterLoader {
 
   @NonNull
   private String fullAssetPathFrom(@NonNull String filePath) {
-    return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
+      return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
+  }
+
+  @NonNull
+  private String fullAssetPathFrom2(@NonNull String filePath) {
+    return filePath;
   }
 
   /**

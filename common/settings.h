@@ -234,6 +234,14 @@ struct Settings {
   /// to log a timeline event that tracks the latency of engine startup.
   std::chrono::microseconds engine_start_timestamp = {};
 
+  // BD ADD: START
+  std::string disable_ygc;
+  std::string dis_ygc_start;
+  std::string dis_ygc_end;
+  std::string new_gen_semi_initial_size;
+  std::string old_gen_heap_initial_size;
+  // END
+
   std::string ToString() const;
 };
 

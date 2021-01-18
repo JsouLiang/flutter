@@ -1299,6 +1299,9 @@ typedef struct {
   /// See also:
   /// https://github.com/dart-lang/sdk/blob/ca64509108b3e7219c50d6c52877c85ab6a35ff2/runtime/vm/flag_list.h#L150
   int64_t dart_old_gen_heap_size;
+  int64_t disable_ygc;
+  int64_t dis_ygc_start;
+  int64_t dis_ygc_end;
 
   /// The AOT data to be used in AOT operation.
   ///

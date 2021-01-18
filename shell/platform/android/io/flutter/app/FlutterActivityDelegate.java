@@ -312,6 +312,26 @@ public final class FlutterActivityDelegate
     if (intent.getBooleanExtra("disable-service-auth-codes", false)) {
       args.add("--disable-service-auth-codes");
     }
+    int disableYgc = intent.getIntExtra("disable-ygc", 0);
+    int dis_ygc_start = intent.getIntExtra("dis-ygc-start", 0);
+    int dis_ygc_end = intent.getIntExtra("dis-ygc-end", 0);
+    if (disableYgc != 0) {
+        args.add("--disable_ygc="+disableYgc);
+    }
+    if (dis_ygc_start != 0) {
+        args.add("--dis_ygc_start="+dis_ygc_start);
+    }
+    if (dis_ygc_end != 0) {
+        args.add("--dis_ygc_end="+dis_ygc_end);
+    }
+    int new_gen_size = intent.getIntExtra("new-gen-size", 0);
+    int old_gen_size = intent.getIntExtra("old-gen-size", 0);
+    if (new_gen_size != 0) {
+        args.add("--new_gen_semi_initial_size="+new_gen_size);
+    }
+    if (old_gen_size != 0) {
+        args.add("--old_gen_heap_initial_size="+old_gen_size);
+    }
     if (intent.getBooleanExtra("use-test-fonts", false)) {
       args.add("--use-test-fonts");
     }

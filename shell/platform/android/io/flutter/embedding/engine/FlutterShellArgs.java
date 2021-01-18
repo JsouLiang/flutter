@@ -127,6 +127,12 @@ public class FlutterShellArgs {
     if (!TextUtils.isEmpty(path)){
       args.add("--package_dill_path="+path);
     }
+    int disableYgc = intent.getIntExtra("disable-ygc", 0);
+    int dis_ygc_start = intent.getIntExtra("dis-ygc-start", -1);
+    int dis_ygc_end = intent.getIntExtra("dis-ygc-end", -1);
+    args.add("--disable_ygc="+disableYgc);
+    args.add("--dis_ygc_start="+dis_ygc_start);
+    args.add("--dis_ygc_end="+dis_ygc_end);
     // END
 
     return new FlutterShellArgs(args);

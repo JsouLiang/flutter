@@ -476,6 +476,25 @@ bool Performance::IsExitApp() {
   return isExitApp_;
 }
 
+void Performance_allocateScheduling(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  int dis_ygc = tonic::DartConverter<int>::FromArguments(args, 1, exception);
+  int dis_ygc_start = tonic::DartConverter<int>::FromArguments(args, 2, exception);
+  int dis_ygc_end = tonic::DartConverter<int>::FromArguments(args, 3, exception);
+  // int new_gen_size = tonic::DartConverter<int>::FromArguments(args, 4, exception);
+  // int old_gen_size = tonic::DartConverter<int>::FromArguments(args, 5, exception);
+  // Dart_DelayGc(dis_ygc, dis_ygc_start, dis_ygc_end, new_gen_size, old_gen_size);
+  Dart_AllocateScheduling(dis_ygc, dis_ygc_start, dis_ygc_end);
+}
+
+void Performance_allocateSchedulingStart(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingStart();
+}
+
+void Performance_allocateSchedulingEnd(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingEnd();
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -499,6 +518,9 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_skGraphicCacheMemoryUsage", Performance_skGraphicCacheMemoryUsage, 1, true},
       {"Performance_getGpuCacheUsageKBInfo", Performance_getGpuCacheUsageKBInfo, 2, true},
       {"Performance_warmUpZeroSizeOnce", Performance_warmUpZeroSizeOnce, 2, true},
+      {"Performance_allocateScheduling", Performance_allocateScheduling, 4, true},
+      {"Performance_allocateSchedulingStart", Performance_allocateSchedulingStart, 1, true},
+      {"Performance_allocateSchedulingEnd", Performance_allocateSchedulingEnd, 1, true},
   });
 }
 

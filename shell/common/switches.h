@@ -208,6 +208,12 @@ DEF_SWITCH(DisablePreload,
 DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
 DEF_SWITCH(DynamicartHost, "dynamicart-host", "indicate is a dynamicart host")
 DEF_SWITCH(ExtraAssetDir, "extra-asset-dir", "Extra Asset Path")
+DEF_SWITCH(DisableYgc, "disable_ygc", "Disable ygc. 0: enable ygc; "
+           "1: disable forever; 2:disable for a fixed time(dis_ygc_end - dis_ygc_start")
+DEF_SWITCH(DisYgcStart, "dis_ygc_start", "Disable ygc start time(s).")
+DEF_SWITCH(DisYgcEnd, "dis_ygc_end", "Disable ygc end time(s)")
+DEF_SWITCH(newGenSemiSize, "new_gen_semi_initial_size", "new gen semi initial size(MB)")
+DEF_SWITCH(oldGenHeapSize, "old_gen_heap_initial_size", "old gen heap size(MB)")
 // END
 DEF_SWITCHES_END
 
