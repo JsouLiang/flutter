@@ -261,6 +261,12 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_startup =
       command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
 
+  command_line.GetOptionValue(FlagForSwitch(Switch::DisableYgc), &settings.disable_ygc);
+  command_line.GetOptionValue(FlagForSwitch(Switch::DisYgcStart), &settings.dis_ygc_start);
+  command_line.GetOptionValue(FlagForSwitch(Switch::DisYgcEnd), &settings.dis_ygc_end);
+  command_line.GetOptionValue(FlagForSwitch(Switch::newGenSemiSize), &settings.new_gen_semi_initial_size);
+  command_line.GetOptionValue(FlagForSwitch(Switch::oldGenHeapSize), &settings.old_gen_heap_initial_size);
+
   settings.skia_deterministic_rendering_on_cpu =
       command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
 

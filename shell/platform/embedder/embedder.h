@@ -1041,6 +1041,10 @@ typedef struct {
   /// absence, platforms views in the scene are ignored and Flutter renders to
   /// the root surface as normal.
   const FlutterCompositor* compositor;
+  int64_t disable_ygc;
+  int64_t dis_ygc_start;
+  int64_t dis_ygc_end;
+
 } FlutterProjectArgs;
 
 //------------------------------------------------------------------------------

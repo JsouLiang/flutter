@@ -121,6 +121,34 @@ static const char* kDartTraceStreamsArgs[] = {
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM,API",
 };
 
+// BD ADD: START
+static std::string DartDisableygcArgs(std::string type) {
+  std::ostringstream oss;
+  oss << "--disable_ygc=" << type;
+  return oss.str();
+}
+static std::string DartDisableygcStartArgs(std::string start) {
+  std::ostringstream oss;
+  oss << "--dis_ygc_start=" << start;
+  return oss.str();
+}
+static std::string DartDisableygcEndArgs(std::string end) {
+  std::ostringstream oss;
+  oss << "--dis_ygc_end=" << end;
+  return oss.str();
+}
+static std::string DartNewGenSizeArgs(std::string size) {
+  std::ostringstream oss;
+  oss << "--new_gen_semi_initial_size=" << size;
+  return oss.str();
+}
+static std::string DartOldGenSizeArgs(std::string size) {
+  std::ostringstream oss;
+  oss << "--old_gen_heap_size=" << size;
+  return oss.str();
+}
+// END
+
 constexpr char kFileUriPrefix[] = "file://";
 constexpr size_t kFileUriPrefixLength = sizeof(kFileUriPrefix) - 1;
 
@@ -395,7 +423,38 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     args.push_back("--enable_interpreter");
     args.push_back("--compilation_counter_threshold=-1");
   }
-//END
+
+  std::string disable_ygc_args;
+  std::string dis_ygc_start_args;
+  std::string dis_ygc_end_args;
+  // FML_LOG(ERROR)<<"===== disable_ygc" << settings_.disable_ygc << std::endl;
+  if (settings_.disable_ygc.compare("1") == 0) {
+    disable_ygc_args = DartDisableygcArgs(settings_.disable_ygc);
+    args.push_back(disable_ygc_args.c_str());
+  } else if (settings_.disable_ygc.compare("2") == 0) {
+    disable_ygc_args = DartDisableygcArgs(settings_.disable_ygc);
+    args.push_back(disable_ygc_args.c_str());
+    dis_ygc_start_args = DartDisableygcStartArgs(settings_.dis_ygc_start);
+    dis_ygc_end_args = DartDisableygcEndArgs(settings_.dis_ygc_end);
+    args.push_back(dis_ygc_start_args.c_str());
+    args.push_back(dis_ygc_end_args.c_str());
+  }
+
+  std::string new_gen_size;
+  std::string old_gen_size;
+  // FML_LOG(ERROR)<<"===== new gen size:" << settings_.new_gen_semi_initial_size << std::endl;
+  if (!settings_.new_gen_semi_initial_size.empty()) {
+    new_gen_size = DartNewGenSizeArgs(settings_.new_gen_semi_initial_size);
+    args.push_back(new_gen_size.c_str());
+    FML_LOG(ERROR) << "===== NEW GEN SIZE:" << new_gen_size << std::endl;
+  }
+  // FML_LOG(ERROR)<<"===== old gen size" << settings_.old_gen_heap_initial_size << std::endl;
+  if (!settings_.old_gen_heap_initial_size.empty()) {
+    old_gen_size = DartOldGenSizeArgs(settings_.old_gen_heap_initial_size);
+    args.push_back(old_gen_size.c_str());
+  }
+  // END
+
 #if defined(OS_FUCHSIA)
   PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
   PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));

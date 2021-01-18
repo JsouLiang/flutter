@@ -112,6 +112,13 @@ bool requestHeapSnapshot(String outFilePath) native 'Performance_requestHeapSnap
 
 String getHeapInfo() native 'Performance_heapInfo';
 
+// TODO: The new gen and old gen size may have some problem, handle it later
+void allocateScheduling(int disYgc, int disYgcStart, int disYgcEnd) native 'Performance_allocateScheduling';
+
+void allocateSchedulingStart() native 'Performance_allocateSchedulingStart';
+
+void allocateSchedulingEnd() native 'Performance_allocateSchedulingEnd';
+
 /// Memory usage of decoded image in dart heap external, in KB
 int getImageMemoryUsage() native 'Performance_imageMemoryUsage';
 

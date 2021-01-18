@@ -662,6 +662,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   settings.icu_data_path = icu_data_path;
   settings.assets_path = args->assets_path;
   settings.leak_vm = !SAFE_ACCESS(args, shutdown_dart_vm_when_done, false);
+  settings.disable_ygc = SAFE_ACCESS(args, disable_ygc, 0);
+  settings.dis_ygc_start = SAFE_ACCESS(args, dis_ygc_start, -1);
+  settings.dis_ygc_end = SAFE_ACCESS(args, dis_ygc_end, -1);
 
   if (!flutter::DartVM::IsRunningPrecompiledCode()) {
     // Verify the assets path contains Dart 2 kernel assets.

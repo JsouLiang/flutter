@@ -73,6 +73,9 @@ namespace flutter {
   V(Performance_stopStackTraceSamples, 0)  \
   V(Performance_getStackTraceSamples, 1)   \
   V(Performance_requestHeapSnapshot, 1)    \
+  V(Performance_allocateScheduling, 3)     \
+  V(Performance_allocateSchedulingStart, 0)\
+  V(Performance_allocateSchedulingEnd, 0)  \
   V(Performance_getTotalExtMemInfo, 1)     \
   V(Performance_skGraphicCacheMemoryUsage, 0) \
   V(Performance_getGpuCacheUsageKBInfo, 1) \
@@ -598,6 +601,24 @@ void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
     Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
     Dart_Handle res = Dart_RequestSnapshot(filePath);
     Dart_SetReturnValue(args, res);
+}
+
+void Performance_allocateScheduling(Dart_NativeArguments args) {
+  int dis_ygc = (int)DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 0));
+  int dis_ygc_start = (int)DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 1));
+  int dis_ygc_end = (int)DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 2));
+  // int new_gen_size = tonic::DartConverter<int>::FromArguments(args, 4, exception);
+  // int old_gen_size = tonic::DartConverter<int>::FromArguments(args, 5, exception);
+  // Dart_DelayGc(dis_ygc, dis_ygc_start, dis_ygc_end, new_gen_size, old_gen_size);
+  Dart_AllocateScheduling(dis_ygc, dis_ygc_start, dis_ygc_end);
+}
+
+void Performance_allocateSchedulingStart(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingStart();
+}
+
+void Performance_allocateSchedulingEnd(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingEnd();
 }
 
 void Reflect_reflectLibrary(Dart_NativeArguments args){
