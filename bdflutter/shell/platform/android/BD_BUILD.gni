@@ -16,5 +16,6 @@ android_image_loader_java_sources = [
   "$bd_flutter_android_path/io/flutter/view/NativeLoadCallback.java",
   "$bd_flutter_android_path/io/flutter/view/ImageLoaderRegistry.java",
   "$bd_flutter_android_path/io/flutter/view/ImageLoaderRegistryImpl.java",
+  "$bd_flutter_android_path/io/flutter/view/FlutterTextureView.java",
 ]
 
