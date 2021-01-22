@@ -754,6 +754,14 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)markedSelectedRange {
+  // BD ADD: START
+  // when inputview get focus on ipad, it will trigger keyboard before set client configure
+  // and send the origin self.text to framework & get a unexpected result
+  if (markedText.length == 0 && markedSelectedRange.length == 0) {
+    [self unmarkText];
+    return;
+  }
+  // END
   NSRange selectedRange = _selectedTextRange.range;
   NSRange markedTextRange = ((FlutterTextRange*)self.markedTextRange).range;
 
@@ -798,8 +806,11 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 - (void)unmarkText {
-  if (!self.markedTextRange)
+  // BD MOD: START
+  // if (!self.markedTextRange)
+  if (!self.markedTextRange || self.markedTextRange.isEmpty) 
     return;
+  // END
   self.markedTextRange = nil;
   [self updateEditingState];
 }
