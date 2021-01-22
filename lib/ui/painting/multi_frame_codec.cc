@@ -76,7 +76,9 @@ static bool CopyToBitmap(SkBitmap* dst,
 }
 
 sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
-    fml::WeakPtr<GrContext> resourceContext) {
+    // BD MOD:
+    // fml::WeakPtr<GrContext> resourceContext
+    fml::WeakPtr<IOManager> io_manager) {
   SkBitmap bitmap = SkBitmap();
   SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
   if (info.alphaType() == kUnpremul_SkAlphaType) {
@@ -120,30 +122,62 @@ sk_sp<SkImage> MultiFrameCodec::State::GetNextFrameImage(
     lastRequiredFrameIndex_ = nextFrameIndex_;
   }
 
-  if (resourceContext) {
-    SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
-                    bitmap.pixelRef()->rowBytes());
-    return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap,
-                                               // BD MOD:
-                                               // true
-                                               !Boost::Current()->IsDisableMips()
-                                               );
-  } else {
-    // Defer decoding until time of draw later on the GPU thread. Can happen
-    // when GL operations are currently forbidden such as in the background
-    // on iOS.
-    return SkImage::MakeFromBitmap(bitmap);
-  }
+  // BD MOD: START
+  //  if (resourceContext) {
+  //    SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
+  //                    bitmap.pixelRef()->rowBytes());
+  //    return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap,
+  //                                               // BD MOD:
+  //                                               // true
+  //                                               !Boost::Current()->IsDisableMips()
+  //                                               );
+  //  } else {
+  //    // Defer decoding until time of draw later on the GPU thread. Can happen
+  //    // when GL operations are currently forbidden such as in the background
+  //    // on iOS.
+  //    return SkImage::MakeFromBitmap(bitmap);
+  //  }
+  sk_sp<SkImage> result;
+  io_manager->GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfTrue([&result, &bitmap]{
+            // Defer decoding until time of draw later on the GPU thread. Can happen
+            // when GL operations are currently forbidden such as in the background
+            // on iOS.
+            result = SkImage::MakeFromBitmap(bitmap);
+          })
+          .SetIfFalse([&result, &bitmap,
+                          resourceContext = io_manager->GetResourceContext()]{
+            SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
+                            bitmap.pixelRef()->rowBytes());
+            result = SkImage::MakeCrossContextFromPixmap(
+                resourceContext.get(),  // context
+                pixmap,         // pixmap
+                // BD MOD:
+                // true,           // buildMips,
+                !Boost::Current()->IsDisableMips()
+            );
+          })
+  );
+  return result;
+  // END
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
-    fml::WeakPtr<GrContext> resourceContext,
-    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
+    // BD MOD: START
+    // fml::WeakPtr<GrContext> resourceContext,
+    // fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
+    fml::WeakPtr<IOManager> io_manager,
+    // END
     size_t trace_id) {
   fml::RefPtr<FrameInfo> frameInfo = NULL;
-  sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);
+  // BD MOD: START
+  // sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);
+  sk_sp<SkImage> skImage = GetNextFrameImage(io_manager);
+  fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue = io_manager->GetSkiaUnrefQueue();
+  // END
   if (skImage) {
     fml::RefPtr<CanvasImage> image = CanvasImage::Create();
     image->set_image({skImage, std::move(unref_queue)});
@@ -186,7 +220,9 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
         }
         state->GetNextFrameAndInvokeCallback(
             std::move(callback), std::move(ui_task_runner),
-            io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
+            // BD MOD:
+            // io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
+            io_manager,
             trace_id);
       }));
 
