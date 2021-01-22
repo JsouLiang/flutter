@@ -388,6 +388,14 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 }
 
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)markedSelectedRange {
+  // BD ADD: START
+  // when inputview get focus on ipad, it will trigger keyboard before set client configure
+  // and send the origin self.text to framework & get a unexpected result
+  if (markedText.length == 0 && markedSelectedRange.length == 0) {
+    [self unmarkText];
+    return;
+  }
+  // END
   NSRange selectedRange = _selectedTextRange.range;
   NSRange markedTextRange = ((FlutterTextRange*)self.markedTextRange).range;
 
@@ -431,6 +439,12 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 }
 
 - (void)unmarkText {
+  // BD ADD: START
+  // when marked TextRange is nil no need to updateEditingState
+  if (!self.markedTextRange || self.markedTextRange.isEmpty) {
+    return;
+  }
+  // END
   self.markedTextRange = nil;
   [self updateEditingState];
 }
