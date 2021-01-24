@@ -793,6 +793,8 @@ class Engine final : public RuntimeDelegate,
   // BD ADD: START
   void ScheduleBackgroundFrame();
 
+  void ScheduleFrameNow();
+
   void ExitApp();
 
   void NotifyLowMemoryWarning();

@@ -1230,8 +1230,9 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   //      }
   //    }));
   //  }
+
   if (!is_setup_ && is_preload_) {
-    task_runners_.GetUITaskRunner()->PostTask(
+    task_runners_.GetUITaskRunner()->PostTaskAtHead(
       fml::MakeCopyable([shell = this, packet = std::move(packet),
                           flow_id = next_pointer_flow_id_]() mutable {
         if (shell && shell->weak_engine_) {
@@ -1239,7 +1240,7 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
         }
       }));
   } else {
-    task_runners_.GetUITaskRunner()->PostTask(
+    task_runners_.GetUITaskRunner()->PostTaskAtHead(
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
@@ -2244,6 +2245,19 @@ void Shell::ScheduleBackgroundFrame() {
     auto engine = GetEngine();
     if (engine) {
       engine->ScheduleBackgroundFrame();
+    }
+  });
+}
+
+void Shell::ScheduleFrameNow() {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(is_preload_ || is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetUITaskRunner()->PostTaskAtHead([this] {
+    auto engine = GetEngine();
+    if (engine) {
+      engine->ScheduleFrameNow();
     }
   });
 }

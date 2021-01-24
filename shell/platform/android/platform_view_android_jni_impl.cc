@@ -568,6 +568,10 @@ static void ScheduleBackgroundFrame(JNIEnv *env, jobject jcaller, jlong shell_ho
   // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
   ANDROID_SHELL_HOLDER->ScheduleBackgroundFrame();
 }
+
+static void ScheduleFrameNow(JNIEnv *env, jobject jcaller, jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->ScheduleFrameNow();
+}
 // END
 
 static void SurfaceCreated(JNIEnv* env,
@@ -1165,19 +1169,12 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
       },
+            {
+          .name = "nativeScheduleFrameNow",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&ScheduleFrameNow),
+      },
       // END
-//      // BD ADD: START
-//      {
-//          .name = "nativeUpdateSettings",
-//          .signature = "(JLjava/lang/String;)V",
-//          .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
-//      },
-//      {
-//          .name = "nativeScheduleBackgroundFrame",
-//          .signature = "(J)V",
-//          .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
-//      },
-//      // END
       {
           .name = "nativeDestroy",
           .signature = "(J)V",

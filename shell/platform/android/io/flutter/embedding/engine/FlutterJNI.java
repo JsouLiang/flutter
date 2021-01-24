@@ -816,7 +816,18 @@ public class FlutterJNI {
     nativeScheduleBackgroundFrame(nativeShellHolderId);
   }
 
+
   private native void nativeScheduleBackgroundFrame(long nativeShellHolderId);
+  private native void nativeUpdateSettings(long nativePlatformViewId, String assetsPath);
+
+  //scheduleFrame  not wait vsync
+  public void scheduleFrameNow() {
+    ensureAttachedToNative();
+    nativeScheduleFrameNow(nativeShellHolderId);
+  }
+
+
+  private native void nativeScheduleFrameNow(long nativePlatformViewId);
   // END
 
   // ------ Start Dart Execution Support -------

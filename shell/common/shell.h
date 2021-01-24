@@ -383,7 +383,11 @@ class Shell final : public PlatformView::Delegate,
    * 增加后台渲染能力，防止一些情况dispose没执行
    */
   void ScheduleBackgroundFrame();
-
+  /**
+   * BD ADD:
+   * 增加立即渲染能力，优化首帧响应速度
+   */
+  void ScheduleFrameNow();
   /**
    * BD ADD:
    * notify flutter to exit app when native container destory

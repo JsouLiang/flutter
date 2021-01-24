@@ -98,6 +98,8 @@ public class AndroidTouchProcessor {
   /** Sends the given {@link MotionEvent} data to Flutter in a format that Flutter understands. */
   public boolean onTouchEvent(@NonNull MotionEvent event, Matrix transformMatrix) {
     int pointerCount = event.getPointerCount();
+    // BD ADD
+    boolean needsAccelRend = false;
 
     // Prepare a data packet of the appropriate size and order.
     ByteBuffer packet =
@@ -114,6 +116,8 @@ public class AndroidTouchProcessor {
                 || maskedAction == MotionEvent.ACTION_POINTER_UP);
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
+      // BD ADD
+      needsAccelRend = true;
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
       // BD ADD:
       deviceList.add(event.getPointerId(event.getActionIndex()));
@@ -160,6 +164,11 @@ public class AndroidTouchProcessor {
     // Send the packet to Flutter.
     renderer.dispatchPointerDataPacket(packet, packet.position());
 
+    // BD ADD: START
+    if(needsAccelRend) {
+     renderer.scheduleFrameNow();
+   }
+   // END
     return true;
   }
 

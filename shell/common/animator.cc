@@ -9,7 +9,6 @@
 
 // BD ADD:
 #include "flutter/bdflutter/lib/ui/performance/boost.h"
-
 namespace flutter {
 
 namespace {
@@ -315,6 +314,18 @@ void Animator::AwaitVSyncForBackground() {
   // BD MOD:
   // delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
   delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_, Boost::kVsyncIdle);
+}
+
+void Animator:: RequestFrameNow() {
+    WeakPtr<Animator> self = weak_factory_.GetWeakPtr();
+    if (!self.get()) {
+      return;
+    }
+     if(self) {
+    self->BeginFrame( fml::TimePoint::Now(), fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(5));
+  }
+    // TODO:
+    TRACE_EVENT_ASYNC_BEGIN0("flutter", "RequestFrameNow", 1);
 }
 // END
 
