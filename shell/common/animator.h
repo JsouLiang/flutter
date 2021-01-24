@@ -56,6 +56,9 @@ class Animator final {
   // BD ADD
   void RequestBackgroundFrame();
 
+  // BD ADD
+  void RequestFrameNow();
+
   void Render(std::unique_ptr<flutter::LayerTree> layer_tree);
 
   //--------------------------------------------------------------------------

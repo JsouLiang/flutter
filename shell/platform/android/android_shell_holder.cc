@@ -245,6 +245,13 @@ void AndroidShellHolder::ScheduleBackgroundFrame() {
   shell_->ScheduleBackgroundFrame();
 }
 
+void AndroidShellHolder::ScheduleFrameNow() {
+  if (!IsValid()) {
+    return;
+  }
+  shell_->ScheduleFrameNow();
+}
+
 void AndroidShellHolder::ExitApp(fml::closure closure) {
   if (!IsValid()) {
     return;

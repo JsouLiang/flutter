@@ -307,6 +307,12 @@ public class FlutterRenderer implements TextureRegistry {
     flutterJNI.dispatchPointerDataPacket(buffer, position);
   }
 
+  // BD ADD: START
+  public void scheduleFrameNow() {
+    flutterJNI.scheduleFrameNow();
+  }
+  // END
+
   // TODO(mattcarroll): describe the native behavior that this invokes
   private void registerTexture(long textureId, @NonNull SurfaceTexture surfaceTexture) {
     flutterJNI.registerTexture(textureId, surfaceTexture);

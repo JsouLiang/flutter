@@ -700,6 +700,15 @@ public class FlutterJNI {
   }
 
   private native void nativeUpdateSettings(long nativePlatformViewId, String assetsPath);
+
+  //scheduleFrame  not wait vsync
+  public void scheduleFrameNow() {
+    ensureAttachedToNative();
+    nativeScheduleFrameNow(nativePlatformViewId);
+  }
+
+
+  private native void nativeScheduleFrameNow(long nativePlatformViewId);
   // END
 
   // ------ Start Dart Execution Support -------
