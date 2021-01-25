@@ -200,8 +200,20 @@ static void InstantiateNativeImageCodec(Dart_NativeArguments args) {
       if (!task_runners.IsValid()) {
         return;
       }
+      std::shared_ptr<flutter::ImageLoader> imageLoader = io_manager.get()->GetImageLoader();
+      if (!imageLoader) {
+        FML_LOG(ERROR) << "ImageLoader is Null";
+
+        ui_task_runner->PostTask(
+            fml::MakeCopyable([callback = std::move(callback),
+                                  trace_id]() mutable {
+              InvokeGetNativeInitCodecCallback(nullptr, std::move(callback),
+                                           trace_id);
+            }));
+        return;
+      }
       // load codec
-      io_manager->GetImageLoader()->LoadCodec(
+      imageLoader->LoadCodec(
         url, width, height, scale, contextPtr,
         fml::MakeCopyable([ui_task_runner,
                             callback = std::move(callback),
