@@ -20,6 +20,10 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+
+// BD ADD:
+import java.nio.ByteBuffer;
+
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import java.util.LinkedList;
@@ -266,7 +270,12 @@ public class FlutterImageView extends View implements RenderSurface {
             Bitmap.createBitmap(
                 desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
       }
-      currentBitmap.copyPixelsFromBuffer(imagePlane.getBuffer());
+      // BD MOD START:
+      // currentBitmap.copyPixelsFromBuffer(imagePlane.getBuffer());
+      ByteBuffer buffer = imagePlane.getBuffer();
+      buffer.rewind();
+      currentBitmap.copyPixelsFromBuffer(buffer);
+      // END
     }
   }
 
