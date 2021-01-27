@@ -583,6 +583,20 @@ def parse_args(args):
 
   return parser.parse_args(args)
 
+# BD ADD: START
+def toolchainWithDolphin(old_cc, dolphin_cc, out_dir):
+    contents = ""
+    with open('%s/%s/toolchain.ninja' % (SRC_ROOT, out_dir), 'r') as f:
+        for line in f:
+            if old_cc in line:
+                line = line.replace(old_cc, dolphin_cc)
+                contents += line
+            else:
+                contents += line
+    result = open('%s/%s/toolchain.ninja' % (SRC_ROOT, out_dir), 'w+')
+    result.write(contents)
+# END
+
 def main(argv):
   args = parse_args(argv)
 
@@ -625,6 +639,12 @@ def main(argv):
   except subprocess.CalledProcessError as exc:
     print("Failed to generate gn files: ", exc.returncode, exc.output)
     sys.exit(1)
+
+  # BD ADD: START
+  if os.path.exists('%s/.dolphin' % SRC_ROOT):
+    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang++", ".dolphin/dolphin_clang++", out_dir)
+    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang", ".dolphin/dolphin_clang", out_dir)
+  # END
 
   return gn_call_result
 
