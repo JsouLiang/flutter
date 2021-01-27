@@ -502,6 +502,18 @@ def parse_args(args):
 
   return parser.parse_args(args)
 
+def toolchainWithDolphin(old_cc, dolphin_cc, out_dir):
+    contents = ""
+    with open('%s/%s/toolchain.ninja' % (SRC_ROOT, out_dir), 'r') as f:
+        for line in f:
+            if old_cc in line:
+                line = line.replace(old_cc, dolphin_cc)
+                contents += line
+            else:
+                contents += line
+    result = open('%s/%s/toolchain.ninja' % (SRC_ROOT, out_dir), 'w+')
+    result.write(contents)
+
 def main(argv):
   args = parse_args(argv)
 
@@ -535,6 +547,9 @@ def main(argv):
     print("Failed to generate gn files: ", exc.returncode, exc.output)
     sys.exit(1)
 
+  if (os.path.exists('%s/.dolphin' % SRC_ROOT)):
+    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang++", ".dolphin/dolphin_clang", out_dir)
+
   if gn_call_result == 0:
     # Generate/Replace the compile commands database in out.
     compile_cmd_gen_cmd = [
@@ -550,8 +565,10 @@ def main(argv):
       'asm',
     ]
 
+
     try:
       contents = subprocess.check_output(compile_cmd_gen_cmd, cwd=SRC_ROOT)
+      # print "=====contents is %s" % contents
     except subprocess.CalledProcessError as exc:
       print("Failed to run ninja: ", exc.returncode, exc.output)
       sys.exit(1)
