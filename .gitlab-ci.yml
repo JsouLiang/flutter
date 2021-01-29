@@ -1,11 +1,45 @@
 stages:  
-  - test
+  - first-stage
 
 # 定义 job
 unittests:
-  stage: test
+  stage: first-stage
+  except: 
+    - web
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/unittests/unittests.py -o unittests.py
     - python3 unittests.py -b $CI_COMMIT_REF_NAME -c $CI_COMMIT_SHA
   tags:
     - flutter
+
+
+buildEngineMacAndroid:
+  stage: first-stage
+  only: 
+    - web
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android
+  tags:
+    - shared
+
+buildEngineLinuxAndroid:
+  stage: first-stage
+  only: 
+    - web
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android
+  tags:
+    - shared
+
+
+buildEngineMacIos:
+  stage: first-stage
+  only: 
+    - web
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios
+  tags:
+    - shared
