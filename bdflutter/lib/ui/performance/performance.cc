@@ -336,6 +336,7 @@ void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
     Dart_SetReturnValue(args, ToDart("Callback must be a function"));
     return;
   }
+#ifndef NO_REALTIME_MEM
   if (Performance::GetInstance()->IsExitApp()) {
     return;
   }
@@ -388,6 +389,15 @@ void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
           }
         }));
     }));
+#else
+  std::vector<int64_t> mem = Performance::GetInstance()->GetMemoryDetails();
+  Dart_Handle data_handle = Dart_NewList(6);
+  tonic::DartState::Scope scope(UIDartState::Current());
+  for(int i = 0; i < 6; i++) {
+    Dart_ListSetAt(data_handle, i, Dart_NewInteger(mem[i + 1]));
+  }
+  tonic::DartInvoke(callback_handle, {data_handle});
+#endif
 }
 
 void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
@@ -397,6 +407,7 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
     return;
   }
   Performance* performance = Performance::GetInstance();
+#ifndef NO_REALTIME_MEM
   if (performance->IsExitApp()) {
     return;
   }
@@ -464,6 +475,16 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
           }
         }));
     }));
+#else
+  performance->UpdateSkGraphicMemUsageKB();
+  std::vector<int64_t> mem = performance->GetMemoryDetails();
+  Dart_Handle data_handle = Dart_NewList(kMemoryDetailsLength);
+  tonic::DartState::Scope scope(UIDartState::Current());
+  for(int i = 0; i < kMemoryDetailsLength; i++) {
+    Dart_ListSetAt(data_handle, i, Dart_NewInteger(mem[i]));
+  }
+  tonic::DartInvoke(callback_handle, {data_handle});
+#endif
 }
 
 void Performance::SetRasterizerAndIOManager(fml::TaskRunnerAffineWeakPtr<flutter::Rasterizer> rasterizer,
@@ -480,6 +501,79 @@ void Performance::SetExitStatus(bool isExitApp) {
 bool Performance::IsExitApp() {
   return isExitApp_;
 }
+
+void Performance::UpdateGpuCacheUsageKB(flutter::Rasterizer* rasterizer) {
+
+    size_t totalBytes = 0;
+    size_t resourceBytes = 0;
+    size_t purgeableBytes = 0;
+
+#if defined(OS_IOS) || defined(OS_ANDROID)
+    rasterizer->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
+#endif
+    grTotalMem_ = totalBytes >> 10;
+    grResMem_ = resourceBytes >> 10;
+    grPurgeableMem_ = purgeableBytes >> 10;
+  }
+
+  void Performance::UpdateIOCacheUsageKB(fml::WeakPtr<GrDirectContext> iOContext) {
+#if THIRD_PARTY_SKIA_BD
+#if defined(OS_IOS) || defined(OS_ANDROID)
+    if (iOContext) {
+      size_t totalBytes = 0;
+      size_t resourceBytes = 0;
+      size_t purgeableBytes = 0;
+      iOContext->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
+
+      iOGrTotalMem_ = totalBytes >> 10;
+      iOGrResMem_ = resourceBytes >> 10;
+      iOGrPurgeableMem_ = purgeableBytes >> 10;
+    }
+#endif
+#endif
+  }
+
+  void Performance::UpdateSkGraphicMemUsageKB() {
+    imageMem_ = Performance::GetImageMemoryUsageKB();
+    bitmapMem_ = SkGraphics::GetResourceCacheTotalBytesUsed() >> 10;
+    fontMem_ = SkGraphics::GetFontCacheUsed() >> 10;
+    #if THIRD_PARTY_SKIA_BD
+    imageFilter_ = SkGraphics::GetImageFilterCacheUsed() >> 10;
+    mallocSize_ = SkGraphics::GetSKMallocMemSize();
+    #endif
+    if (mallocSize_ >= 0) {
+      mallocSize_ = mallocSize_ >> 10;
+    } else {
+      mallocSize_ = 0;
+    }
+  }
+
+  std::vector<int64_t> Performance::GetMemoryDetails(){
+    // 0 -> imageMem
+    // 1 -> grTotalMem
+    // 2 -> grResMem
+    // 3 -> grPurgeableMem
+    // 4 -> iOGrTotalMem
+    // 5 -> iOGrResMem
+    // 6 -> iOGrPurgeableMem
+    // 7 -> bitmapMem
+    // 8 -> fontMem
+    // 9 -> imageFilter
+    // 10 -> mallocSize
+    std::vector<int64_t> mem(kMemoryDetailsLength);
+    mem[0] = imageMem_;
+    mem[1] = grTotalMem_;
+    mem[2] = grResMem_;
+    mem[3] = grPurgeableMem_;
+    mem[4] = iOGrTotalMem_;
+    mem[5] = iOGrResMem_;
+    mem[6] = iOGrPurgeableMem_;
+    mem[7] = bitmapMem_;
+    mem[8] = fontMem_;
+    mem[9] = imageFilter_;
+    mem[10] = mallocSize_;
+    return mem;
+  }
 
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({

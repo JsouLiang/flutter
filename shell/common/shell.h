@@ -491,6 +491,7 @@ class Shell final : public PlatformView::Delegate,
   // BD ADD: START
   bool is_preload_ = false;
   bool is_createView_post_ = false;
+  int64_t lastIOMemUpdate_ = 0;
   // END
 
   // How many frames have been timed since last report.

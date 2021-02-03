@@ -17,8 +17,10 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
-// BD ADD:
+// BD ADD: START
 #include "flutter/bdflutter/common/fps_recorder.h"
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
+// END
 
 // When screenshotting we want to ensure we call the base method for
 // CompositorContext::AcquireFrame instead of the platform-specific method.
@@ -506,6 +508,11 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
     }
 
+    // BD ADD: START
+#ifdef NO_REALTIME_MEM
+    Performance::GetInstance()->UpdateGpuCacheUsageKB(this);
+#endif
+    // END
     return raster_status;
   }
 

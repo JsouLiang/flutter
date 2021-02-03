@@ -8,6 +8,8 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/message_loop.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+// BD ADD:
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
 
 namespace flutter {
 
@@ -109,9 +111,18 @@ fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
 
 // |IOManager|
 fml::WeakPtr<GrDirectContext> ShellIOManager::GetResourceContext() const {
-  return resource_context_weak_factory_
+  // BD MOD: START
+  //  return resource_context_weak_factory_
+  //         ? resource_context_weak_factory_->GetWeakPtr()
+  //         : fml::WeakPtr<GrDirectContext>();
+  fml::WeakPtr<GrDirectContext> context = resource_context_weak_factory_
              ? resource_context_weak_factory_->GetWeakPtr()
              : fml::WeakPtr<GrDirectContext>();
+#ifdef NO_REALTIME_MEM
+    Performance::GetInstance()->UpdateIOCacheUsageKB(context);
+#endif
+    return context;
+    // END
 }
 
 // |IOManager|
