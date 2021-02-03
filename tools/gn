@@ -548,7 +548,8 @@ def main(argv):
     sys.exit(1)
 
   if (os.path.exists('%s/.dolphin' % SRC_ROOT)):
-    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang++", ".dolphin/dolphin_clang", out_dir)
+    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang++", ".dolphin/dolphin_clang++", out_dir)
+    toolchainWithDolphin("buildtools/mac-x64/clang/bin/clang", ".dolphin/dolphin_clang", out_dir)
 
   if gn_call_result == 0:
     # Generate/Replace the compile commands database in out.
