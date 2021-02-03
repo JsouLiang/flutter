@@ -472,6 +472,10 @@ class Shell final : public PlatformView::Delegate,
   // used to discard wrong size layer tree produced during interactive resizing
   SkISize expected_frame_size_ = SkISize::MakeEmpty();
 
+  // BD ADD: START
+  int64_t lastIOMemUpdate_ = 0;
+  // END
+
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 

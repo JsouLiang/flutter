@@ -21,8 +21,10 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
-// BD ADD:
+// BD ADD: START
 #include "flutter/bdflutter/common/fps_recorder.h"
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
+// END
 
 namespace flutter {
 
@@ -609,6 +611,11 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
     }
 
+    // BD ADD: START
+#ifdef NO_REALTIME_MEM
+    Performance::GetInstance()->UpdateGpuCacheUsageKB(this);
+#endif
+    // END
     return raster_status;
   }
 
