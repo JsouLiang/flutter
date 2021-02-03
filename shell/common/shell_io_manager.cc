@@ -118,7 +118,9 @@ fml::WeakPtr<GrContext> ShellIOManager::GetResourceContext() const {
   fml::WeakPtr<GrContext> context = resource_context_weak_factory_
          ? resource_context_weak_factory_->GetWeakPtr()
          : fml::WeakPtr<GrContext>();
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_JIT_RELEASE
   Performance::GetInstance()->UpdateIOCacheUsageKB(context);
+#endif
   return context;
   // END
   }

@@ -372,8 +372,11 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
     }
 
-    // BD ADD:
+    // BD ADD: START
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_JIT_RELEASE
     Performance::GetInstance()->UpdateGpuCacheUsageKB(this);
+#endif
+    // END
     return raster_status;
   }
 
