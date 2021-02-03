@@ -262,8 +262,10 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     }
     latch.Wait();
   }
+#ifndef NO_REALTIME_MEM
   Performance::GetInstance()->SetRasterizerAndIOManager(
     shell->weak_rasterizer_, shell->io_manager_->GetWeakPtr());
+#endif
   Performance::GetInstance()->TraceApmStartAndEnd("shell_wait", shell_wait_start_timestamp);
   // END
   return shell;
@@ -1428,6 +1430,22 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline, int type) {
     // BD: MOD
     // engine_->NotifyIdle(deadline);
     engine_->NotifyIdle(deadline, type);
+    // BD ADD: START
+#ifdef NO_REALTIME_MEM
+    // update IO Cache 10 sec
+    if (lastIOMemUpdate_ == 0 || deadline - lastIOMemUpdate_ >= 9900000) {
+      lastIOMemUpdate_ = deadline;
+      if (task_runners_.IsValid()) {
+        task_runners_.GetIOTaskRunner()->PostDelayedTask(
+          [io_manager = io_manager_->GetWeakPtr()] {
+            if (io_manager) {
+              io_manager->GetResourceContext();
+            }
+          }, fml::TimeDelta::FromSecondsF(10));
+      }
+    }
+#endif
+    // END
   }
 }
 
