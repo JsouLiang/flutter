@@ -117,9 +117,11 @@ void Performance::GetIOGpuCacheUsageKB(int64_t* grTotalMem,
 
 void Performance::SetRasterizerAndIOManager(fml::WeakPtr<flutter::Rasterizer> rasterizer,
   fml::WeakPtr<flutter::ShellIOManager> ioManager) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
   rasterizer_ = std::move(rasterizer);
   iOManager_ = std::move(ioManager);
   isExitApp_ = false;
+#endif
 }
 
 void Performance::SetExitStatus(bool isExitApp) {
@@ -128,6 +130,75 @@ void Performance::SetExitStatus(bool isExitApp) {
 
 bool Performance::IsExitApp() {
   return isExitApp_;
+}
+
+void Performance::UpdateGpuCacheUsageKB(flutter::Rasterizer* rasterizer) {
+
+  size_t totalBytes = 0;
+  size_t resourceBytes = 0;
+  size_t purgeableBytes = 0;
+
+#if defined(OS_IOS) || defined(OS_ANDROID)
+  rasterizer->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
+#endif
+  grTotalMem_ = totalBytes >> 10;
+  grResMem_ = resourceBytes >> 10;
+  grPurgeableMem_ = purgeableBytes >> 10;
+}
+
+void Performance::UpdateIOCacheUsageKB(fml::WeakPtr<GrContext> iOContext) {
+#if defined(OS_IOS) || defined(OS_ANDROID)
+  if (iOContext) {
+    size_t totalBytes = 0;
+    size_t resourceBytes = 0;
+    size_t purgeableBytes = 0;
+    iOContext->getResourceCacheBytes(&totalBytes, &resourceBytes, &purgeableBytes);
+
+    iOGrTotalMem_ = totalBytes >> 10;
+    iOGrResMem_ = resourceBytes >> 10;
+    iOGrPurgeableMem_ = purgeableBytes >> 10;
+  }
+#endif
+}
+
+void Performance::UpdateSkGraphicMemUsageKB() {
+  imageMem_ = Performance::GetImageMemoryUsageKB();
+  bitmapMem_ = SkGraphics::GetResourceCacheTotalBytesUsed() >> 10;
+  fontMem_ = SkGraphics::GetFontCacheUsed() >> 10;
+  imageFilter_ = SkGraphics::GetImageFilterCacheUsed() >> 10;
+  mallocSize_ = SkGraphics::GetSKMallocMemSize();
+  if (mallocSize_ >= 0) {
+    mallocSize_ = mallocSize_ >> 10;
+  } else {
+    mallocSize_ = 0;
+  }
+}
+
+std::vector<int64_t> Performance::GetMemoryDetails(){
+  // 0 -> imageMem
+  // 1 -> grTotalMem
+  // 2 -> grResMem
+  // 3 -> grPurgeableMem
+  // 4 -> iOGrTotalMem
+  // 5 -> iOGrResMem
+  // 6 -> iOGrPurgeableMem
+  // 7 -> bitmapMem
+  // 8 -> fontMem
+  // 9 -> imageFilter
+  // 10 -> mallocSize
+  std::vector<int64_t> mem(kMemoryDetailsLength);
+  mem[0] = imageMem_;
+  mem[1] = grTotalMem_;
+  mem[2] = grResMem_;
+  mem[3] = grPurgeableMem_;
+  mem[4] = iOGrTotalMem_;
+  mem[5] = iOGrResMem_;
+  mem[6] = iOGrPurgeableMem_;
+  mem[7] = bitmapMem_;
+  mem[8] = fontMem_;
+  mem[9] = imageFilter_;
+  mem[10] = mallocSize_;
+  return mem;
 }
 
 }

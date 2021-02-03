@@ -8,6 +8,8 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
+// BD ADD:
+#include "flutter/lib/ui/performance.h"
 
 namespace flutter {
 
@@ -109,10 +111,17 @@ fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
 
 // |IOManager|
 fml::WeakPtr<GrContext> ShellIOManager::GetResourceContext() const {
-  return resource_context_weak_factory_
-             ? resource_context_weak_factory_->GetWeakPtr()
-             : fml::WeakPtr<GrContext>();
-}
+  // BD MOD: START
+  // return resource_context_weak_factory_
+  //             ? resource_context_weak_factory_->GetWeakPtr()
+  //             : fml::WeakPtr<GrContext>();
+  fml::WeakPtr<GrContext> context = resource_context_weak_factory_
+         ? resource_context_weak_factory_->GetWeakPtr()
+         : fml::WeakPtr<GrContext>();
+  Performance::GetInstance()->UpdateIOCacheUsageKB(context);
+  return context;
+  // END
+  }
 
 // |IOManager|
 fml::RefPtr<flutter::SkiaUnrefQueue> ShellIOManager::GetSkiaUnrefQueue() const {

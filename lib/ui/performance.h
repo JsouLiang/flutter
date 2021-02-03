@@ -13,6 +13,7 @@
 using namespace std;
 
 namespace flutter {
+static constexpr int kMemoryDetailsLength(11);
 
 class Performance {
  public:
@@ -41,6 +42,11 @@ class Performance {
   void SetExitStatus(bool isExitApp);
   bool IsExitApp();
 
+  void UpdateGpuCacheUsageKB(flutter::Rasterizer* rasterizer);
+  void UpdateIOCacheUsageKB(fml::WeakPtr<GrContext> iOContext);
+  void UpdateSkGraphicMemUsageKB();
+  std::vector<int64_t> GetMemoryDetails();
+
  private:
   Performance();
 
@@ -49,6 +55,30 @@ class Performance {
   fml::WeakPtr<flutter::ShellIOManager> iOManager_;
   std::vector<int64_t> engine_launch_infos; // Map
   std::atomic_bool isExitApp_ = {false};
+
+  // 0 -> imageMem
+  // 1 -> grTotalMem
+  // 2 -> grResMem
+  // 3 -> grPurgeableMem
+  // 4 -> iOGrTotalMem
+  // 5 -> iOGrResMem
+  // 6 -> iOGrPurgeableMem
+  // 7 -> bitmapMem
+  // 8 -> fontMem
+  // 9 -> imageFilter
+  // 10 -> mallocSize
+  std::atomic_int64_t imageMem_;
+  std::atomic_int64_t grTotalMem_;
+  std::atomic_int64_t grResMem_;
+  std::atomic_int64_t grPurgeableMem_;
+  std::atomic_int64_t iOGrTotalMem_;
+  std::atomic_int64_t iOGrResMem_;
+  std::atomic_int64_t iOGrPurgeableMem_;
+  std::atomic_int64_t bitmapMem_;
+  std::atomic_int64_t fontMem_;
+  std::atomic_int64_t imageFilter_;
+  std::atomic_int64_t mallocSize_;
+
 };
 
 }

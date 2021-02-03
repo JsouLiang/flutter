@@ -1342,6 +1342,20 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline, int type) {
     // BD: MOD
     // engine_->NotifyIdle(deadline);
     engine_->NotifyIdle(deadline, type);
+    // BD ADD: START
+    // update IO Cache 10 sec
+    if (lastIOMemUpdate_ == 0 || deadline - lastIOMemUpdate_ >= 9900000) {
+      lastIOMemUpdate_ = deadline;
+      if (task_runners_.IsValid()) {
+        task_runners_.GetIOTaskRunner()->PostDelayedTask(
+          [io_manager = io_manager_->GetWeakPtr()] {
+            if (io_manager) {
+              io_manager->GetResourceContext();
+            }
+          }, TimeDelta::FromSecondsF(10));
+      }
+    }
+    // END
   }
 }
 

@@ -452,6 +452,7 @@ void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
     Dart_SetReturnValue(args, ToDart("Callback must be a function"));
     return;
   }
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
   if (Performance::GetInstance()->IsExitApp()) {
     return;
   }
@@ -504,6 +505,15 @@ void Performance_getGpuCacheUsageKBInfo(Dart_NativeArguments args) {
             }
           }));
     }));
+#else
+  std::vector<int64_t> mem = Performance::GetInstance()->GetMemoryDetails();
+  Dart_Handle data_handle = Dart_NewList(6);
+  tonic::DartState::Scope scope(UIDartState::Current());
+  for(int i = 0; i < 6; i++) {
+    Dart_ListSetAt(data_handle, i, Dart_NewInteger(mem[i + 1]));
+  }
+  tonic::DartInvoke(callback_handle, {data_handle});
+#endif
 }
 
 void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
@@ -513,6 +523,7 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
     return;
   }
   Performance* performance = Performance::GetInstance();
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
   if (performance->IsExitApp()) {
     return;
   }
@@ -580,6 +591,16 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
             }
           }));
     }));
+#else
+  performance->UpdateSkGraphicMemUsageKB();
+  std::vector<int64_t> mem = performance->GetMemoryDetails();
+  Dart_Handle data_handle = Dart_NewList(kMemoryDetailsLength);
+  tonic::DartState::Scope scope(UIDartState::Current());
+  for(int i = 0; i < kMemoryDetailsLength; i++) {
+    Dart_ListSetAt(data_handle, i, Dart_NewInteger(mem[i]));
+  }
+  tonic::DartInvoke(callback_handle, {data_handle});
+#endif
 }
 
 void Performance_startStackTraceSamples(Dart_NativeArguments args) {
