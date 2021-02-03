@@ -200,6 +200,12 @@ import io.flutter.plugin.platform.PlatformPlugin;
 public class FlutterActivity extends Activity
     implements FlutterActivityAndFragmentDelegate.Host, LifecycleOwner {
   private static final String TAG = "FlutterActivity";
+  // BD ADD: START
+  protected  boolean mBDFlutter = false;
+  protected  void setBDFlutter(boolean isBDFlutter ) {
+    mBDFlutter = isBDFlutter;
+  }
+  // END
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which creates a {@link
@@ -531,6 +537,8 @@ public class FlutterActivity extends Activity
   @Override
   protected void onStart() {
     super.onStart();
+    // BD ADD
+    if(mBDFlutter)  return;
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START);
     delegate.onStart();
   }
@@ -568,6 +576,8 @@ public class FlutterActivity extends Activity
   @Override
   protected void onStop() {
     super.onStop();
+    // BD ADD
+    if(mBDFlutter)  return;
     if (stillAttachedForEvent("onStop")) {
       delegate.onStop();
     }
@@ -614,6 +624,8 @@ public class FlutterActivity extends Activity
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    // BD ADD
+    if(mBDFlutter)  return;
     if (stillAttachedForEvent("onDestroy")) {
       release();
     }
