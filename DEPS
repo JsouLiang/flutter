@@ -37,6 +37,8 @@ vars = {
   'tt_icu_revision': 'aaef69b8fb55ccc86f1735731eebe36c72c64a1e',
   'tt_harfbuzz_git': 'ssh://git@code.byted.org/tech_client/harfbuzz',
   'tt_harfbuzz_revision': '042a928fde990555b8b516d0eb1bdec3a42211c8',
+  'tt_ffi_git': 'ssh://git@code.byted.org/tt_client/ffi',
+  'tt_ffi_revision': '454ab0f9ea6bd06942a983238d8a6818b1357edb',
   # END
 
   # When updating the Dart revision, ensure that all entries that are
@@ -215,7 +217,9 @@ deps = {
    Var('dart_git') + '/dartdoc.git@b039e21a7226b61ca2de7bd6c7a07fc77d4f64a9',
 
   'src/third_party/dart/third_party/pkg/ffi':
-   Var('dart_git') + '/ffi.git@454ab0f9ea6bd06942a983238d8a6818b1357edb',
+   # BD MOD:
+   # Var('dart_git') + '/ffi.git@454ab0f9ea6bd06942a983238d8a6818b1357edb',
+   Var('tt_ffi_git') + '@' + Var('tt_ffi_revision'),
 
   'src/third_party/dart/third_party/pkg/fixnum':
    Var('dart_git') + '/fixnum.git@16d3890c6dc82ca629659da1934e412292508bba',
