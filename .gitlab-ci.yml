@@ -2,15 +2,15 @@ stages:
   - first-stage
 
 # 定义 job
-unittests:
-  stage: first-stage
-  except: 
-    - web
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/unittests/unittests.py -o unittests.py
-    - python3 unittests.py -b $CI_COMMIT_REF_NAME -c $CI_COMMIT_SHA
-  tags:
-    - flutter
+#unittests:
+#  stage: first-stage
+#  except:
+#    - web
+#  script:
+#    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/unittests/unittests.py -o unittests.py
+#    - python3 unittests.py -b $CI_COMMIT_REF_NAME -c $CI_COMMIT_SHA
+#  tags:
+#    - flutter
 
 
 buildEngineMacAndroid:
