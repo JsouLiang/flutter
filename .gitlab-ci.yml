@@ -20,6 +20,8 @@ buildEngineMacAndroid:
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android
+  retry: 2
+  parallel: 2
   tags:
     - shared
 
@@ -30,6 +32,8 @@ buildEngineLinuxAndroid:
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android
+  retry: 2
+  parallel: 2
   tags:
     - shared
 
@@ -41,6 +45,8 @@ buildEngineMacIos:
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios
+  retry: 2
+  parallel: 2
   tags:
     - shared
 
@@ -52,5 +58,7 @@ buildLitesAndLiteg:
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME lites_and_liteg
+  retry: 2
+  parallel: 2
   tags:
     - shared
