@@ -6,6 +6,7 @@
 #include "flutter/lib/ui/painting/native_codec.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/lib/ui/painting/image.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/tonic/logging/dart_invoke.h"
@@ -26,7 +27,8 @@ NativeCodec::State::State(std::unique_ptr<NativeExportCodec> codec)
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
-    fml::RefPtr<FrameInfo> frameInfo,
+    fml::RefPtr<CanvasImage> image,
+    int duration,
     std::unique_ptr<DartPersistentValue> callback,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
@@ -36,10 +38,11 @@ static void InvokeNextFrameCallback(
     return;
   }
   tonic::DartState::Scope scope(dart_state);
-  if (!frameInfo) {
-    tonic::DartInvoke(callback->value(), {Dart_Null()});
+  if (!image->image()) {
+    tonic::DartInvoke(callback->value(), {Dart_Null(), Dart_Null()});
   } else {
-    tonic::DartInvoke(callback->value(), {ToDart(frameInfo)});
+    tonic::DartInvoke(callback->value(),
+                      {tonic::ToDart(image), tonic::ToDart(duration)});
   }
 }
 
@@ -51,12 +54,10 @@ void NativeCodec::State::GetNextFrameAndInvokeCallback(
     size_t trace_id,
     sk_sp<SkImage> skImage,
     int duration) {
-  fml::RefPtr<FrameInfo> frameInfo = NULL;
+  fml::RefPtr<CanvasImage> image = CanvasImage::Create();
 
   if (skImage) {
-    fml::RefPtr<CanvasImage> image = CanvasImage::Create();
     image->set_image({skImage, unref_queue});
-    frameInfo = fml::MakeRefCounted<FrameInfo>(std::move(image), duration);
   }
 
   if (frameCount_ > 0) {
@@ -64,8 +65,8 @@ void NativeCodec::State::GetNextFrameAndInvokeCallback(
   }
 
   ui_task_runner->PostTask(fml::MakeCopyable(
-      [callback = std::move(callback), frameInfo, trace_id]() mutable {
-        InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
+      [callback = std::move(callback), image, duration, trace_id]() mutable {
+        InvokeNextFrameCallback(image, duration, std::move(callback), trace_id);
       }));
 }
 
