@@ -287,7 +287,7 @@ deps = {
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
 
   'src/third_party/dart/third_party/pkg/pub':
-   Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
+  "git@code.byted.org:tech_client/pub.git" + "@" + Var("dart_pub_rev"),
 
   'src/third_party/dart/third_party/pkg/pub_semver':
    Var('dart_git') + '/pub_semver.git@10569a1e867e909cf5db201f73118020453e5db8',
