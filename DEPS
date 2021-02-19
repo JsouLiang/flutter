@@ -62,7 +62,7 @@ vars = {
   'dart_linter_tag': '0.1.118',
   'dart_oauth2_tag': '1.6.0',
   'dart_protobuf_rev': '3746c8fd3f2b0147623a8e3db89c3ff4330de760',
-  'dart_pub_rev': '04e237f78b2302d7f20d0b362554425e8deb8add',
+  'dart_pub_rev': '8de0febfb1afa1135c2ba6df7c648fd272263286',
   'dart_pub_semver_tag': 'v1.4.4',
   'dart_quiver-dart_tag': '246e754fe45cecb6aa5f3f13b4ed61037ff0d784',
   'dart_resource_rev': 'f8e37558a1c4f54550aa463b88a6a831e3e33cd6',
@@ -288,7 +288,7 @@ deps = {
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
 
   'src/third_party/dart/third_party/pkg/pub':
-   Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
+  "git@code.byted.org:tech_client/pub.git" + "@" + Var("dart_pub_rev"),
 
   'src/third_party/dart/third_party/pkg/pub_semver':
    Var('dart_git') + '/pub_semver.git' + '@' + Var('dart_pub_semver_tag'),
