@@ -80,6 +80,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     const Shell::EngineCreateCallback& on_create_engine,
+    bool is_gpu_disabled,
     // BD ADD:
     bool preLoad) {
   if (!task_runners.IsValid()) {
@@ -91,7 +92,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       new Shell(std::move(vm), task_runners, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
-                    !settings.skia_deterministic_rendering_on_cpu)));
+                    !settings.skia_deterministic_rendering_on_cpu),
+                is_gpu_disabled));
   // BD ADD:
   shell->SetPreloadState(preLoad);
 
@@ -350,12 +352,14 @@ std::unique_ptr<Shell> Shell::Create(
     TaskRunners task_runners,
     Settings settings,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) {
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    bool is_gpu_disable) {
   return Shell::Create(std::move(task_runners),                    //
                        PlatformData{/* default platform data */},  //
                        std::move(settings),                        //
                        std::move(on_create_platform_view),         //
                        std::move(on_create_rasterizer),            //
+                       is_gpu_disable,
                        // BD ADD:
                        false
   );
@@ -368,7 +372,8 @@ std::unique_ptr<Shell> Shell::Create(
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer,
     // BD ADD:
-    bool preLoad
+    bool preLoad,
+    bool is_gpu_disable
     ) {
   PerformInitializationTasks(settings);
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
@@ -388,6 +393,7 @@ std::unique_ptr<Shell> Shell::Create(
                        on_create_rasterizer,           //
                        std::move(vm),                  //
                        CreateEngine,
+                       is_gpu_disable,
                        preLoad
   );
 }
@@ -401,6 +407,7 @@ std::unique_ptr<Shell> Shell::Create(
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     DartVMRef vm,
     const Shell::EngineCreateCallback& on_create_engine,
+    bool is_gpu_disabled,
     // BD ADD:
     bool preLoad) {
   PerformInitializationTasks(settings);
@@ -426,8 +433,9 @@ std::unique_ptr<Shell> Shell::Create(
                          on_create_platform_view,                 //
                          on_create_rasterizer,                    //
                          &on_create_engine,
+                         is_gpu_disabled,
                          // BD ADD:
-                        preLoad
+                         preLoad
   ]() mutable {
         auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
@@ -438,6 +446,7 @@ std::unique_ptr<Shell> Shell::Create(
                                             on_create_platform_view,      //
                                             on_create_rasterizer,         //
                                             on_create_engine,
+                                            is_gpu_disabled,
                                             // BD ADD:
                                             preLoad
         );
@@ -450,11 +459,12 @@ std::unique_ptr<Shell> Shell::Create(
 Shell::Shell(DartVMRef vm,
              TaskRunners task_runners,
              Settings settings,
-             std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
+             std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+             bool is_gpu_disabled)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
-      is_gpu_disabled_sync_switch_(new fml::SyncSwitch()),
+      is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
       volatile_path_tracker_(std::move(volatile_path_tracker)),
       weak_factory_gpu_(nullptr),
       weak_factory_(this) {
@@ -585,6 +595,13 @@ std::unique_ptr<Shell> Shell::Spawn(
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
+  // BD ADD: START
+  bool is_gpu_disable = false;
+  GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfFalse([&] { is_gpu_disable = false; })
+          .SetIfTrue([&] { is_gpu_disable = true; }));
+  // BD END
   std::unique_ptr<Shell> result(Shell::Create(
       task_runners_, PlatformData{}, GetSettings(),
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
@@ -604,6 +621,7 @@ std::unique_ptr<Shell> Shell::Spawn(
                              /*settings=*/settings,
                              /*animator=*/std::move(animator));
       },
+      is_gpu_disable,
       // BD ADD
       false));
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();

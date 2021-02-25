@@ -130,6 +130,8 @@ class Shell final : public PlatformView::Delegate,
   ///                                      valid rasterizer. This will be called
   ///                                      on the render task runner before this
   ///                                      method returns.
+  /// @param[in]  is_gpu_disabled          The default value for the switch that
+  ///                                      turns off the GPU.
   ///
   /// @return     A full initialized shell if the settings and callbacks are
   ///             valid. The root isolate has been created but not yet launched.
@@ -143,7 +145,8 @@ class Shell final : public PlatformView::Delegate,
       TaskRunners task_runners,
       Settings settings,
       const CreateCallback<PlatformView>& on_create_platform_view,
-      const CreateCallback<Rasterizer>& on_create_rasterizer);
+      const CreateCallback<Rasterizer>& on_create_rasterizer,
+      bool is_gpu_disabled = false);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings. The
@@ -183,7 +186,8 @@ class Shell final : public PlatformView::Delegate,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer,
       // BD ADD:
-      bool preLoad);
+      bool preLoad,
+      bool is_gpu_disabled = false);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings.
@@ -205,6 +209,7 @@ class Shell final : public PlatformView::Delegate,
       const CreateCallback<Rasterizer>& on_create_rasterizer,
       DartVMRef vm,
       const EngineCreateCallback& on_create_engine,
+      bool is_gpu_disabled,
       // BD ADD:
       bool preLoad);
 
@@ -509,7 +514,8 @@ class Shell final : public PlatformView::Delegate,
   Shell(DartVMRef vm,
         TaskRunners task_runners,
         Settings settings,
-        std::shared_ptr<VolatilePathTracker> volatile_path_tracker);
+        std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+        bool is_gpu_disabled);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
@@ -520,6 +526,7 @@ class Shell final : public PlatformView::Delegate,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       const EngineCreateCallback& on_create_engine,
+      bool is_gpu_disabled,
       // BD ADD:
       bool preLoad);
 
