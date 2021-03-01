@@ -117,7 +117,7 @@ public class AndroidTouchProcessor {
     if (updateForSinglePointer) {
       // ACTION_DOWN and ACTION_POINTER_DOWN always apply to a single pointer only.
       // BD ADD
-      needsAccelRend = true;
+      // needsAccelRend = true;
       addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, transformMatrix, packet);
       // BD ADD:
       deviceList.add(event.getPointerId(event.getActionIndex()));
