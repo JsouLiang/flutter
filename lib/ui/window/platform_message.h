@@ -26,7 +26,10 @@ class PlatformMessage : public fml::RefCountedThreadSafe<PlatformMessage> {
   const fml::RefPtr<PlatformMessageResponse>& response() const {
     return response_;
   }
-
+  // BD ADD: START
+  bool runInChannelThread() { return runInChannelThread_; }
+  bool runInUiThread() { return runInUiThread_; }
+  // END
  private:
   PlatformMessage(std::string channel,
                   std::vector<uint8_t> data,
@@ -39,6 +42,10 @@ class PlatformMessage : public fml::RefCountedThreadSafe<PlatformMessage> {
   std::vector<uint8_t> data_;
   bool hasData_;
   fml::RefPtr<PlatformMessageResponse> response_;
+  // BD ADD: START
+  bool runInChannelThread_ = false;
+  bool runInUiThread_ = false;
+  // END
 };
 
 }  // namespace flutter
