@@ -14,13 +14,42 @@ PlatformMessage::PlatformMessage(std::string channel,
     : channel_(std::move(channel)),
       data_(std::move(data)),
       hasData_(true),
-      response_(std::move(response)) {}
+      response_(std::move(response)) {
+  // BD ADD: START
+  if (channel_.compare(0, 5, "(bg-)") == 0) {
+    channel_.erase(0, 5);
+    runInChannelThread_ = true;
+  } else if (channel_.compare(0, 3, "bg-") == 0) {
+    runInChannelThread_ = true;
+  } else if (channel_.compare(0, 5, "(fg-)") == 0) {
+    channel_.erase(0, 5);
+    runInUiThread_ = true;
+  } else if (channel_.compare(0, 3, "fg-") == 0) {
+    runInUiThread_ = true;
+  }
+  // END
+}
+
 PlatformMessage::PlatformMessage(std::string channel,
                                  fml::RefPtr<PlatformMessageResponse> response)
     : channel_(std::move(channel)),
       data_(),
       hasData_(false),
-      response_(std::move(response)) {}
+      response_(std::move(response)) {
+  // BD ADD: START
+  if (channel_.compare(0, 5, "(bg-)") == 0) {
+    channel_.erase(0, 5);
+    runInChannelThread_ = true;
+  } else if (channel_.compare(0, 3, "bg-") == 0) {
+    runInChannelThread_ = true;
+  } else if (channel_.compare(0, 5, "(fg-)") == 0) {
+    channel_.erase(0, 5);
+    runInUiThread_ = true;
+  } else if (channel_.compare(0, 3, "fg-") == 0) {
+    runInUiThread_ = true;
+  }
+  // END
+}
 
 PlatformMessage::~PlatformMessage() = default;
 
