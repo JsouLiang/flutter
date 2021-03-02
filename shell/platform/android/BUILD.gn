@@ -452,10 +452,18 @@ action("pom_libflutter") {
   }
   # END
 
+  # BD MOD: START
+  #  outputs = [
+  #      "$root_build_dir/$artifact_id.pom",
+  #      "$root_build_dir/$artifact_id.maven-metadata.xml",
+  #    ]
   outputs = [
     "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/${artifact_id}_local_engine.pom",
     "$root_build_dir/$artifact_id.maven-metadata.xml",
+    "$root_build_dir/${artifact_id}_local_engine.maven-metadata.xml"
   ]
+  # END
 
   args = [
     "--destination",
@@ -481,10 +489,18 @@ action("pom_embedding") {
   }
   # END
 
+  # BD MOD: START
+  #  outputs = [
+  #      "$root_build_dir/$artifact_id.pom",
+  #      "$root_build_dir/$artifact_id.maven-metadata.xml",
+  #    ]
   outputs = [
     "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/${artifact_id}_local_engine.pom",
     "$root_build_dir/$artifact_id.maven-metadata.xml",
+    "$root_build_dir/${artifact_id}_local_engine.maven-metadata.xml"
   ]
+  # END
 
   args = [
     "--destination",

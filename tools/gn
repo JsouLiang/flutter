@@ -498,6 +498,10 @@ def parse_args(args):
                       help='Enable lite global mode.')
   parser.add_argument('--lites', dest='enable_lite_share_skia', action='store_const', const='true',
                       help='Enable lite and share skia mode.')
+  parser.add_argument('--dynamicart', default=False, action='store_true')
+  parser.add_argument('--only-gen-snapshot', dest='only_gen_snapshot', default=False, action='store_true')
+  parser.add_argument('--systrace', dest='enable_systrace', action='store_const', const='true',
+                      help='Enable systrace for flutter.')
   # END
 
   return parser.parse_args(args)
