@@ -581,6 +581,19 @@ def parse_args(args):
   # Verbose output.
   parser.add_argument('--verbose', default=False, action='store_true')
 
+  # BD ADD: START
+  parser.add_argument('--lite', dest='enable_lite', action='store_const', const='true',
+                      help='Enable lite mode.')
+  parser.add_argument('--liteg', dest='enable_lite_global', action='store_const', const='true',
+                      help='Enable lite global mode.')
+  parser.add_argument('--lites', dest='enable_lite_share_skia', action='store_const', const='true',
+                      help='Enable lite and share skia mode.')
+  parser.add_argument('--dynamicart', default=False, action='store_true')
+  parser.add_argument('--only-gen-snapshot', dest='only_gen_snapshot', default=False, action='store_true')
+  parser.add_argument('--systrace', dest='enable_systrace', action='store_const', const='true',
+                      help='Enable systrace for flutter.')
+  # END
+
   return parser.parse_args(args)
 
 # BD ADD: START
