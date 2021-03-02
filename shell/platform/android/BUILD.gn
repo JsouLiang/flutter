@@ -432,7 +432,13 @@ action("pom_libflutter") {
   }
   # END
 
-  outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  # BD MOD: START
+  # outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  outputs = [
+    "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/${artifact_id}_local_engine.pom"
+  ]
+  # END
 
   args = [
     "--destination",
@@ -462,7 +468,13 @@ action("pom_embedding") {
   }
   # END
 
-  outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  # BD MOD: START
+  # outputs = [ "$root_build_dir/$artifact_id.pom" ]
+  outputs = [
+    "$root_build_dir/$artifact_id.pom",
+    "$root_build_dir/${artifact_id}_local_engine.pom"
+  ]
+  # END
 
   args = [
     "--destination",

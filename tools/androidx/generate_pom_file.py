@@ -53,6 +53,8 @@ def main():
   engine_version = args.engine_version
   artifact_version = '1.0.0-' + engine_version
   out_file_name = '%s.pom' % engine_artifact_id
+  # BD ADD:
+  local_pom_out_file_name = '%s_local_engine.pom' % engine_artifact_id
 
   pom_dependencies = ''
   if args.include_embedding_dependencies:
@@ -67,5 +69,10 @@ def main():
   with open(os.path.join(args.destination, out_file_name), 'w') as f:
     f.write(POM_FILE_CONTENT.format(engine_artifact_id, artifact_version, pom_dependencies))
 
+  # BD MOD: START
+  # Write the local engine POM file.
+  with open(os.path.join(args.destination, local_pom_out_file_name), 'w') as f:
+    f.write(POM_FILE_CONTENT.format(engine_artifact_id, artifact_version + '-local-engine', pom_dependencies))
+  # END
 if __name__ == '__main__':
   sys.exit(main())
