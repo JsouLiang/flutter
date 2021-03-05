@@ -1,4 +1,20 @@
-stages:  
+.common_branch_config: &common_branch_config
+  stage: first-stage
+  only:
+    - web
+  retry: 2
+  tags:
+    - shared
+
+.protect_branch_config: &protect_branch_config
+  stage: first-stage
+  only:
+    - bd_1.22
+  retry: 2
+  tags:
+    - shared
+
+stages:
   - first-stage
   - end-stage
 
@@ -14,58 +30,71 @@ stages:
 #    - flutter
 
 
-buildEngineMacAndroid:
-  stage: first-stage
-  only:
-    - web
+WebBuildEngineMacAndroid:
+  <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android
-  retry: 2
-  tags:
-    - shared
 
-buildEngineLinuxAndroid:
-  stage: first-stage
-  only:
-    - web
+WebBuildEngineLinuxAndroid:
+  <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android
-  retry: 2
-  tags:
-    - shared
 
 
-buildEngineMacIos:
-  stage: first-stage
-  only:
-    - web
+WebBuildEngineMacIos:
+  <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios
-  retry: 2
-  tags:
-    - shared
 
 
-buildLitesAndLiteg:
-  stage: first-stage
-  only:
-    - web
+WebBuildLitesAndLiteg:
+  <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME lites_and_liteg
-  retry: 2
-  tags:
-    - shared
+
 
 reportOnEnd:
+  <<: *common_branch_config
   stage: end-stage
-  only:
-    - web
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/reportEngineBuildComplete.sh -o reportEngineBuildComplete.sh
     - sh reportEngineBuildComplete.sh $GITLAB_USER_EMAIL $CI_COMMIT_REF_NAME
-  tags:
-    - shared
+
+
+AutoBuildEngineMacAndroid:
+  <<: *protect_branch_config
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android
+
+AutoBuildEngineLinuxAndroid:
+  <<: *protect_branch_config
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android
+
+
+AutoBuildEngineMacIos:
+  <<: *protect_branch_config
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios
+
+
+AutoBuildLitesAndLiteg:
+  <<: *protect_branch_config
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME lites_and_liteg
+
+
+AutoReportOnEnd:
+  <<: *protect_branch_config
+  stage: end-stage
+  script:
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/reportEngineBuildComplete.sh -o reportEngineBuildComplete.sh
+    - sh reportEngineBuildComplete.sh $GITLAB_USER_EMAIL $CI_COMMIT_REF_NAME
