@@ -1111,7 +1111,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
           public void onFlutterUiDisplayed() {
             renderer.removeIsDisplayingFlutterUiListener(this);
             onDone.run();
-            flutterImageView.detachFromRenderer();
+            if (!(renderSurface instanceof FlutterImageView)) {
+              flutterImageView.detachFromRenderer();
+            }
           }
 
           @Override
