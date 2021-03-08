@@ -43,6 +43,8 @@ import java.util.Queue;
  */
 @TargetApi(19)
 public class FlutterImageView extends View implements RenderSurface {
+  // BD ADD:
+  private static final boolean HARDWARE_BUFFER_OPTIMIZE_ENABLED = false;
   @NonNull private ImageReader imageReader;
   @Nullable private Queue<Image> imageQueue;
   @Nullable private Image currentImage;
@@ -103,7 +105,9 @@ public class FlutterImageView extends View implements RenderSurface {
   @TargetApi(19)
   @NonNull
   private static ImageReader createImageReader(int width, int height) {
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    // BD MOD:
+//    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (HARDWARE_BUFFER_OPTIMIZE_ENABLED && android.os.Build.VERSION.SDK_INT >= 29) {
       return ImageReader.newInstance(
           width,
           height,
@@ -249,7 +253,9 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @TargetApi(29)
   private void updateCurrentBitmap() {
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    // BD MOD
+//    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (HARDWARE_BUFFER_OPTIMIZE_ENABLED && android.os.Build.VERSION.SDK_INT >= 29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
       currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
       buffer.close();
