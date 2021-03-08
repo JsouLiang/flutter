@@ -43,6 +43,9 @@ import java.util.Locale;
 public class FlutterImageView extends View implements RenderSurface {
   private static final String TAG = "FlutterImageView";
 
+  // BD ADD:
+  private static final boolean HARDWARE_BUFFER_OPTIMIZE_ENABLED = false;
+
   @NonNull private ImageReader imageReader;
   @Nullable private Image currentImage;
   @Nullable private Bitmap currentBitmap;
@@ -111,7 +114,9 @@ public class FlutterImageView extends View implements RenderSurface {
       logW("ImageReader height must be greater than 0, but given height=%d, set height=1", height);
       height = 1;
     }
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    // BD MOD:
+    // if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (HARDWARE_BUFFER_OPTIMIZE_ENABLED && android.os.Build.VERSION.SDK_INT >= 29) {
       return ImageReader.newInstance(
           width,
           height,
@@ -252,7 +257,9 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @TargetApi(29)
   private void updateCurrentBitmap() {
-    if (android.os.Build.VERSION.SDK_INT >= 29) {
+    // BD MOD
+    // if (android.os.Build.VERSION.SDK_INT >= 29) {
+    if (HARDWARE_BUFFER_OPTIMIZE_ENABLED && android.os.Build.VERSION.SDK_INT >= 29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
       currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
       buffer.close();
