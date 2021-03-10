@@ -66,6 +66,10 @@ def get_out_dir(args):
         target_dir.append('liteg')
     if args.enable_lite_share_skia:
         target_dir.append('lites')
+    if args.dynamicart:
+        target_dir.append('dynamicart')
+    if args.only_gen_snapshot:
+        target_dir.append('gen_snapshot')
     # END
 
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
@@ -104,6 +108,14 @@ def to_gn_args(args):
         gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
+
+    # check dynamicart arg
+    if args.dynamicart and runtime_mode not in ['profile', 'release']:
+        raise Exception('--dynamicart is only supported on --release or --profile')
+    gn_args['dynamicart'] = args.dynamicart # Enable dynamicart Mode.
+    if args.only_gen_snapshot and runtime_mode not in ['profile', 'release']:
+        raise Exception('--only-gen-snapshot is only supported on --release or --profile')
+    gn_args['only_gen_snapshot'] = args.only_gen_snapshot
 
     # BD ADD: START
     if args.enable_lite:

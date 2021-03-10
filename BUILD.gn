@@ -13,6 +13,7 @@ import("//flutter/bdflutter/bdconfig.gni")
 # required for the flutter web sdk.
 declare_args() {
   full_dart_sdk = false
+  only_gen_snapshot = false
 }
 
 config("config") {
@@ -43,6 +44,17 @@ config("export_dynamic_symbols") {
   }
 }
 
+
+if(only_gen_snapshot) {
+  group("flutter") {
+    public_deps = [
+      "//flutter/lib/snapshot:generate_snapshot_bin",
+    ]
+  }
+  group("dist") {
+
+  }
+} else {
 group("flutter") {
   testonly = true
 
@@ -195,4 +207,5 @@ if (is_fuchsia) {
 
     deps = [ "//flutter/shell/platform/fuchsia:tests" ]
   }
+}
 }
