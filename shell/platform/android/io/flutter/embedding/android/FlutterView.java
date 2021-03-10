@@ -753,55 +753,6 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
         || super.dispatchKeyEvent(event);
   }
 
-  // BD ADD: START
-  private final TouchEventStateManager touchEventStateManager = new TouchEventStateManager();
-
-  private enum DispatchTarget {
-    Normal, Android, Flutter
-  }
-
-  /**
-   * Fix the engine reuse problem caused by detachFromFlutterEngine() in onPause(), then the
-   * ACTION_CANCEL event will lost, and it won't reach the flutter target below some dialog or UI.
-   */
-  private class TouchEventStateManager {
-    private DispatchTarget currentTarget = DispatchTarget.Normal;
-
-    private boolean shouldDispatchTouchEventToFlutter(MotionEvent event) {
-      int maskedAction = event.getActionMasked();
-      boolean isStartEvent = maskedAction == MotionEvent.ACTION_DOWN
-              || maskedAction == MotionEvent.ACTION_POINTER_DOWN;
-      boolean isEndEvent = maskedAction == MotionEvent.ACTION_CANCEL
-              || maskedAction == MotionEvent.ACTION_UP
-              || maskedAction == MotionEvent.ACTION_POINTER_UP;
-      boolean isAttachedToFlutter = isAttachedToFlutterEngine();
-      // 1. If it's a start event, dispatch it to Flutter when isAttachedToFlutterEngine() else to
-      //   Android, and record it as currentTarget.
-      // 2. If it's an end event or middle event, then dispatch it to the currentTarget (if the
-      //   target state is Normal, then print a warning log, dispatch it to attachedToFlutter()
-      //   related target). And also it it's an end event, then set currentTarget to Normal,
-      //   and wait for next event.
-      // TODO: The multi-touch is not handled by the code, considering few user faced this problem.
-      //  Multi-touch case may go into the "previous state is normal" code below, it's also safe.
-      if (isStartEvent) {
-        currentTarget = isAttachedToFlutter ? DispatchTarget.Flutter : DispatchTarget.Android;
-        return isAttachedToFlutter;
-      } else {
-        // ensure previous state is not normal
-        if (currentTarget == DispatchTarget.Normal) {
-          currentTarget = isAttachedToFlutter ? DispatchTarget.Flutter : DispatchTarget.Android;
-          Log.w(TAG, "currentTarget is normal, but event is " + event + ", force to " + currentTarget);
-        }
-        boolean shouldDispatchToFlutter = currentTarget == DispatchTarget.Flutter;
-        if (isEndEvent) {
-          currentTarget = DispatchTarget.Normal;
-        }
-        return shouldDispatchToFlutter;
-      }
-    }
-  }
-  // END
-
   /**
    * Invoked by Android when a user touch event occurs.
    *
@@ -810,12 +761,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    */
   @Override
   public boolean onTouchEvent(@NonNull MotionEvent event) {
-    // BD MOD: START
-    // if (!isAttachedToFlutterEngine()) {
-    if (!touchEventStateManager.shouldDispatchTouchEventToFlutter(event)) {
+    if (!isAttachedToFlutterEngine()) {
       return super.onTouchEvent(event);
     }
-    // END
 
     // TODO(abarth): This version check might not be effective in some
     // versions of Android that statically compile code and will be upset
