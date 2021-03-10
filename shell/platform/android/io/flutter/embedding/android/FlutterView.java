@@ -945,7 +945,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     } else {
         resetWillNotDraw(
                     false,
-                    accessibilityBridge.isTouchExplorationEnabled());
+                    false);
     }
     // END
     this.flutterEngine
