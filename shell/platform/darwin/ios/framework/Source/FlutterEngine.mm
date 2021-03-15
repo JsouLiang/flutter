@@ -615,7 +615,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _publisher.reset([[FlutterObservatoryPublisher alloc]
       initWithEnableObservatoryPublication:doesObservatoryPublication]);
   [self maybeSetupPlatformViewChannels];
-  _shell->GetIsGpuDisabledSyncSwitch()->SetSwitch(_isGpuDisabled ? true : false);
 }
 
 + (BOOL)isProfilerEnabled {
@@ -710,13 +709,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   // BD ADD
   [self setupQualityOfService:task_runners];
   
+  _isGpuDisabled = [UIApplication sharedApplication].applicationState != UIApplicationStateActive;
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(std::move(task_runners),  // task runners
                                   std::move(platformData),  // window data
                                   std::move(settings),      // settings
                                   on_create_platform_view,  // platform view creation
                                   on_create_rasterizer,      // rasterzier creation
-                                  /*is_gpu_disabled=*/[UIApplication sharedApplication].applicationState != UIApplicationStateActive,
+                                  /*is_gpu_disabled=*/_isGpuDisabled,
                                   // BD ADD:
                                   preLoad
   );
