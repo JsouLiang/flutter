@@ -182,7 +182,7 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue = io_manager->GetSkiaUnrefQueue();
   // END
   if (skImage) {
-    fml::RefPtr<CanvasImage> image = CanvasImage::Create();
+    image = CanvasImage::Create();
     // BD ADD:
     image->setMips(!Performance::GetInstance()->IsDisableMips());
     image->set_image({skImage, std::move(unref_queue)});
