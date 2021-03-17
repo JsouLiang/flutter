@@ -1037,7 +1037,8 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     // BD DEL
     // tmp del for webview with Hybrid Router
     // flutterImageView = null;
-    previousRenderSurface = null;
+    // BD DEL
+    // previousRenderSurface = null;
     flutterEngine = null;
   }
 
