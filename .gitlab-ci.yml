@@ -25,6 +25,7 @@
     - shared
 
 stages:
+  - start-stage
   - first-stage
   - end-stage
 
@@ -89,13 +90,27 @@ WebBuildEngineHostLinux:
     - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME host_linux_build
 
 reportOnEnd:
-  <<: *common_branch_config
   stage: end-stage
+  only:
+    - web
+  retry: 2
+  tags:
+    - shared
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/reportEngineBuildComplete.sh -o reportEngineBuildComplete.sh
     - sh reportEngineBuildComplete.sh $GITLAB_USER_EMAIL $CI_COMMIT_REF_NAME
   after_script:
-  - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","jobId":"'${CI_JOB_ID}'","endTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","date":"'"$(date +%Y-%m-%d)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/updateTotalEndTime
+    - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","endTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/reportEndTime
+
+ReportOnStart:
+  stage: start-stage
+  only:
+    - web
+  retry: 2
+  tags:
+    - shared
+  script:
+    - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","userId":"'${GITLAB_USER_ID}'","userEmail":"'${GITLAB_USER_EMAIL}'","commitName":"'${CI_COMMIT_REF_NAME}'","projectName":"'${CI_PROJECT_NAME}'","commitVersion":"'${CI_COMMIT_SHA}'","startTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","date":"'"$(date +%Y-%m-%d)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/reportStartTime
 
 AutoBuildEngineMacAndroid:
   <<: *protect_branch_config
@@ -147,10 +162,28 @@ AutoBuildEngineHostLinux:
 
 
 AutoReportOnEnd:
-  <<: *protect_branch_config
   stage: end-stage
+  only:
+    - bd_1.22
+  except:
+    - web
+  retry: 2
+  tags:
+    - shared
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/reportEngineBuildComplete.sh -o reportEngineBuildComplete.sh
     - sh reportEngineBuildComplete.sh $GITLAB_USER_EMAIL $CI_COMMIT_REF_NAME
   after_script:
-    - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","jobId":"'${CI_JOB_ID}'","endTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","date":"'"$(date +%Y-%m-%d)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/updateTotalEndTime
+    - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","endTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/reportEndTime
+
+AutoReportOnStart:
+  stage: start-stage
+  only:
+    - bd_1.22
+  except:
+    - web
+  retry: 2
+  tags:
+    - shared
+  script:
+    - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","userId":"'${GITLAB_USER_ID}'","userEmail":"'${GITLAB_USER_EMAIL}'","commitName":"'${CI_COMMIT_REF_NAME}'","projectName":"'${CI_PROJECT_NAME}'","commitVersion":"'${CI_COMMIT_SHA}'","startTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","date":"'"$(date +%Y-%m-%d)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/reportStartTime
