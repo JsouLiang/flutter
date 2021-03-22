@@ -41,53 +41,17 @@ stages:
 #    - flutter
 
 
-WebBuildEngineMacAndroid:
+WebBuildEngineMac:
   <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android_build
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac
 
-WebBuildEngineMacAndroidLite:
+WebBuildEngineLinux:
   <<: *common_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android_lite_build
-
-WebBuildEngineLinuxAndroid:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android_build
-
-WebBuildEngineLinuxAndroidLite:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android_lite_build
-
-WebBuildEngineMacIos:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios_build
-
-WebBuildEngineMacIosLite:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios_lite_build
-
-WebBuildEngineHostMac:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME host_mac_build
-
-WebBuildEngineHostLinux:
-  <<: *common_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME host_linux_build
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux
 
 reportOnEnd:
   stage: end-stage
@@ -112,53 +76,17 @@ ReportOnStart:
   script:
     - curl --request POST -H "content-type:application/json" -d '{"pipelineId":"'${CI_PIPELINE_ID}'","userId":"'${GITLAB_USER_ID}'","userEmail":"'${GITLAB_USER_EMAIL}'","commitName":"'${CI_COMMIT_REF_NAME}'","projectName":"'${CI_PROJECT_NAME}'","commitVersion":"'${CI_COMMIT_SHA}'","startTime":"'"$(date +%Y-%m-%dT%H:%M:%S)"'","date":"'"$(date +%Y-%m-%d)"'"}' https://cloudapi.bytedance.net/faas/services/ttxnzk/invoke/reportStartTime
 
-AutoBuildEngineMacAndroid:
+AutoBuildEngineMac:
   <<: *protect_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android_build
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac
 
-AutoBuildEngineMacAndroidLite:
+AutoBuildEngineLinux:
   <<: *protect_branch_config
   script:
     - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_android_lite_build
-
-AutoBuildEngineLinuxAndroid:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android_build
-
-AutoBuildEngineLinuxAndroidLite:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux_android_lite_build
-
-AutoBuildEngineMacIos:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios_build
-
-AutoBuildEngineMacIosLite:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME mac_ios_lite_build
-
-AutoBuildEngineHostMac:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME host_mac_build
-
-AutoBuildEngineHostLinux:
-  <<: *protect_branch_config
-  script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME host_linux_build
+    - python3 -u trigger_cloud_build_engine.py $CI_COMMIT_REF_NAME linux
 
 
 AutoReportOnEnd:
