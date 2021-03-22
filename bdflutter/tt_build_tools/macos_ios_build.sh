@@ -47,6 +47,13 @@ if [ ${#liteModes[@]} == 0 ];then
 fi
 echo "IOS build modes: ${liteModes[@]}"
 
+releaseModeArg=$4
+releaseModes=(${releaseModeArg//,/ })
+if [ ${#releaseModes[@]} == 0 ];then
+    releaseModes=('debug' 'profile' 'release' 'release_dynamicart' 'profile_dynamicart')
+fi
+echo "Android release modes: ${releaseModes[@]}"
+
 function checkResult() {
     if [ $? -ne 0 ]; then
         echo "Host debug compile failed !"
@@ -56,7 +63,7 @@ function checkResult() {
 
 cd ..
 for liteMode in ${liteModes[@]}; do
-	for mode in 'debug' 'profile' 'release' 'release_dynamicart' 'profile_dynamicart'; do
+	for mode in ${releaseModes[@]}; do
 		# lite only build for release mode
 		if [ $mode == 'debug' ] || [ $mode == 'profile' ] || [[ $mode == *"profile_dynamicart"* ]]; then
 		  if [ $liteMode != 'normal' ]; then

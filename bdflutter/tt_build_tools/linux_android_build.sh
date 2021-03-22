@@ -38,6 +38,13 @@ if [ ${#liteModes[@]} == 0 ];then
 fi
 echo "Android build modes: ${liteModes[@]}"
 
+releaseModeArg=$4
+releaseModes=(${releaseModeArg//,/ })
+if [ ${#releaseModes[@]} == 0 ];then
+    releaseModes=('debug' 'profile' 'release')
+fi
+echo "Android release modes: ${releaseModes[@]}"
+
 function checkResult() {
     if [ $? -ne 0 ]; then
         echo "Host debug compile failed !"
@@ -80,7 +87,7 @@ for liteMode in ${liteModes[@]}; do
      echo 'lites is lite & share skia mode, now only for ios release !'
      continue
   fi
-  for mode in 'debug' 'profile' 'release'; do
+  for mode in ${releaseModes[@]}; do
       for platform in ${platforms[@]}; do
           # x64和x86只打debug
           if [ $mode != 'debug' ]; then
