@@ -331,6 +331,16 @@ RasterStatus Rasterizer::DoDraw(
     return RasterStatus::kFailed;
   }
 
+  // BD ADD:
+  // 在部分配置较低的机器上会出现进入后台之后surface_并没有被及时reset到nullptr而进入渲染流程
+  // 在iOS13以下，后台渲染会触发_gpus_ReturnNotPermittedKillClient被系统kill
+  bool disable_draw = false;
+  delegate_.GetIsGpuDisabledSyncSwitch()->Execute(fml::SyncSwitch::Handlers().SetIfTrue([&] {  disable_draw = true; }));
+  if (disable_draw) {
+    return RasterStatus::kFailed;
+  }
+  // END
+    
   FrameTiming timing;
 #if !defined(OS_FUCHSIA)
   const fml::TimePoint frame_target_time = layer_tree->target_time();
