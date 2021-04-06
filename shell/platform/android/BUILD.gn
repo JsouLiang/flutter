@@ -51,6 +51,7 @@ shared_library("flutter_shell_native") {
     "platform_view_android_jni_impl.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
+    "bd_android_external_texture_gl.cc",
   ]
 
 # BD ADD:

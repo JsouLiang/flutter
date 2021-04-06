@@ -20,7 +20,8 @@
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
-
+// BD ADD
+#include <android/surface_texture.h>
 namespace flutter {
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
@@ -122,6 +123,12 @@ class PlatformViewAndroid final : public PlatformView {
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;
   }
+
+  // BD  ADD:
+  void RegisterExternalTexture(
+      int64_t texture_id,
+      const fml::jni::JavaObjectWeakGlobalRef& surface_texture, ASurfaceTexture* n_surface_texture);
+
   /**
    * BD ADD: register android image loader
    */

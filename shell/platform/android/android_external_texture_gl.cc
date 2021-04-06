@@ -8,6 +8,7 @@
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 

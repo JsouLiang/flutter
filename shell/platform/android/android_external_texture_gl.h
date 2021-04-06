@@ -35,15 +35,24 @@ class AndroidExternalTextureGL : public flutter::Texture {
   void MarkNewFrameAvailable() override;
 
   void OnTextureUnregistered() override;
+ // BD MOD:
+ //private:
+ protected:
+  // BD MOD:
+  //void Attach(jint textureName);
+  virtual void Attach(jint textureName);
 
- private:
-  void Attach(jint textureName);
+  // BD MOD:
+  //void Update();
+  virtual void Update();
 
-  void Update();
+  // BD MOD:
+  //void Detach();
+  virtual void Detach();
 
-  void Detach();
-
-  void UpdateTransform();
+  // BD MOD:
+  //void UpdateTransform();
+  virtual void UpdateTransform();
 
   enum class AttachmentState { uninitialized, attached, detached };
 

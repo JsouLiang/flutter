@@ -830,16 +830,45 @@ static void SetAccessibilityFeatures(JNIEnv* env,
 static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
   return FlutterMain::Get().GetSettings().enable_software_rendering;
 }
+// BD ADD: START
+extern "C" ASurfaceTexture * __attribute((weak))  ASurfaceTexture_fromSurfaceTexture(JNIEnv* env, jobject jobject);
 
+//获取SurfaceTexture 请注意该方法会增加一个native引用，使用完毕需要手动释放
+//只有在android sdkversion API>=28时才能获取到正确的符号
+//警告：返回值可能会nullptr
+static ASurfaceTexture* getNativeSurfaceTexture(JNIEnv* env, jobject jobject) {
+  void* iterate = (void*)&ASurfaceTexture_fromSurfaceTexture;
+  // TODO 是否还有必要判断sdk_version
+  if (iterate != NULL) {
+    return ASurfaceTexture_fromSurfaceTexture(env, jobject);
+    } else {
+        FML_LOG(ERROR)<<"ASurfaceTexture_fromSurfaceTexture iterate null!";
+        return nullptr;
+    }
+}
+// END
 static void RegisterTexture(JNIEnv* env,
                             jobject jcaller,
                             jlong shell_holder,
                             jlong texture_id,
                             jobject surface_texture) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
-      static_cast<int64_t>(texture_id),                        //
-      fml::jni::JavaObjectWeakGlobalRef(env, surface_texture)  //
-  );
+  // BD MOD: START
+  // ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+  //        static_cast<int64_t>(texture_id),
+  //        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture));
+  ASurfaceTexture*  nSurfaceTexturePtr = getNativeSurfaceTexture(env, surface_texture);
+  if (nSurfaceTexturePtr != nullptr) {
+    ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+        static_cast<int64_t>(texture_id),
+        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture),
+        nSurfaceTexturePtr);
+  } else 
+  {
+    ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+        static_cast<int64_t>(texture_id),
+        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture));
+  }
+  // END
 }
 
 static void MarkTextureFrameAvailable(JNIEnv* env,
