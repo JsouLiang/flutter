@@ -24,6 +24,8 @@
 #include "flutter/shell/platform/android/surface/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
+// BD ADD:
+#include "flutter/shell/platform/android/bd_android_external_texture_gl.h"
 namespace flutter {
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
@@ -268,6 +270,16 @@ void PlatformViewAndroid::RegisterExternalTexture(
   RegisterTexture(std::make_shared<AndroidExternalTextureGL>(
       texture_id, surface_texture, std::move(jni_facade_)));
 }
+
+// BD ADD: START
+void PlatformViewAndroid::RegisterExternalTexture(
+    int64_t texture_id,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
+    ASurfaceTexture* n_surface_texture) {
+  RegisterTexture(std::make_shared<BdAndroidExternalTextureGL>(
+      texture_id, surface_texture, std::move(jni_facade_), n_surface_texture));
+}
+// END
 
 // |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {

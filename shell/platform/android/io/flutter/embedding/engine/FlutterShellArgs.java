@@ -56,6 +56,8 @@ public class FlutterShellArgs {
   public static final String ARG_OBSERVATORY_PORT = "--observatory-port=";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
+  // BD ADD
+  public static final String ARG_OPT_SURFACETEXTURE = "--opt_surface_texture";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -124,6 +126,11 @@ public class FlutterShellArgs {
       args.add(ARG_DART_FLAGS + "=" + intent.getStringExtra(ARG_KEY_DART_FLAGS));
     }
 
+    // BD ADD: START
+    if (intent.getBooleanExtra(ARG_OPT_SURFACETEXTURE, false)) {
+      args.add(ARG_OPT_SURFACETEXTURE + "=" + true);
+    }
+    // END
     return new FlutterShellArgs(args);
   }
 

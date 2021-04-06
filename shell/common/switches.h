@@ -225,6 +225,10 @@ DEF_SWITCH(DisablePreload,
 DEF_SWITCH(DisableLeakVM,
            "disable-leak-vm",
            "Set leak_vm in setting.h to false.")
+
+DEF_SWITCH(OptSurfaceTexture,
+           "opt_surface_texture",
+           "opt surface texture with ndk(true/false)")
 // END
 DEF_SWITCHES_END
 
