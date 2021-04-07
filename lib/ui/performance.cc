@@ -201,4 +201,25 @@ std::vector<int64_t> Performance::GetMemoryDetails(){
   return mem;
 }
 
+
+void Performance::RecordLastLayoutTime() {
+  lastLayoutTime_ = Performance::CurrentTimestamp();
+}
+
+int64_t Performance::GetRecordLastLayoutTime() {
+  return lastLayoutTime_;
+}
+
+void Performance::ClearHugeFontCache() {
+  minikin::Layout::purgeHugeFontCaches();
+}
+
+void Performance::ClearAllFontCache() {
+  minikin::Layout::purgeAllFontCaches();
+}
+
+void Performance::ClearLayoutCache() {
+  minikin::Layout::purgeCaches();
+}
+
 }

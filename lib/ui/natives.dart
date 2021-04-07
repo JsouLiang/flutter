@@ -157,3 +157,8 @@ dynamic classInvoke(dynamic cls, int invokeType, String functionName, List argum
 dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, List arguments, List names) native 'Reflect_instanceInvoke';
 
 /// END
+
+int64_t Performance_getRecordLastLayoutTime() native 'Performance_getRecordLastLayoutTime';
+void Performance_clearHugeFontCache() native 'Performance_clearHugeFontCache';
+void Performance_clearAllFontCache() native 'Performance_clearAllFontCache';
+void Performance_clearLayoutCache() native 'Performance_clearLayoutCache';

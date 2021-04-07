@@ -682,5 +682,21 @@ void Reflect_instanceInvoke(Dart_NativeArguments args) {
     Dart_SetReturnValue(args, res);
 }
 
+void Performance_getRecordLastLayoutTime(Dart_NativeArguments args) {
+  Dart_SetReturnValue(args, Dart_NewInteger(Performance::GetInstance()->GetRecordLastLayoutTime()));
+}
+
+void Performance_clearHugeFontCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearHugeFontCache();
+}
+
+void Performance_clearAllFontCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearAllFontCache();
+}
+
+void Performance_clearLayoutCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearLayoutCache();
+}
+
 // END
 }  // namespace flutter
