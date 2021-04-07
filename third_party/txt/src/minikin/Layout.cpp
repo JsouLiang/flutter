@@ -105,7 +105,7 @@ class LayoutCacheKey {
                 LayoutContext* ctx,
                 const std::shared_ptr<FontCollection>& collection) const {
     // BD ADD:
-    TRACE_EVENT0("flutter", "LayoutCacheKey::doLayout");
+//    TRACE_EVENT0("flutter", "LayoutCacheKey::doLayout");
     layout->mAdvances.resize(mCount, 0);
     ctx->clearHbFonts();
     layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx,
@@ -145,7 +145,7 @@ class LayoutCache : private android::OnEntryRemoved<LayoutCacheKey, Layout*> {
               LayoutContext* ctx,
               const std::shared_ptr<FontCollection>& collection) {
     // BD ADD:
-    TRACE_EVENT0("flutter", "LayoutCache::get");
+//    TRACE_EVENT0("flutter", "LayoutCache::get");
     Layout* layout = mCache.get(key);
     if (layout == NULL) {
       key.copyText();
@@ -647,7 +647,7 @@ float Layout::doLayoutRunCached(
     Layout* layout,
     float* advances) {
   // BD ADD:
-  TRACE_EVENT0("flutter", "Layout::doLayoutRunCached");
+//  TRACE_EVENT0("flutter", "Layout::doLayoutRunCached");
   const uint32_t originalHyphen = ctx->paint.hyphenEdit.getHyphen();
   float advance = 0;
   if (!isRtl) {
@@ -714,8 +714,8 @@ float Layout::doLayoutWord(const uint16_t* buf,
                            Layout* layout,
                            float* advances) {
   // BD ADD: START
-  TRACE_EVENT1("flutter", "Layout::doLayoutWord", "count",
-               std::to_string(count).c_str());
+//  TRACE_EVENT1("flutter", "Layout::doLayoutWord", "count",
+//               std::to_string(count).c_str());
   // END
   LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
   LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count,
@@ -936,7 +936,7 @@ void Layout::doLayoutRun(const uint16_t* buf,
                          LayoutContext* ctx,
                          const std::shared_ptr<FontCollection>& collection) {
   // BD ADD:
-  TRACE_EVENT0("flutter", "Layout::doLayoutRun");
+//  TRACE_EVENT0("flutter", "Layout::doLayoutRun");
   hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
   std::vector<FontCollection::Run> items;
   collection->itemize(buf + start, count, ctx->style, &items);
@@ -1043,7 +1043,7 @@ void Layout::doLayoutRun(const uint16_t* buf,
       // hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0],
       //          features.size());
       {
-        TRACE_EVENT0("flutter", "Layout::doLayoutRun::hb_shape");
+//        TRACE_EVENT0("flutter", "Layout::doLayoutRun::hb_shape");
         hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0],
                  features.size());
       }
@@ -1222,5 +1222,17 @@ void Layout::purgeCaches() {
   layoutCache.clear();
   purgeHbFontCacheLocked();
 }
+
+// BD ADD: START
+void Layout::purgeHugeFontCaches() {
+  std::scoped_lock _l(gMinikinLock);
+  clearHugeFontCacheLocked();
+}
+
+void Layout::purgeAllFontCaches() {
+  std::scoped_lock _l(gMinikinLock);
+  purgeHbFontCacheLocked();
+}
+// END
 
 }  // namespace minikin

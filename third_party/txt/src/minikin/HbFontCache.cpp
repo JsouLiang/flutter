@@ -44,14 +44,35 @@ class HbFontCache : private android::OnEntryRemoved<int32_t, hb_font_t*> {
 
   void put(int32_t fontId, hb_font_t* font) { mCache.put(fontId, font); }
 
-  void clear() { mCache.clear(); }
+  // BD MOD: START
+  // void clear() { mCache.clear(); }
+  void clear() {
+    mCache.clear();
+    mHugeFontArray.clear();
+  }
+  // END
 
   void remove(int32_t fontId) { mCache.remove(fontId); }
+
+  // BD ADD: START
+  void putHugeFontId(int32_t fontId) {
+    mHugeFontArray.push_back(fontId);
+  }
+
+  void clearHugeFont() {
+    for(auto i : mHugeFontArray) {
+      remove(i);
+    }
+    mHugeFontArray.clear();
+  }
+  // END
 
  private:
   static const size_t kMaxEntries = 100;
 
   android::LruCache<int32_t, hb_font_t*> mCache;
+  // BD ADD:
+  std::vector<int32_t> mHugeFontArray;
 };
 
 HbFontCache* getFontCacheLocked() {
@@ -112,6 +133,17 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
   hb_face_destroy(face);
   fontCache->put(fontId, font);
   return hb_font_reference(font);
+}
+
+void putHugeFontIdLocked(int32_t fontId, size_t fontSize) {
+  assertMinikinLocked();
+  if (fontSize >= HUGE_FONT_SIZE) {
+    getFontCacheLocked()->putHugeFontId(fontId);
+  }
+}
+void clearHugeFontCacheLocked() {
+  assertMinikinLocked();
+  getFontCacheLocked()->clearHugeFont();
 }
 
 }  // namespace minikin

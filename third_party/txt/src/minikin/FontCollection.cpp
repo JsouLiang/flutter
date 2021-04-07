@@ -317,7 +317,7 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     uint32_t langListId,
     int variant) const {
   // BD ADD:
-  TRACE_EVENT0("flutter", "FontCollection::getFamilyForChar");
+//  TRACE_EVENT0("flutter", "FontCollection::getFamilyForChar");
   if (ch >= mMaxChar) {
     // libtxt: check if the fallback font provider can match this character
     // BD ADD: START
@@ -501,7 +501,7 @@ void FontCollection::itemize(const uint16_t* string,
                              FontStyle style,
                              vector<Run>* result) const {
   // BD ADD:
-  TRACE_EVENT0("flutter", "FontCollection::itemize");
+//  TRACE_EVENT0("flutter", "FontCollection::itemize");
   const uint32_t langListId = style.getLanguageListId();
   int variant = style.getVariant();
   const FontFamily* lastFamily = nullptr;

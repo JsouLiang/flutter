@@ -64,6 +64,11 @@ class Performance {
   void UpdateIOCacheUsageKB(fml::WeakPtr<GrDirectContext> iOContext);
   void UpdateSkGraphicMemUsageKB();
   std::vector<int64_t> GetMemoryDetails();
+  void RecordLastLayoutTime();
+  int64_t GetRecordLastLayoutTime();
+  void ClearHugeFontCache();
+  void ClearAllFontCache();
+  void ClearLayoutCache();
 
  private:
   Performance();
@@ -100,6 +105,9 @@ class Performance {
   std::atomic_int64_t fontMem_;
   std::atomic_int64_t imageFilter_;
   std::atomic_int64_t mallocSize_;
+
+  // record last layout time
+  std::atomic_int64_t lastLayoutTime_;
 
 };
 

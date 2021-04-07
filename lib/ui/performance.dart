@@ -102,6 +102,11 @@ class Performance {
 
 
   void warmUpZeroSizeOnce(bool enable) native 'Performance_warmUpZeroSizeOnce';
+
+  int getRecordLastLayoutTime() native 'Performance_getRecordLastLayoutTime';
+  void clearHugeFontCache() native 'Performance_clearHugeFontCache';
+  void clearAllFontCache() native 'Performance_clearAllFontCache';
+  void clearLayoutCache() native 'Performance_clearLayoutCache';
 }
 
 /// The [Performance] singleton.
