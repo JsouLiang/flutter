@@ -17,6 +17,8 @@
 #include "font_skia.h"
 
 #include <minikin/MinikinFont.h>
+// BD ADD:
+#include <minikin/HbFontCache.h>
 
 #include "third_party/skia/include/core/SkFont.h"
 
@@ -38,6 +40,8 @@ hb_blob_t* GetTable(hb_face_t* face, hb_tag_t tag, void* context) {
     free(buffer);
     return nullptr;
   }
+  // BD ADD:
+  minikin::putHugeFontIdLocked(typeface->uniqueID(), actual_size);
   return hb_blob_create(reinterpret_cast<char*>(buffer), table_size,
                         HB_MEMORY_MODE_WRITABLE, buffer, free);
 }

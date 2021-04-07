@@ -116,6 +116,9 @@ class Layout {
 
   // Purge all caches, useful in low memory conditions
   static void purgeCaches();
+  // BD ADD: START
+  static void purgeHugeFontCaches();
+  static void purgeAllFontCaches();
 
  private:
   friend class LayoutCacheKey;

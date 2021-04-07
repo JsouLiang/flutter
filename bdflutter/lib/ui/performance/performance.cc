@@ -2,6 +2,7 @@
 
 #include "performance.h"
 #include <flutter/fml/make_copyable.h>
+#include <flutter/third_party/txt/src/minikin/Layout.h>
 #include "bdflutter/common/fps_recorder.h"
 #include "boost.h"
 #include "flutter/flow/instrumentation.h"
@@ -620,6 +621,44 @@ std::vector<int64_t> Performance::GetMemoryDetails() {
   return mem;
 }
 
+void Performance::RecordLastLayoutTime() {
+  lastLayoutTime_ = Performance::CurrentTimestamp();
+}
+
+int64_t Performance::GetRecordLastLayoutTime() {
+  return lastLayoutTime_;
+}
+
+void Performance::ClearHugeFontCache() {
+  minikin::Layout::purgeHugeFontCaches();
+}
+
+void Performance::ClearAllFontCache() {
+  minikin::Layout::purgeAllFontCaches();
+}
+
+void Performance::ClearLayoutCache() {
+  minikin::Layout::purgeCaches();
+}
+
+void Performance_getRecordLastLayoutTime(Dart_NativeArguments args) {
+  Dart_SetReturnValue(
+      args,
+      Dart_NewInteger(Performance::GetInstance()->GetRecordLastLayoutTime()));
+}
+
+void Performance_clearHugeFontCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearHugeFontCache();
+}
+
+void Performance_clearAllFontCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearAllFontCache();
+}
+
+void Performance_clearLayoutCache(Dart_NativeArguments args) {
+  Performance::GetInstance()->ClearLayoutCache();
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -654,7 +693,12 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
        2, true},
       {"Performance_getGpuCacheUsageKBInfo", Performance_getGpuCacheUsageKBInfo,
        2, true},
-
+      {"Performance_getRecordLastLayoutTime",
+       Performance_getRecordLastLayoutTime, 1, true},
+      {"Performance_clearHugeFontCache", Performance_clearHugeFontCache, 1,
+       true},
+      {"Performance_clearAllFontCache", Performance_clearAllFontCache, 1, true},
+      {"Performance_clearLayoutCache", Performance_clearLayoutCache, 1, true},
   });
 }
 

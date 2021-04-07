@@ -13,6 +13,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 // BD ADD: START
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
 #include "flutter/fml/make_copyable.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 // END
@@ -112,6 +113,8 @@ void Paragraph::layout(double maxWidth,
                   ui_task_runner = task_runners.GetUITaskRunner(), maxWidth,
                   minWidth, callback]() {
     if (auto paragraph = weak_paragraph.lock()) {
+      // BD ADD:
+      Performance::GetInstance()->RecordLastLayoutTime();
       paragraph->Layout(maxWidth);
 
       if (minWidth >= 0 && minWidth != maxWidth) {
