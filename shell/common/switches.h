@@ -214,6 +214,7 @@ DEF_SWITCH(DisablePreload,
      "disable-preload",
      "Disable preload DartVM and SkFontMgr")
 DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
+DEF_SWITCH(OptSurfaceTexture, "opt_surface_texture", "opt surface texture with ndk(true/false)")
 // END
 DEF_SWITCHES_END
 

@@ -224,6 +224,7 @@ struct Settings {
   bool limit_skia_worker = false;
   bool disable_preload = false;
   bool high_qos = false;
+  bool opt_surfacetexture = false;
   // END
 
   // Callback to handle the timings of a rasterized frame. This is called as

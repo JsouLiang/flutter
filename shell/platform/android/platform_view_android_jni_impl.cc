@@ -856,18 +856,20 @@ static void RegisterTexture(JNIEnv* env,
   // ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
   //        static_cast<int64_t>(texture_id),
   //        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture));
-  ASurfaceTexture*  nSurfaceTexturePtr = getNativeSurfaceTexture(env, surface_texture);
-  if (nSurfaceTexturePtr != nullptr) {
-    ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
-        static_cast<int64_t>(texture_id),
-        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture),
-        nSurfaceTexturePtr);
-  } else 
-  {
-    ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
-        static_cast<int64_t>(texture_id),
-        fml::jni::JavaObjectWeakGlobalRef(env, surface_texture));
+  if(ANDROID_SHELL_HOLDER->GetSettings().opt_surfacetexture) {
+    ASurfaceTexture*  nSurfaceTexturePtr = getNativeSurfaceTexture(env, surface_texture);
+    if (nSurfaceTexturePtr != nullptr) {
+        ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+            static_cast<int64_t>(texture_id),
+            fml::jni::JavaObjectWeakGlobalRef(env, surface_texture),
+            nSurfaceTexturePtr);
+            return;
+    }
   }
+
+  ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterExternalTexture(
+      static_cast<int64_t>(texture_id),
+      fml::jni::JavaObjectWeakGlobalRef(env, surface_texture));
   // END
 }
 

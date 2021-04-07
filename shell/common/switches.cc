@@ -363,6 +363,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   if (command_line.HasOption(FlagForSwitch(Switch::DisableLeakVM))) {
       settings.leak_vm = false;
   }
+   if(command_line.HasOption(FlagForSwitch(Switch::OptSurfaceTexture))) {
+      settings.opt_surfacetexture = true;
+   }
   // END
   if (settings.icu_initialization_required) {
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
