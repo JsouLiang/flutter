@@ -374,6 +374,26 @@ class Shell final : public PlatformView::Delegate,
   ///
   bool EngineHasLivePorts() const;
 
+  /**
+   * BD ADD:
+   * 增加后台渲染能力，防止一些情况dispose没执行
+   */
+  void ScheduleBackgroundFrame();
+  /**
+   * BD ADD:
+   * 增加立即渲染能力，优化首帧响应速度
+   */
+  void ScheduleFrameNow();
+  /**
+   * BD ADD:
+   * notify flutter to exit app when native container destory
+   * @param closure callback
+   */
+  void ExitApp(fml::closure closure);
+
+  // BD ADD:
+  bool IsInShellNotBlockAndPosting();
+
   //----------------------------------------------------------------------------
   /// @brief     Accessor for the disable GPU SyncSwitch
   std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override;
@@ -458,6 +478,12 @@ class Shell final : public PlatformView::Delegate,
 
   // used to discard wrong size layer tree produced during interactive resizing
   SkISize expected_frame_size_ = SkISize::MakeEmpty();
+
+  // BD ADD: START
+  bool is_preload_ = false;
+  bool is_createView_post_ = false;
+  int64_t lastIOMemUpdate_ = 0;
+  // END
 
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;

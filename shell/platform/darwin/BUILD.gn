@@ -6,6 +6,8 @@ assert(is_mac || is_ios)
 
 import("//flutter/shell/platform/config.gni")
 import("//flutter/testing/testing.gni")
+# BD: ADD
+import("//flutter/bdflutter/shell/platform/darwin/common/BD_BUILD.gni")
 
 group("darwin") {
   if (is_ios) {

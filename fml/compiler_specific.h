@@ -26,4 +26,16 @@
 #define FML_ALLOW_UNUSED_TYPE
 #endif
 
+// BD ADD: START
+// Annotate a function indicating the caller must examine the return value.
+// Use like:
+//   int foo() FML_WARN_UNUSED_RESULT;
+// To explicitly ignore a result, see |ignore_result()| in base/macros.h.
+#if defined(__GNUC__) || defined(__clang__)
+#define FML_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define FML_WARN_UNUSED_RESULT
+#endif
+// END
+
 #endif  // FLUTTER_FML_COMPILER_SPECIFIC_H_

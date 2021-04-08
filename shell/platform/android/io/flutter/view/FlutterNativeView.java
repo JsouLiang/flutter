@@ -153,6 +153,16 @@ public class FlutterNativeView implements BinaryMessenger {
     dartExecutor.onAttachedToJNI();
   }
 
+  // BD ADD: START
+  public void updateNative(String assetsPath) {
+      updateNative(assetsPath, null);
+  }
+
+  public void updateNative(String assetsPath, String preloadLibs) {
+      mFlutterJNI.updateNative(assetsPath, preloadLibs);
+  }
+  // END
+
   private final class EngineLifecycleListenerImpl implements EngineLifecycleListener {
     // Called by native to notify when the engine is restarted (cold reload).
     @SuppressWarnings("unused")

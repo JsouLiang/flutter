@@ -450,6 +450,16 @@ void Engine::ScheduleFrame(bool regenerate_layer_tree) {
   animator_->RequestFrame(regenerate_layer_tree);
 }
 
+// BD ADD: START
+void Engine::ScheduleBackgroundFrame() {
+    animator_->RequestBackgroundFrame();
+}
+
+void Engine::ScheduleFrameNow() {
+    animator_->RequestFrameNow();
+}
+// END
+
 void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   if (!layer_tree) {
     return;
@@ -539,6 +549,16 @@ const std::string& Engine::GetLastEntrypoint() const {
 const std::string& Engine::GetLastEntrypointLibrary() const {
   return last_entry_point_library_;
 }
+
+// BD ADD: START
+void Engine::ExitApp() {
+    runtime_controller_->ExitApp();
+}
+
+void Engine::NotifyLowMemoryWarning() {
+    runtime_controller_->NotifyLowMemoryWarning();
+}
+// END
 
 // |RuntimeDelegate|
 void Engine::RequestDartDeferredLibrary(intptr_t loading_unit_id) {

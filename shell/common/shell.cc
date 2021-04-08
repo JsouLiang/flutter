@@ -1771,6 +1771,56 @@ std::shared_ptr<fml::SyncSwitch> Shell::GetIsGpuDisabledSyncSwitch() const {
   return is_gpu_disabled_sync_switch_;
 }
 
+// BD ADD: START
+void Shell::ScheduleBackgroundFrame() {
+    // BD MOD:
+    // FML_DCHECK(is_setup_);
+    FML_DCHECK(is_preload_ || is_setup_);
+    FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+    task_runners_.GetUITaskRunner()->PostTask([this] {
+        auto engine = GetEngine();
+        if (engine) {
+            engine->ScheduleBackgroundFrame();
+        }
+    });
+}
+
+void Shell::ScheduleFrameNow() {
+    FML_DCHECK(is_setup_);
+    FML_DCHECK(is_preload_ || is_setup_);
+    FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+    task_runners_.GetUITaskRunner()->PostTaskAtHead([this] {
+        auto engine = GetEngine();
+        if (engine) {
+            engine->ScheduleFrameNow();
+        }
+    });
+}
+
+void Shell::ExitApp(fml::closure closure) {
+    // 1：notify flutter to exit app
+    fml::TaskRunner::RunNowOrPostTask(
+            task_runners_.GetUITaskRunner(),
+            fml::MakeCopyable(
+                    [this, ui_task_runner = task_runners_.GetUITaskRunner(),
+                            platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+                            closure = std::move(closure)]() {
+                        auto engine = GetEngine();
+                        if (engine) {
+                            engine->ExitApp();
+                        }
+                        // 步骤2：完成UI线程剩余任务
+                        ui_task_runner->PostTask(fml::MakeCopyable(
+                                [platform_task_runner, closure = std::move(closure)] {
+                                    // 步骤3：完成Platform线程剩余任务
+                                    platform_task_runner->PostTask(fml::MakeCopyable(
+                                            [closure = std::move(closure)] { closure(); }));
+                                }));
+                    }));
+}
+
 void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
                              std::vector<Display> displays) {
   display_manager_->HandleDisplayUpdates(update_type, displays);

@@ -355,6 +355,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);
 
+  // BD ADD:START
+  command_line.GetOptionValue(FlagForSwitch(Switch::PackageDillPath),
+                              &settings.package_dill_path);
+  command_line.GetOptionValue(FlagForSwitch(Switch::PackagePreloadLibs),
+                                &settings.package_preload_libs);
+  settings.dynamicart_host =
+          command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
+  // END
+
   if (settings.icu_initialization_required) {
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
                                 &settings.icu_data_path);

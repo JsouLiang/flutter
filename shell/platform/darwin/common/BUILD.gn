@@ -4,6 +4,8 @@
 
 import("//flutter/common/config.gni")
 import("framework_shared.gni")
+# BD: ADD
+import("//flutter/bdflutter/shell/platform/darwin/common/BD_BUILD.gni")
 
 source_set("common") {
   cflags_objc = flutter_cflags_objc

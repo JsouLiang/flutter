@@ -411,6 +411,10 @@ class PlatformConfiguration final {
   ///
   void CompletePlatformMessageEmptyResponse(int response_id);
 
+  // BD ADD: START
+  void ExitApp();
+  // END
+
  private:
   PlatformConfigurationClient* client_;
   tonic::DartPersistentValue update_locales_;
@@ -423,6 +427,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
+  tonic::DartPersistentValue exit_app_;
 
   std::unordered_map<int64_t, std::unique_ptr<Window>> windows_;
 

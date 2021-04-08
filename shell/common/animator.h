@@ -48,6 +48,11 @@ class Animator final {
   ~Animator();
 
   void RequestFrame(bool regenerate_layer_tree = true);
+  // BD ADD
+  void RequestBackgroundFrame();
+
+  // BD ADD
+  void RequestFrameNow();
 
   void Render(std::unique_ptr<flutter::LayerTree> layer_tree);
 
@@ -88,6 +93,8 @@ class Animator final {
   void DrawLastLayerTree();
 
   void AwaitVSync();
+  // BD ADD
+  void AwaitVSyncForBackground();
 
   const char* FrameParity();
 

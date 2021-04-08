@@ -77,6 +77,12 @@ FLUTTER_DARWIN_EXPORT
  */
 + (NSString*)defaultBundleIdentifier;
 
+/**
+ * Package settings
+ */
+- (void)setDillPath:(NSString*)path;    // 动态App压缩包路径
+- (void)setEnginePath:(NSString*)path;  // 动态Engine文件夹路径
+
 @end
 
 NS_ASSUME_NONNULL_END

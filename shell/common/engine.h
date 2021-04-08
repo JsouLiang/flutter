@@ -781,6 +781,16 @@ class Engine final : public RuntimeDelegate,
   // |RuntimeDelegate|
   FontCollection& GetFontCollection() override;
 
+  // BD ADD: START
+  void ScheduleBackgroundFrame();
+
+  void ScheduleFrameNow();
+
+  void ExitApp();
+
+  void NotifyLowMemoryWarning();
+  // END
+
   // Return the asset manager associated with the current engine, or nullptr.
   std::shared_ptr<AssetManager> GetAssetManager();
 

@@ -5,6 +5,8 @@
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
+# BD: ADD
+import("//flutter/bdflutter/lib/BD_BUILD.gni")
 
 source_set("ui") {
   sources = [

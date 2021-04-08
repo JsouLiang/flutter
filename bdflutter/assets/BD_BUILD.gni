@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+bd_flutter_assets = "//flutter/bdflutter/assets"
+
+assets_store = [
+  "$bd_flutter_assets/zip_asset_store.h",
+  "$bd_flutter_assets/zip_asset_store.cc",
+]
+
+assets_deps = [
+   "//third_party/zlib:minizip",
+]
+

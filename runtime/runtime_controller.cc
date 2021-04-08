@@ -482,4 +482,16 @@ RuntimeController::Locale::Locale(std::string language_code_,
 
 RuntimeController::Locale::~Locale() = default;
 
+// BD ADD: START
+
+void RuntimeController::ExitApp() {
+    if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+        platform_configuration->ExitApp();
+    }
+}
+
+void RuntimeController::NotifyLowMemoryWarning() {
+    Dart_NotifyLowMemory();
+}
+
 }  // namespace flutter

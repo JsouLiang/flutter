@@ -6,6 +6,8 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/platform/config.gni")
 import("//flutter/shell/platform/glfw/config.gni")
 import("//flutter/testing/testing.gni")
+# BD: ADD
+import("//flutter/bdflutter/bdconfig.gni")
 
 # Whether to build the dartdevc sdk, libraries, and source files
 # required for the flutter web sdk.

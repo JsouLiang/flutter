@@ -469,4 +469,15 @@ void PlatformConfiguration::RegisterNatives(
   });
 }
 
+// BD ADD: START
+void PlatformConfiguration::ExitApp() {
+    std::shared_ptr<tonic::DartState> dart_state = exit_app_.dart_state().lock();
+    if (!dart_state)
+        return;
+    tonic::DartState::Scope scope(dart_state);
+
+    tonic::LogIfError(tonic::DartInvokeField(exit_app_.value(), "_exitApp", {}));
+}
+// END
+
 }  // namespace flutter

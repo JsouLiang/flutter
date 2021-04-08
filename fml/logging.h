@@ -95,4 +95,8 @@ bool ShouldCreateLogMessage(LogSeverity severity);
     ::fml::KillProcess();                          \
   }
 
+// BD ADD: START
+#define TT_LOG() FML_LOG(ERROR)
+// END
+
 #endif  // FLUTTER_FML_LOGGING_H_

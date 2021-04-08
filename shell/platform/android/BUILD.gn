@@ -8,6 +8,9 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
+# BD ADD
+import("//flutter/bdflutter/shell/platform/android/BD_BUILD.gni")
+import("//third_party/dart/runtime/runtime_args.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
@@ -110,7 +113,16 @@ action("gen_android_build_config_java") {
   ]
 }
 
-embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode"
+# BD MOD: START
+#embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode"
+if (lite_suffix != "") {
+    embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode" + "_$lite_suffix"
+} else if (dynamicart) {
+  embedding_artifact_id = "flutter_embedding_"+"dynamicart"+"_$flutter_runtime_mode"
+} else {
+  embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode"
+}
+# END
 embedding_jar_filename = "$embedding_artifact_id.jar"
 embedding_jar_path = "$root_out_dir/$embedding_jar_filename"
 
@@ -366,6 +378,21 @@ action("android_jar") {
     "$root_build_dir/$engine_library",
   ]
 
+  # BD MOD: START
+  # engine_artifact_id =
+  #       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  if (lite_suffix != "") {
+    engine_artifact_id =
+          string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode + "_$lite_suffix"
+  } else if (dynamicart) {
+    engine_artifact_id =
+          string_replace(android_app_abi, "-", "_") + "_dynamicart_" + flutter_runtime_mode
+  } else {
+    engine_artifact_id =
+          string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  }
+  # END
+
   engine_artifact_id =
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
@@ -402,6 +429,21 @@ action("pom_libflutter") {
 
   inputs = [ "//flutter/tools/androidx/files.json" ]
 
+  # BD MOD: START
+  #artifact_id =
+  #    string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  if (lite_suffix != "") {
+    artifact_id =
+              string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode + "_$lite_suffix"
+  } else if (dynamicart) {
+    artifact_id =
+          string_replace(android_app_abi, "-", "_") + "_dynamicart_" + flutter_runtime_mode
+  } else {
+    artifact_id =
+          string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+  }
+  # END
+
   artifact_id =
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
@@ -424,6 +466,17 @@ action("pom_embedding") {
   script = "//flutter/tools/androidx/generate_pom_file.py"
 
   inputs = [ "//flutter/tools/androidx/files.json" ]
+
+  # BD MOD: START
+  # artifact_id = "flutter_embedding_$flutter_runtime_mode"
+  if (lite_suffix != "") {
+    artifact_id = "flutter_embedding_${flutter_runtime_mode}_$lite_suffix"
+  } else if (dynamicart) {
+    artifact_id = "flutter_embedding_"+"dynamicart"+"_$flutter_runtime_mode"
+  } else {
+    artifact_id = "flutter_embedding_$flutter_runtime_mode"
+  }
+  # END
 
   artifact_id = "flutter_embedding_$flutter_runtime_mode"
 

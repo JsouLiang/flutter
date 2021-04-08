@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+// BD ADD:
+import io.flutter.embedding.engine.FlutterShellArgs;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -46,6 +48,11 @@ public class FlutterLoader {
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
   private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
+
+  private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
+  private static final String DEFAULT_OPTI_PROPS = "optimize.properties";
+  private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
+  private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
   private static FlutterLoader instance;
 
@@ -71,6 +78,16 @@ public class FlutterLoader {
   public FlutterLoader() {
     this(new FlutterJNI());
   }
+
+  // BD ADD START:
+  public interface SoLoader {
+    void loadLibrary(Context context, String libraryName);
+  }
+
+  public interface MonitorCallback {
+    void onMonitor(String event, long cost);
+  }
+  // END
 
   /**
    * Creates a {@code FlutterLoader} with the specified {@link FlutterJNI}.
@@ -201,6 +218,13 @@ public class FlutterLoader {
       List<String> shellArgs = new ArrayList<>();
       shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
 
+      // BD ADD: START
+      String nativeLibraryDir = settings.getNativeLibraryDir();
+      if (nativeLibraryDir == null) {
+        nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
+      }
+      // END
+
       shellArgs.add(
           "--icu-native-lib-path="
               + flutterApplicationInfo.nativeLibraryDir
@@ -233,6 +257,11 @@ public class FlutterLoader {
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
+      }
+
+      String hostManifestJson = PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir + File.separator + DEFAULT_HOST_MANIFEST_JSON;
+      if(new File(hostManifestJson).exists()) {
+          shellArgs.add("--dynamicart-host");
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
@@ -346,15 +375,16 @@ public class FlutterLoader {
       final String packageName = applicationContext.getPackageName();
       final PackageManager packageManager = applicationContext.getPackageManager();
       final AssetManager assetManager = applicationContext.getResources().getAssets();
-      resourceExtractor =
-          new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
+      resourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager, settings);
 
       // In debug/JIT mode these assets will be written to disk and then
       // mapped into memory so they can be provided to the Dart VM.
       resourceExtractor
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
-          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
+          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
+          .addResource(fullAssetPathFrom(DEFAULT_HOST_MANIFEST_JSON))
+          .addResource(fullAssetPathFrom2(DEFAULT_OPTI_PROPS));
 
       resourceExtractor.start();
     }
@@ -397,8 +427,58 @@ public class FlutterLoader {
     return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
   }
 
+  @NonNull
+  private String fullAssetPathFrom2(@NonNull String filePath) {
+    return filePath;
+  }
+
+  public interface InitExceptionCallback {
+      void onRetryException(Throwable t);
+      void onInitException(Throwable t);
+  }
+
   public static class Settings {
     private String logTag;
+    // BD ADD START:
+    private String nativeLibraryDir;
+    private SoLoader soLoader;
+    private MonitorCallback monitorCallback;
+    private boolean disableLeakVM = false;
+    private Runnable onInitResources;
+    private InitExceptionCallback initExceptionCallback;
+    private boolean enableDebugMode = false;
+
+    public Runnable getOnInitResourcesCallback() {
+         return onInitResources;
+     }
+
+    public void setOnInitResourcesCallback(Runnable callback) {
+         onInitResources = callback;
+    }
+
+     public InitExceptionCallback getInitExceptionCallback() {
+         return initExceptionCallback;
+    }
+
+    public void setInitExceptionCallback(InitExceptionCallback iec) {
+           initExceptionCallback = iec;
+    }
+
+    public String getNativeLibraryDir() {
+      return nativeLibraryDir;
+    }
+
+    public SoLoader getSoLoader() {
+      return soLoader;
+    }
+
+    public void setNativeLibraryDir(String dir) {
+      nativeLibraryDir = dir;
+    }
+
+    public void setSoLoader(SoLoader loader) {
+      soLoader = loader;
+    }
 
     @Nullable
     public String getLogTag() {

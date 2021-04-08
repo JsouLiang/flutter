@@ -22,6 +22,11 @@ declare_args() {
 
   # Whether to use the legacy embedder when building for Fuchsia.
   flutter_enable_legacy_fuchsia_embedder = true
+
+  # BD ADD: START
+  lite_suffix = ""
+  flutter_enable_systrace_direct = false
+  # END
 }
 
 # feature_defines_list ---------------------------------------------------------

@@ -265,6 +265,41 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
   shell_->NotifyLowMemoryWarning();
 }
 
+// BD ADD: START
+void AndroidShellHolder::UpdateSettings(const std::string& package_dill_path, const std::string& package_preload_libs) {
+    if (!IsValid()) {
+        return;
+    }
+    std::string a = "bc";
+    std::string b = "cd";
+    a = b;
+    settings_.package_dill_path = package_dill_path;
+    settings_.package_preload_libs = package_preload_libs;
+}
+
+// BD ADD: START
+void AndroidShellHolder::ScheduleBackgroundFrame() {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ScheduleBackgroundFrame();
+}
+
+void AndroidShellHolder::ScheduleFrameNow() {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ScheduleFrameNow();
+}
+
+void AndroidShellHolder::ExitApp(fml::closure closure) {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ExitApp(std::move(closure));
+}
+// END
+
 std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     std::shared_ptr<flutter::AssetManager> asset_manager,
     const std::string& entrypoint,

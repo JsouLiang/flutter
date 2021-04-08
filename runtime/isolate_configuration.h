@@ -76,6 +76,12 @@ class IsolateConfiguration {
   ///
   static std::unique_ptr<IsolateConfiguration> CreateForAppSnapshot();
 
+  // BD ADD: START
+  static std::unique_ptr<IsolateConfiguration> CreateForDynamicart(
+          const Settings &settings,
+          AssetManager& asset_manager);
+  // END
+
   //----------------------------------------------------------------------------
   /// @brief      Creates a JIT isolate configuration using a list of futures to
   ///             snapshots defining the ready isolate state. In environments
@@ -163,6 +169,10 @@ class IsolateConfiguration {
   virtual bool DoPrepareIsolate(DartIsolate& isolate) = 0;
 
  private:
+  // BD ADD: START
+  static std::unique_ptr<IsolateConfiguration> CreateForDynamicartKernel(
+          std::vector<std::unique_ptr<const fml::Mapping>> kernel_pieces, std::string package_preload_libs);
+  // END
   FML_DISALLOW_COPY_AND_ASSIGN(IsolateConfiguration);
 };
 

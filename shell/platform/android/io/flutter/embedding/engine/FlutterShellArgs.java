@@ -9,6 +9,9 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 import java.util.*;
 
+// BD ADD:
+import android.text.TextUtils;
+
 /**
  * Arguments that can be delivered to the Flutter shell when it is created.
  *
@@ -117,6 +120,15 @@ public class FlutterShellArgs {
     if (intent.hasExtra(ARG_KEY_DART_FLAGS)) {
       args.add(ARG_DART_FLAGS + "=" + intent.getStringExtra(ARG_KEY_DART_FLAGS));
     }
+
+    // BD ADD:
+    String path = intent.getStringExtra("package_dill_path");
+    String preLoadLibs = intent.getStringExtra("package_preload_libs");
+    if (!TextUtils.isEmpty(path)){
+      args.add("--package_dill_path="+path);
+      args.add("--package_preload_libs="+preLoadLibs);
+    }
+    // END
 
     return new FlutterShellArgs(args);
   }

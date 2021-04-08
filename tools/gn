@@ -54,6 +54,11 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
+    # BD ADD: START
+    if args.dynamicart:
+        target_dir.append('dynamicart')
+    # END
+
     if args.macos_enable_metal:
       target_dir.append('metal')
 
@@ -93,6 +98,10 @@ def to_gn_args(args):
         gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
+    # check dynamicart arg
+    if args.dynamicart and runtime_mode not in ['profile', 'release']:
+        raise Exception('--dynamicart is only supported on --release or --profile')
+    gn_args['dynamicart'] = args.dynamicart # Enable dynamicart Mode.
 
     # Skia GN args.
     gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
@@ -137,6 +146,11 @@ def to_gn_args(args):
     enable_lto = args.lto
     if args.unoptimized:
       # There is no point in enabling LTO in unoptimized builds.
+      enable_lto = False
+
+    #if args.dynamicart == 'dynamicart' and args.runtime_mode == 'profile':
+    if args.dynamicart and args.runtime_mode == 'profile':
+      print("enable_lto")
       enable_lto = False
 
     if not sys.platform.startswith('win'):
@@ -434,6 +448,9 @@ def parse_args(args):
   parser.add_argument('--msan', default=False, action='store_true')
   parser.add_argument('--tsan', default=False, action='store_true')
   parser.add_argument('--ubsan', default=False, action='store_true')
+
+  # BD ADD: START
+  parser.add_argument('--dynamicart', default=False, action='store_true')
 
   return parser.parse_args(args)
 

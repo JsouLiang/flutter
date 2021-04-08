@@ -253,4 +253,51 @@ void Animator::ScheduleSecondaryVsyncCallback(const fml::closure& callback) {
   waiter_->ScheduleSecondaryCallback(callback);
 }
 
+// BD ADD: START
+void Animator::RequestBackgroundFrame() {
+    if (!paused_) {
+        return;
+    }
+
+    if (!pending_frame_semaphore_.TryWait()) {
+        return;
+    }
+    regenerate_layer_tree_ = true;
+    frame_scheduled_ = true;
+    task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
+                                                      frame_number = frame_number_]() {
+        if (!self.get()) {
+            return;
+        }
+        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+        self->AwaitVSyncForBackground();
+    });
+}
+
+void Animator::AwaitVSyncForBackground() {
+    waiter_->AsyncWaitForVsync(
+            [self = weak_factory_.GetWeakPtr()](fml::TimePoint frame_start_time,
+                                                fml::TimePoint frame_target_time) {
+                if (self) {
+                    self->BeginFrame(frame_start_time, frame_target_time);
+                }
+            });
+    // BD MOD:
+    // delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+    delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
+}
+
+void Animator:: RequestFrameNow() {
+    fml::WeakPtr<Animator> self = weak_factory_.GetWeakPtr();
+    if (!self.get()) {
+        return;
+    }
+    if(self) {
+        self->BeginFrame( fml::TimePoint::Now(), fml::TimePoint::Now() + fml::TimeDelta::FromMilliseconds(5));
+    }
+    // TODO:
+    TRACE_EVENT_ASYNC_BEGIN0("flutter", "RequestFrameNow", 1);
+}
+// END
+
 }  // namespace flutter

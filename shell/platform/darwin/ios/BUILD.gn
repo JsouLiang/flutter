@@ -10,6 +10,8 @@ import("//flutter/common/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/darwin/common/framework_shared.gni")
 import("//flutter/testing/testing.gni")
+# BD: ADD
+import("//flutter/bdflutter/shell/platform/darwin/ios/BD_BUILD.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 

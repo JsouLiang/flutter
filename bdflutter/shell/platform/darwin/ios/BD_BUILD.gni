@@ -1,0 +1,39 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/shell/gpu/gpu.gni")
+
+bd_flutter_ios_path = "//flutter/bdflutter/shell/platform/darwin/ios"
+
+external_image_loader_sources = [
+  "$bd_flutter_ios_path/ios_image_loader_callback_context.h",
+  "$bd_flutter_ios_path/ios_external_image_loader.h",
+  "$bd_flutter_ios_path/ios_external_image_loader.mm",
+  "$bd_flutter_ios_path/ios_external_image_loader_gl.h",
+  "$bd_flutter_ios_path/ios_external_image_loader_gl.mm",
+]
+
+if (shell_enable_metal) {
+  external_image_loader_sources += [
+    "$bd_flutter_ios_path/ios_external_image_loader_metal.h",
+    "$bd_flutter_ios_path/ios_external_image_loader_metal.mm",
+  ]
+}
+
+compress_size_sources = [
+  "$bd_flutter_ios_path/framework/Source/FlutterCompressSizeModeManager.h",
+  "$bd_flutter_ios_path/framework/Source/FlutterCompressSizeModeManager.mm",
+  "$bd_flutter_ios_path/framework/Source/FlutterZipArchive.h",
+  "$bd_flutter_ios_path/framework/Source/FlutterZipArchive.m",
+  "$bd_flutter_ios_path/framework/Source/NSData+FlutterGzip.h",
+  "$bd_flutter_ios_path/framework/Source/NSData+FlutterGzip.m",
+]
+
+assets_deps = [
+  "//flutter/assets",
+  "//third_party/zlib",
+  "//third_party/zlib:minizip",
+]
+
+skia_lite_libs = ["CoreGraphics.framework", "Metal.framework",]
