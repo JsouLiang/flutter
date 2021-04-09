@@ -156,6 +156,7 @@ dynamic classInvoke(dynamic cls, int invokeType, String functionName, List argum
 
 dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, List arguments, List names) native 'Reflect_instanceInvoke';
 
+void setMaxImageSize(int imageSize) native 'SetMaxImageSize';
 /// END
 
 int Performance_getRecordLastLayoutTime() native 'Performance_getRecordLastLayoutTime';

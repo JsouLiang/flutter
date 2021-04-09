@@ -223,4 +223,24 @@ void Performance::ClearLayoutCache() {
   minikin::Layout::purgeCaches();
 }
 
+void Performance::SetViewportSize(int32_t width, int32_t  height) {
+  viewportSize_ = {max(width, viewportSize_.fWidth), max(viewportSize_.fHeight, height)};
+  maxImageWidthByViewport = viewportSize_.fWidth * imageResizeRatio;
+}
+
+int32_t Performance::GetMaxImageWidth() {
+  return maxImageWidthByUser_ != 0 ? maxImageWidthByUser_ : viewportSize_.fWidth;
+}
+
+bool Performance::NeedResizeImage(int32_t width) {
+  if (maxImageWidthByUser_ < 0) {
+    return false;
+  }
+  int limit = maxImageWidthByUser_ != 0 ? maxImageWidthByUser_ : maxImageWidthByViewport;
+  return limit > 0 && width > limit;
+}
+
+void Performance::SetMaxImageWidth(int32_t width) {
+  maxImageWidthByUser_ = width;
+}
 }

@@ -18,6 +18,7 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 // BD ADD:
 #include "flutter/lib/ui/boost.h"
+#include "flutter/lib/ui/performance.h"
 
 namespace flutter {
 namespace {
@@ -280,6 +281,8 @@ void Window::DidCreateIsolate() {
 }
 
 void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
+  // BD ADD:
+  Performance::GetInstance()->SetViewportSize((int32_t) metrics.physical_width, (int32_t) metrics.physical_height);
   viewport_metrics_ = metrics;
 
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();

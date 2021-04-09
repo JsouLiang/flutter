@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// BD ADD:
+// BD ADD: START
 #include "flutter/lib/ui/boost.h"
+#include <flutter/lib/ui/performance.h>
+// END
 #include "flutter/lib/ui/painting/image_decoder.h"
 
 #include <algorithm>
@@ -54,6 +56,14 @@ static SkISize GetResizedDimensions(SkISize current_size,
   if (target_width && target_height) {
     return SkISize::Make(target_width.value(), target_height.value());
   }
+
+  // BD ADD: START
+  if (!target_width && !target_height) {
+    if (Performance::GetInstance()->NeedResizeImage(current_size.fWidth)) {
+      target_width = Performance::GetInstance()->GetMaxImageWidth();
+    }
+  }
+  // END
 
   const auto aspect_ratio = AspectRatio(current_size);
 
@@ -267,10 +277,13 @@ sk_sp<SkImage> ImageFromCompressedData(sk_sp<SkData> data,
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
 
-  if (!target_width && !target_height) {
+   // BD MOD:
+   // if (!target_width && !target_height) {
+   if (!target_width && !target_height && !Performance::GetInstance()->NeedResizeImage()) {
     // No resizing requested. Just decode & rasterize the image.
     return SkImage::MakeFromEncoded(data)->makeRasterImage();
-  }
+   }
+
 
   auto codec = SkCodec::MakeFromData(data);
   if (codec == nullptr) {
@@ -283,6 +296,17 @@ sk_sp<SkImage> ImageFromCompressedData(sk_sp<SkData> data,
   // respect image orientation provided e.g. in EXIF data.
   auto image_generator = SkCodecImageGenerator::MakeFromCodec(std::move(codec));
   const auto& source_dimensions = image_generator->getInfo().dimensions();
+
+  // BD ADD: START
+  if (!target_width && !target_height) {
+    if (Performance::GetInstance()->NeedResizeImage(source_dimensions.fWidth)) {
+      target_width = Performance::GetInstance()->GetMaxImageWidth();
+    } else {
+      // No resizing requested. Just decode & rasterize the image.
+      return SkImage::MakeFromEncoded(data)->makeRasterImage();
+    }
+  }
+  // END
 
   auto resized_dimensions =
       GetResizedDimensions(source_dimensions, target_width, target_height);

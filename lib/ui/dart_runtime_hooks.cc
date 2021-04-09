@@ -83,7 +83,8 @@ namespace flutter {
   V(Reflect_libraryInvoke, 5)              \
   V(Reflect_reflectClass, 2)               \
   V(Reflect_classInvoke, 5)                \
-  V(Reflect_instanceInvoke, 5)
+  V(Reflect_instanceInvoke, 5)             \
+  V(SetMaxImageSize, 1)
   /** END **/
 
   BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
@@ -601,6 +602,11 @@ void Performance_getTotalExtMemInfo(Dart_NativeArguments args) {
   }
   tonic::DartInvoke(callback_handle, {data_handle});
 #endif
+}
+
+void SetMaxImageSize(Dart_NativeArguments args) {
+  int32_t maxImageSize = (int32_t)DartConverter<int32_t >::FromDart(Dart_GetNativeArgument(args, 0));
+  Performance::GetInstance()->SetMaxImageWidth(maxImageSize);
 }
 
 void Performance_startStackTraceSamples(Dart_NativeArguments args) {

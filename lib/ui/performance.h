@@ -51,9 +51,31 @@ class Performance {
   void ClearHugeFontCache();
   void ClearAllFontCache();
   void ClearLayoutCache();
+  void SetLastRasterCostTime(int64_t microseconds);
+  int64_t GetLastRasterCostTime();
+  void SetViewportSize(int32_t width, int32_t  height);
+
+  /// @brief      If width is 0, resize by viewport width
+  ///             If width is greater than 0, resize by width
+  ///             If width is lower than 0, disable resize
+  ///
+  void SetMaxImageWidth(int32_t width);
+  int32_t GetMaxImageWidth();
+
+  /// @brief      Disable resize default
+  ///             If @maxImageWidthByUser_ lower than 0, disable resize
+  ///             else if origin image width is getter than @maxImageWidthByUser_
+  ///             or @maxImageWidthByViewport, enable resize
+  ///
+  /// @return     Returns if need resize image by @maxImageWidthByUser_ or
+  ///             @viewportSize_ width
+  ///
+  bool NeedResizeImage(int32_t width = INT_MAX);
 
  private:
   Performance();
+
+  const float imageResizeRatio = 1.189; // sqrt(sqrt(2))
 
   std::atomic_int64_t dart_image_memory_usage;  // KB
   fml::WeakPtr<flutter::Rasterizer> rasterizer_;
@@ -87,6 +109,10 @@ class Performance {
   // record last layout time
   std::atomic_int64_t lastLayoutTime_;
 
+  std::atomic_int64_t lastRasterCostTime_;
+  SkISize viewportSize_;
+  int32_t maxImageWidthByUser_ = -1;
+  int32_t maxImageWidthByViewport = 0;
 };
 
 }
