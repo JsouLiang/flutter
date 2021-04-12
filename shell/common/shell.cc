@@ -667,6 +667,7 @@ void Shell::NotifyLowMemoryWarning() const {
   // 4.对于图片内存的释放需要确保图片sk_sp<SkImage>外面包裹的Codec、FrameInfo、CanvasImage先销毁
   task_runners_.GetUITaskRunner()->PostTask(
       [io_task_runner = task_runners_.GetIOTaskRunner(), io_task] {
+        Performance::GetInstance()->ClearHugeFontCache();
         io_task_runner->PostTask(io_task);
       });
   // END
