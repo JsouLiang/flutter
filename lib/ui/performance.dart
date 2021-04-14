@@ -27,6 +27,11 @@ class Performance {
     _exitAppZone = Zone.current;
   }
 
+  final double imageResizeRatio = 1.189; // sqrt(sqrt(2))
+  int _maxImageWidthByUser = -1;
+  int _maxImageWidthByViewport = 0;
+  int _screenWidth = 0;
+
   /**
    *  BD ADD:
    *
@@ -107,6 +112,41 @@ class Performance {
   void clearHugeFontCache() native 'Performance_clearHugeFontCache';
   void clearAllFontCache() native 'Performance_clearAllFontCache';
   void clearLayoutCache() native 'Performance_clearLayoutCache';
+
+  void updateScreenWidth(int width) {
+    if (width != _screenWidth) {
+      _screenWidth = math.max(width, _screenWidth);
+      _maxImageWidthByViewport = (_screenWidth * imageResizeRatio).toInt();
+    }
+  }
+
+  /// @brief      If width is 0, resize by viewport width
+  ///             If width is greater than 0, resize by width
+  ///             If width is lower than 0, disable resize
+  ///
+  void setMaxImageWidth(int maxImageWidth) {
+    _maxImageWidthByUser = maxImageWidth;
+  }
+
+  int getMaxImageWidth() {
+    return _maxImageWidthByUser != 0 ? _maxImageWidthByUser : _screenWidth;
+  }
+
+  /// @brief      Disable resize default
+  ///             If @maxImageWidthByUser_ lower than 0, disable resize
+  ///             else if origin image width is getter than @maxImageWidthByUser_
+  ///             or @maxImageWidthByViewport, enable resize
+  ///
+  /// @return     Returns if need resize image by @maxImageWidthByUser_ or
+  ///             @viewportSize_ width
+  ///
+  bool shouldResizeImage(int width) {
+    if (_maxImageWidthByUser < 0) {
+      return false;
+    }
+    int limit = _maxImageWidthByUser != 0 ? _maxImageWidthByUser : _maxImageWidthByViewport;
+    return limit > 0 && width > limit;
+  }
 }
 
 /// The [Performance] singleton.

@@ -46,6 +46,9 @@ void _updateWindowMetrics(
     systemGestureInsetBottom,
     systemGestureInsetLeft,
   );
+
+  // BD ADD:
+  performance.updateScreenWidth(width.toInt());
 }
 
 typedef _LocaleClosure = String Function();
