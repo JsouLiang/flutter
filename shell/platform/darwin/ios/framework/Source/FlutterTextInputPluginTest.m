@@ -205,10 +205,17 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(updateCount, 4);
 
   [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
-  XCTAssertEqual(updateCount, 5);
+  
+  // BD MOD
+  // After fix text bug updateEditingClient will call one more time
+  // XCTAssertEqual(updateCount, 6);
+  XCTAssertEqual(updateCount, 6);
 
   [inputView unmarkText];
-  XCTAssertEqual(updateCount, 6);
+  // BD MOD
+  // After fix text bug updateEditingClient will call one more time
+  // XCTAssertEqual(updateCount, 6);
+  XCTAssertEqual(updateCount, 7);
 }
 
 - (void)testTextChangesDoNotTriggerUpdateEditingClient {
@@ -268,11 +275,17 @@ FLUTTER_ASSERT_ARC
 
   [inputView setMarkedText:@"marked text" selectedRange:NSMakeRange(0, 1)];
   // updateEditingClient fires in response to setMarkedText.
-  XCTAssertEqual(updateCount, 1);
-
+  // BD MOD
+  // After fix text bug updateEditingClient will call one more time
+  // XCTAssertEqual(updateCount, 1);
+  XCTAssertEqual(updateCount, 2);
+  
   [inputView unmarkText];
   // updateEditingClient fires in response to unmarkText.
-  XCTAssertEqual(updateCount, 2);
+  // BD MOD
+  // After fix text bug updateEditingClient will call one more time
+  // XCTAssertEqual(updateCount, 2);
+  XCTAssertEqual(updateCount, 3);
 }
 
 - (void)testUpdateEditingClientNegativeSelection {
