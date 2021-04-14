@@ -12,16 +12,20 @@ namespace flutter {
       FML_DCHECK(imageCodec);
         this->frameCount_ = imageCodec.frameCount;
         this->repetitionCount_ = imageCodec.repetitionCount;
-        NSArray* durations = [imageCodec frameDurations];
-        this->frameDurations = new int[durations.count];
-        for (NSUInteger i = 0; i < durations.count; i ++) {
-            int duration = [durations[i] doubleValue] * 1000;
-            this->frameDurations[i] = duration;
+        if (imageCodec.frameCount > 1) {
+          NSArray* durations = [imageCodec frameDurations];
+          this->frameDurations = new int[durations.count];
+          for (NSUInteger i = 0; i < durations.count; i ++) {
+              int duration = [durations[i] doubleValue] * 1000;
+              this->frameDurations[i] = duration;
+          }
         }
     }
 
     IOSNativeExportCodec::~IOSNativeExportCodec() {
+      if (this->frameDurations) {
         delete [] this->frameDurations;
+      }
     }
 }  // namespace flutter
 // END
