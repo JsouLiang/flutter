@@ -5537,8 +5537,17 @@ class ImageDescriptor extends NativeFieldWrapperClass1 {
     }
 
     if (targetWidth == null && targetHeight == null) {
-      targetWidth = width;
-      targetHeight = height;
+      // BD MOD: START
+      // targetWidth = width;
+      // targetHeight = height;
+      if (performance.shouldResizeImage(width)) {
+        targetWidth = performance.getMaxImageWidth();
+        targetHeight = targetWidth ~/ (width / height);
+      } else {
+        targetWidth = width;
+        targetHeight = height;
+      }
+      // END
     } else if (targetWidth == null && targetHeight != null) {
       targetWidth = (targetHeight * (width / height)).round();
       targetHeight = targetHeight;
