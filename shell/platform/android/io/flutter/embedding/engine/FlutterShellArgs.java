@@ -121,7 +121,7 @@ public class FlutterShellArgs {
     }
 
     // BD ADD: START
-    if (intent.getBooleanExtra(ARG_OPT_SURFACETEXTURE, true)) {
+    if (intent.getBooleanExtra(ARG_OPT_SURFACETEXTURE, false)) {
       args.add(ARG_OPT_SURFACETEXTURE+"="+true);
     }
     // END

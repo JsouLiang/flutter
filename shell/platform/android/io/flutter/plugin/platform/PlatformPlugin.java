@@ -121,8 +121,8 @@ public class PlatformPlugin {
           // return data != null && data.length() > 0;
           ClipboardManager clipboard =
               (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
-          return clipboard.hasPrimaryClip();
-          // END
+          return clipboard.hasText();
+          //END
         }
       };
 

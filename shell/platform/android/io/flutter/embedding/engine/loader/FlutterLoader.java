@@ -177,6 +177,10 @@ public class FlutterLoader {
                 settings.getSoLoader().loadLibrary(appContext, "flutter");
             } else {
                 System.loadLibrary("flutter");
+              }
+              //Todo @wanglikun wait flutter apm ad
+              //FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
+              // END
             }
 
             // Prefetch the default font manager as soon as possible on a background thread.
