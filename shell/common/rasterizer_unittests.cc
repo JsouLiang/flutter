@@ -114,6 +114,9 @@ TEST(RasterizerTest,
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
 
   std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
       std::make_shared<MockExternalViewEmbedder>();
@@ -172,6 +175,10 @@ TEST(
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+
   std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
       std::make_shared<MockExternalViewEmbedder>();
   rasterizer->SetExternalViewEmbedder(external_view_embedder);
@@ -230,6 +237,9 @@ TEST(
 
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
 
   std::shared_ptr<MockExternalViewEmbedder> external_view_embedder =
       std::make_shared<MockExternalViewEmbedder>();

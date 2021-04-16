@@ -168,8 +168,12 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
       paint_context().raster_time, "Raster", "");
   auto overlay_text_data = overlay_text->serialize(SkSerialProcs{});
   SkPaint text_paint;
-  text_paint.setColor(SK_ColorGRAY);
-  SkPoint text_position = SkPoint::Make(16.0f, 22.0f);
+  // BD MOD: START
+  // text_paint.setColor(SK_ColorGRAY);
+  // SkPoint text_position = SkPoint::Make(16.0f, 22.0f);
+  text_paint.setColor(SK_ColorRED);
+  SkPoint text_position = SkPoint::Make(16.0f, 7.0f);
+  // END
   EXPECT_EQ(mock_canvas().draw_calls(),
             std::vector({MockCanvas::DrawCall{
                 0, MockCanvas::DrawTextData{overlay_text_data, text_paint,
