@@ -2,6 +2,7 @@
 
 #include <flutter/fml/make_copyable.h>
 #include <flutter/third_party/txt/src/minikin/Layout.h>
+#include <flutter/third_party/txt/src/minikin/HbFontCache.h>
 #include "performance.h"
 #include "flutter/flow/instrumentation.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
@@ -272,7 +273,7 @@ void Performance_getEngineInitApmInfo(Dart_NativeArguments args) {
                                          int64_t* fontMem, int64_t* imageFilter, int64_t* mallocSize) {
   #if THIRD_PARTY_SKIA_BD
   *bitmapMem = SkGraphics::GetResourceCacheTotalBytesUsed() >> 10;
-  *fontMem = SkGraphics::GetFontCacheUsed() >> 10;
+  *fontMem = (SkGraphics::GetFontCacheUsed() + minikin::getFontMemoryUsage())>> 10;
   *imageFilter = SkGraphics::GetImageFilterCacheUsed() >> 10;
   *mallocSize = SkGraphics::GetSKMallocMemSize();
   if (*mallocSize >= 0) {
@@ -537,11 +538,11 @@ void Performance::UpdateGpuCacheUsageKB(flutter::Rasterizer* rasterizer) {
   void Performance::UpdateSkGraphicMemUsageKB() {
     imageMem_ = Performance::GetImageMemoryUsageKB();
     bitmapMem_ = SkGraphics::GetResourceCacheTotalBytesUsed() >> 10;
-    fontMem_ = SkGraphics::GetFontCacheUsed() >> 10;
-    #if THIRD_PARTY_SKIA_BD
+    fontMem_ = (SkGraphics::GetFontCacheUsed() + minikin::getFontMemoryUsage())>> 10;
+#if THIRD_PARTY_SKIA_BD
     imageFilter_ = SkGraphics::GetImageFilterCacheUsed() >> 10;
     mallocSize_ = SkGraphics::GetSKMallocMemSize();
-    #endif
+#endif
     if (mallocSize_ >= 0) {
       mallocSize_ = mallocSize_ >> 10;
     } else {

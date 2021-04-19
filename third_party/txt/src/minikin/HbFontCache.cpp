@@ -135,6 +135,7 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
   return hb_font_reference(font);
 }
 
+// BD ADD: START
 void putHugeFontIdLocked(int32_t fontId, size_t fontSize) {
   assertMinikinLocked();
   if (fontSize >= HUGE_FONT_SIZE) {
@@ -146,4 +147,8 @@ void clearHugeFontCacheLocked() {
   getFontCacheLocked()->clearHugeFont();
 }
 
+size_t getFontMemoryUsage() {
+  return getHbFontMemoryUsage();
+}
+// END
 }  // namespace minikin

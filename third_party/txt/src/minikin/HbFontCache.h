@@ -25,7 +25,7 @@
 struct hb_font_t;
 
 namespace minikin {
-// BD ADD: START
+// BD ADD:
 static const size_t HUGE_FONT_SIZE = 5 << 20;
 class MinikinFont;
 
@@ -35,6 +35,7 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont);
 // BD ADD: START
 void putHugeFontIdLocked(int32_t fontId, size_t fontSize);
 void clearHugeFontCacheLocked();
+size_t getFontMemoryUsage();
 // END
 
 }  // namespace minikin
