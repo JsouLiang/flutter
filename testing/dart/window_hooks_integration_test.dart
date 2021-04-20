@@ -32,6 +32,8 @@ part '../../lib/ui/pointer.dart';
 part '../../lib/ui/semantics.dart';
 part '../../lib/ui/text.dart';
 part '../../lib/ui/window.dart';
+// BD ADD
+part '../../lib/ui/performance.dart';
 
 void main() {
   VoidCallback? originalOnMetricsChanged;

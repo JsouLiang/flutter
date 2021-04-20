@@ -6,4 +6,4 @@ BUILD_VARIANT="${1:-host_debug_unopt}"
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 #python "${CURRENT_DIR}/run_tests.py" --variant="${BUILD_VARIANT}" --type=all
-python "${CURRENT_DIR}/run_tests.py" --variant="${BUILD_VARIANT}" --type=engine,benchmarks,java,objc,font-subset
+python "${CURRENT_DIR}/run_tests.py" --variant="${BUILD_VARIANT}" --type=engine,dart,benchmarks,java,objc,font-subset
