@@ -8,6 +8,7 @@ import android.view.Choreographer;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.FlutterJNI;
+import android.view.Display;
 
 // TODO(mattcarroll): add javadoc.
 public class VsyncWaiter {
@@ -32,7 +33,15 @@ public class VsyncWaiter {
                   new Choreographer.FrameCallback() {
                     @Override
                     public void doFrame(long frameTimeNanos) {
-                      float fps = windowManager.getDefaultDisplay().getRefreshRate();
+                      // BD MOD: START
+                      //float fps = windowManager.getDefaultDisplay().getRefreshRate();
+                      // 60.0 default value
+                      float fps = 60.0f;
+                      Display display = windowManager.getDefaultDisplay();
+                      if(display != null) {
+                        fps = windowManager.getDefaultDisplay().getRefreshRate();
+                      }
+                      // END
                       long refreshPeriodNanos = (long) (1000000000.0 / fps);
                       FlutterJNI.nativeOnVsync(
                           frameTimeNanos, frameTimeNanos + refreshPeriodNanos, cookie);
