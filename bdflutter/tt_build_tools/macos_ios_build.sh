@@ -18,7 +18,6 @@ upload_dsym_to_slardar() {
 	echo "HMD us server response: ${STATUS}"
 }
 
-dSYMInfoPlistPath=$(pwd)"/Info.plist"
 cd ..
 cd ..
 
@@ -152,7 +151,6 @@ for liteMode in ${liteModes[@]}; do
 			echo "Generate dSYM"
 			cd $cacheDir
 			xcrun dsymutil -o Flutter.dSYM Flutter
-			cp ${dSYMInfoPlistPath} Flutter.dSYM/Contents/Info.plist
 			zip -rq Flutter.dSYM.zip Flutter.dSYM
 			[ -e Flutter.dSYM ] && rm -rf Flutter.dSYM
 			xcrun strip -x -S Flutter
