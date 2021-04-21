@@ -96,6 +96,12 @@ GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrDirectContext> gr_context,
       context_owner_(false),
       render_to_surface_(render_to_surface),
       weak_factory_(this) {
+  // BD ADD: START
+  if (!delegate_) {
+     FML_LOG(ERROR) << "GPUSurfaceGL::delegate_ is null. ";
+  }
+  // END
+
   auto context_switch = delegate_->GLContextMakeCurrent();
   if (!context_switch->GetResult()) {
     FML_LOG(ERROR)
@@ -109,7 +115,11 @@ GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrDirectContext> gr_context,
 }
 
 GPUSurfaceGL::~GPUSurfaceGL() {
-  if (!valid_) {
+  // BD MOD: START
+  //if (!valid_) {
+  if (!valid_ || !delegate_) {
+     FML_LOG(ERROR) << (!delegate_?"~GPUSurfaceGL::delegate_ is null. ":"~GPUSurfaceGL !valid_");
+  // END
     return;
   }
   auto context_switch = delegate_->GLContextMakeCurrent();

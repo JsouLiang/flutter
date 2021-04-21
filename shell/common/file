@@ -1,9 +1,0 @@
-animator_unittests.cc
-      canvas_spy_unittests.cc
-      engine_unittests.cc
-      input_events_unittests.cc
-      persistent_cache_unittests.cc
-      pipeline_unittests.cc
-      rasterizer_unittests.cc
-      shell_unittests.cc
-skp_shader_warmup_unittests.cc
