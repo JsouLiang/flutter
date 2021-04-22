@@ -1,0 +1,18 @@
+name: Engine Test
+trigger:
+  change:
+    branches: [ bd_1.22 ]
+    types: [ submit ]
+    notification:
+      when: [ failure ]
+      to: ["6888970356313292802"]
+jobs:
+  engine_test:
+    name: Engine Test
+    image: hub.byted.org/codebase/ci_debian_buster:latest
+    steps:
+      - uses: actions/setup-proxy
+      - name: Engine Test
+        commands:
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_engine_unit_test.py -o trigger_engine_unit_test.py
+          - python3 -u trigger_engine_unit_test.py ${{Head.SHA}}

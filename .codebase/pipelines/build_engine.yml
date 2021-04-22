@@ -1,0 +1,24 @@
+name: Build Engine
+trigger:
+  change:
+    branches: [ bd_1.22 ]
+    types: [ submit ]
+    notification:
+      when: [ start, success, failure ]
+jobs:
+  build_engine_on_mac:
+    name: Build Engine On Mac
+    image: hub.byted.org/codebase/ci_debian_buster:latest
+    steps:
+      - name: Build Engine On Mac
+        commands:
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+          - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} mac
+  build_engine_on_linux:
+    name: Build Engine On Linux
+    image: hub.byted.org/codebase/ci_debian_buster:latest
+    steps:
+      - name: Build Engine On Linux
+        commands:
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
+          - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} linux
