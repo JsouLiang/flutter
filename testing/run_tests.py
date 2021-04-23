@@ -25,13 +25,18 @@ font_subset_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'font-subset')
 
 fml_unittests_filter = '--gtest_filter=-*TimeSensitiveTest*'
 
+# BD ADD:
+repeat_times = 3
+
 def PrintDivider(char='='):
   print '\n'
   for _ in xrange(4):
     print(''.join([char for _ in xrange(80)]))
   print '\n'
 
-def RunCmd(cmd, **kwargs):
+# BD MOD:
+# def RunCmd(cmd, **kwargs):
+def RunCmd(cmd, loop=1, **kwargs):
   command_string = ' '.join(cmd)
 
   PrintDivider('>')
@@ -42,9 +47,17 @@ def RunCmd(cmd, **kwargs):
   process.communicate()
   end_time = time.time()
 
+  # BD MOD:
+  # if process.returncode != 0:
+  #   PrintDivider('!')
+  #   raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
   if process.returncode != 0:
-    PrintDivider('!')
-    raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
+    if loop <= repeat_times:
+      print 'Retry RunCmd'
+      RunCmd(cmd, loop + 1, **kwargs)
+    else:
+      PrintDivider('!')
+      raise Exception('Command "%s" exited with code %d' % (command_string, process.returncode))
 
   PrintDivider('<')
   print 'Command run successfully in %.2f seconds: %s' % (end_time - start_time, command_string)
@@ -182,7 +195,7 @@ def RunEngineBenchmarks(build_dir, filter):
 
 
 
-def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot):
+def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot, loop=1):
   print("Generating snapshot for test %s" % dart_file)
 
   dart = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
@@ -214,14 +227,25 @@ def SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot
   if verbose_dart_snapshot:
     RunCmd(snapshot_command, cwd=buildroot_dir)
   else:
-    try:
-      subprocess.check_output(snapshot_command, cwd=buildroot_dir)
-    except subprocess.CalledProcessError as error:
-      # CalledProcessError's string doesn't print the output. Print it before
-      # the crash for easier inspection.
-      print('Error occurred from the subprocess, with the output:')
-      print(error.output)
-      raise
+   # BD MOD: START
+   # try:
+   #   subprocess.check_output(snapshot_command, cwd=buildroot_dir)
+   # except subprocess.CalledProcessError as error:
+   #   # CalledProcessError's string doesn't print the output. Print it before
+   #   # the crash for easier inspection.
+   #   print('Error occurred from the subprocess, with the output:')
+   #   print(error.output)
+   #   raise
+   try:
+     subprocess.check_output(snapshot_command, cwd=buildroot_dir)
+   except:
+     if loop <= repeat_times:
+       print 'Retry SnapshotTest'
+       SnapshotTest(build_dir, dart_file, kernel_file_output, verbose_dart_snapshot, loop + 1)
+     else:
+       PrintDivider('!')
+       raise Exception('Command "%s" exited' % (' '.join(snapshot_command)))
+
   assert os.path.exists(kernel_file_output)
 
 
