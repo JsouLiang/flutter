@@ -165,7 +165,7 @@ public class FlutterLoader {
             if (settings != null && settings.getSoLoader() != null) {
               settings.getSoLoader().loadLibrary(appContext, "flutter");
             } else {
-              flutterJNI.loadLibrary()
+              flutterJNI.loadLibrary();
             }
 
             // Prefetch the default font manager as soon as possible on a background thread.

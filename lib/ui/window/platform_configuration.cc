@@ -227,6 +227,11 @@ void PlatformConfiguration::DidCreateIsolate() {
                       Dart_GetField(library, tonic::ToDart("_reportTimings")));
   windows_.insert(std::make_pair(0, std::unique_ptr<Window>(new Window{
                                         0, ViewportMetrics{1.0, 0.0, 0.0}})));
+  // BD ADD: START
+  notifyIdle_.Set(tonic::DartState::Current(),
+                     Dart_GetField(library, tonic::ToDart("_notifyIdle")));
+  exitApp_.Set(tonic::DartState::Current(),
+                     Dart_GetField(library, tonic::ToDart("_exitApp")));
 }
 
 void PlatformConfiguration::UpdateLocales(
@@ -476,26 +481,23 @@ void PlatformConfiguration::RegisterNatives(
 
 // BD ADD: START
 void PlatformConfiguration::NotifyIdle(int64_t microseconds) {
-  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart("dart:ui"));
-  std::shared_ptr<tonic::DartState> dart_state = library->dart_state().lock();
+    std::shared_ptr<tonic::DartState> dart_state = notifyIdle_.dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library->value(), "_notifyIdle",
-                                           {
-                                               Dart_NewInteger(microseconds),
-                                           }));
+  tonic::LogIfError(tonic::DartInvoke(notifyIdle_.Get(), {
+                                                           Dart_NewInteger(microseconds),
+                                                          }));
 }
 
 void PlatformConfiguration::ExitApp() {
-  Dart_Handle library = Dart_LookupLibrary(tonic::ToDart("dart:ui"));
-  std::shared_ptr<tonic::DartState> dart_state = library->dart_state().lock();
+  std::shared_ptr<tonic::DartState> dart_state = exitApp_.dart_state().lock();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  tonic::LogIfError(tonic::DartInvokeField(library->value(), "_exitApp", {}));
+  tonic::LogIfError(tonic::DartInvoke(exitApp_.Get(), {}));
 }
 // END
 

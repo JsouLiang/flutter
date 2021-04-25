@@ -338,8 +338,8 @@ public class FlutterEngine {
 
     //BD MOD: START
     //this.pluginRegistry =
-    //    new FlutterEnginePluginRegistry(context.getApplicationContext(), this, flutterLoader);
-    this.pluginRegistry = new FlutterEnginePluginRegistry(
+    //    new FlutterEngineConnectionRegistry(context.getApplicationContext(), this, flutterLoader);
+    this.pluginRegistry = new FlutterEngineConnectionRegistry(
       context.getApplicationContext(),
       this,
       flutterLoader,

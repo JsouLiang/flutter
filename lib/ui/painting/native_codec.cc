@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkPixelRef.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "flutter/lib/ui/painting/codec.h"
+#include "flutter/lib/ui/painting/image.h"
 
 namespace flutter {
 int NativeCodec::nativeCodecCount = 0;
@@ -26,21 +27,20 @@ NativeCodec::State::State(std::unique_ptr<NativeExportCodec> codec)
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
-    fml::RefPtr<FrameInfo> frameInfo,
-    std::unique_ptr<DartPersistentValue> callback,
-    size_t trace_id) {
-  std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
-  if (!dart_state) {
-    FML_DLOG(ERROR) << "Could not acquire Dart state while attempting to fire "
-                       "next frame callback.";
-    return;
-  }
-  tonic::DartState::Scope scope(dart_state);
-  if (!frameInfo) {
-    tonic::DartInvoke(callback->value(), {Dart_Null()});
-  } else {
-    tonic::DartInvoke(callback->value(), {ToDart(frameInfo)});
-  }
+    fml::RefPtr<CanvasImage> image,
+    int duration,
+  std::unique_ptr<DartPersistentValue> callback,
+  size_t trace_id)
+  {
+    std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
+    if (!dart_state) {
+      FML_DLOG(ERROR) << "Could not acquire Dart state while attempting to fire "
+                         "next frame callback.";
+      return;
+    }
+    tonic::DartState::Scope scope(dart_state);
+    tonic::DartInvoke(callback->value(),
+                      {tonic::ToDart(image), tonic::ToDart(duration)});
 }
 
 void NativeCodec::State::GetNextFrameAndInvokeCallback(
@@ -51,22 +51,23 @@ void NativeCodec::State::GetNextFrameAndInvokeCallback(
     size_t trace_id,
     sk_sp<SkImage> skImage,
     int duration) {
-  fml::RefPtr<FrameInfo> frameInfo = NULL;
+  fml::RefPtr<CanvasImage> image = nullptr;
 
   if (skImage) {
-    fml::RefPtr<CanvasImage> image = CanvasImage::Create();
+    image = CanvasImage::Create();
     image->set_image({skImage, unref_queue});
-    frameInfo = fml::MakeRefCounted<FrameInfo>(std::move(image), duration);
   }
 
   if (frameCount_ > 0) {
     nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
   }
 
-  ui_task_runner->PostTask(fml::MakeCopyable(
-      [callback = std::move(callback), frameInfo, trace_id]() mutable {
-        InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
-      }));
+  ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
+                                              image = std::move(image),
+                                              duration, trace_id]() mutable {
+    InvokeNextFrameCallback(std::move(image), duration, std::move(callback),
+                            trace_id);
+  }));
 }
 
 Dart_Handle NativeCodec::getNextFrame(Dart_Handle callback_handle) {

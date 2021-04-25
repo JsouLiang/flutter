@@ -27,7 +27,7 @@ class DartLibraryNatives;
 // List<dynamic>.
 template <>
 struct DartListFactory<int64_t> {
-  static Dart_Handle NewList(intptr_t length) {
+  static Dart_Handle NewList(Dart_Handle handle, intptr_t length) {
     return Dart_NewListOf(Dart_CoreType_Int, length);
   }
 };
@@ -451,6 +451,9 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
+  // BD ADD:
+  tonic::DartPersistentValue notifyIdle_;
+  tonic::DartPersistentValue exitApp_;
 
   std::unordered_map<int64_t, std::unique_ptr<Window>> windows_;
 

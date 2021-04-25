@@ -3,4 +3,4 @@
 # 2. XXX is the name of the third party
 # 3. 0/1 indicates whether to use our custom BD third party
 # 4. The name is uppercase letter
-defines = [ "THIRD_PARTY_DART_BD=0", "THIRD_PARTY_SKIA_BD=0"]
+defines = [ "THIRD_PARTY_DART_BD=0", "THIRD_PARTY_SKIA_BD=1"]

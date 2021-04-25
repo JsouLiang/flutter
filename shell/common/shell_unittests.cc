@@ -92,6 +92,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD2(UpdateAssetResolverByType,
                void(std::unique_ptr<AssetResolver> updated_asset_resolver,
                     AssetResolver::AssetResolverType type));
+  // BD ADD:
+  MOCK_METHOD1(OnPlatformViewRegisterImageLoader,
+                                   void(std::shared_ptr<flutter::ImageLoader> imageLoader));
 };
 
 class MockSurface : public Surface {

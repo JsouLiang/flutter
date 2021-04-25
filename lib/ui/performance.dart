@@ -1,6 +1,6 @@
 /// BD ADD
 
-// @dart = 2.10
+// @dart = 2.12
 part of dart.ui;
 
 typedef TimeToFirstFrameMicrosCallback = void Function(int frameworkInitTime, int firstFrameTime);
@@ -72,7 +72,7 @@ class Performance {
   NotifyIdleCallback? get onNotifyIdle => _onNotifyIdle;
   NotifyIdleCallback? _onNotifyIdle;
   Zone? _onNotifyIdleZone;
-  set onNotifyIdle(NotifyIdleCallback callback) {
+  set onNotifyIdle(NotifyIdleCallback? callback) {
     _onNotifyIdle = callback;
     _onNotifyIdleZone = Zone.current;
   }

@@ -1323,7 +1323,8 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeDeferredComponentInstallFailure",
           .signature = "(ILjava/lang/String;Z)V",
           .fnPtr = reinterpret_cast<void*>(&DeferredComponentInstallFailure),
-	      // BD ADD: add for register android image loader
+       },
+	  // BD ADD: add for register android image loader
       {
           .name = "nativeRegisterAndroidImageLoader",
           .signature = "(JLio/flutter/view/AndroidImageLoader;)V",

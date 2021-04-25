@@ -727,12 +727,12 @@ public class FlutterJNI {
   @UiThread
   public void registerAndroidImageLoader(AndroidImageLoader androidImageLoader) {
     ensureAttachedToNative();
-    nativeRegisterAndroidImageLoader(nativePlatformViewId, androidImageLoader);
+    nativeRegisterAndroidImageLoader(nativeShellHolderId, androidImageLoader);
   }
   /**
    * BD ADD: register android image loader HuWeijie
    */
-  private native void nativeRegisterAndroidImageLoader(long nativePlatformViewId, AndroidImageLoader androidImageLoader);
+  private native void nativeRegisterAndroidImageLoader(long nativeShellHolderId, AndroidImageLoader androidImageLoader);
 
   /**
    * BD ADD: unregister android image loader
@@ -740,12 +740,12 @@ public class FlutterJNI {
   @UiThread
   public void unRegisterAndroidImageLoader() {
     ensureAttachedToNative();
-    nativeUnregisterAndroidImageLoader(nativePlatformViewId);
+    nativeUnregisterAndroidImageLoader(nativeShellHolderId);
   }
   /**
    * BD ADD: unregister android image loader HuWeijie
    */
-  private native void nativeUnregisterAndroidImageLoader(long nativePlatformViewId);
+  private native void nativeUnregisterAndroidImageLoader(long nativeShellHolderId);
 
   // ------ Start Texture Registration Support -----
   /**
@@ -794,10 +794,10 @@ public class FlutterJNI {
   // BD ADD: START
   public void scheduleBackgroundFrame() {
     ensureAttachedToNative();
-    nativeScheduleBackgroundFrame(nativePlatformViewId);
+    nativeScheduleBackgroundFrame(nativeShellHolderId);
   }
 
-  private native void nativeScheduleBackgroundFrame(long nativePlatformViewId);
+  private native void nativeScheduleBackgroundFrame(long nativeShellHolderId);
   // END
 
   // ------ Start Dart Execution Support -------
