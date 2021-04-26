@@ -482,6 +482,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     platformViewsChannel = null;
     context = null;
     textureRegistry = null;
+    // BD ADD
+    flutterViewConvertedToImageView = false;
   }
 
   /**
