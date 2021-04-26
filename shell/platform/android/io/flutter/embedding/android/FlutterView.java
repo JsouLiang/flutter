@@ -993,8 +993,9 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     flutterRenderer.stopRenderingToSurface();
     flutterRenderer.setSemanticsEnabled(false);
     renderSurface.detachFromRenderer();
-
-    flutterImageView = null;
+    // BD DEL
+    // tmp del for webview with Hybrid Router
+    // flutterImageView = null;
     previousRenderSurface = null;
     flutterEngine = null;
   }

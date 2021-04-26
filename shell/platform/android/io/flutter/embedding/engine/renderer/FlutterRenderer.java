@@ -196,8 +196,18 @@ public class FlutterRenderer implements TextureRegistry {
    * a platform view is in the current frame.
    */
   public void swapSurface(@NonNull Surface surface) {
-    this.surface = surface;
-    flutterJNI.onSurfaceWindowChanged(surface);
+    // BD MOD: START
+    // this.surface = surface;
+    //flutterJNI.onSurfaceWindowChanged(surface);
+    /*tmp mod for webview with  hybrid router*/
+    if (this.surface != null) {
+      this.surface = surface;
+      flutterJNI.onSurfaceWindowChanged(surface);
+    }else {
+      this.surface = surface;
+      flutterJNI.onSurfaceCreated(surface);
+    }
+    // END
   }
 
   /**
