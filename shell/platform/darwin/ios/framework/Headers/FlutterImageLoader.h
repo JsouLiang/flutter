@@ -17,7 +17,6 @@ typedef struct IOSImageInfo{
 
 NS_ASSUME_NONNULL_BEGIN
 
-FLUTTER_EXPORT
 @protocol IOSImageCodec <NSObject>
 @property(nonatomic, assign) NSInteger frameCount;
 @property(nonatomic, assign) NSInteger repetitionCount;
@@ -28,7 +27,6 @@ FLUTTER_EXPORT
 - (void)getNextFrame:(NSInteger)currentFrame complete:(void (^)(IOSImageInfo))complete;
 @end
 
-FLUTTER_EXPORT
 @protocol FlutterImageLoader <NSObject>
 typedef void(^callback)(IOSImageInfo);
 - (void)loadImage:(NSString*)url complete:(callback)complete;
@@ -36,7 +34,6 @@ typedef void(^callback)(IOSImageInfo);
 - (void)loadCodec:(NSString*)url width:(NSInteger)width height:(NSInteger)height scale:(CGFloat)scale complete:(void (^)(NSObject<IOSImageCodec>*))complete;
 @end
 
-FLUTTER_EXPORT
 @protocol FlutterImageLoaderRegistry <NSObject>
 - (void)registerImageLoader:(NSObject<FlutterImageLoader>*)imageLoader;
 @end

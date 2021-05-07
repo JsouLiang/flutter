@@ -333,7 +333,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
     scoped_engine.get().isolateId = nil;
     scoped_engine.get()->_shell.reset();
     scoped_engine.get()->_profiler.reset();
-    scoped_engine.get()->_threadHost.Reset();
+    scoped_engine.get()->_threadHost.reset();
     scoped_engine.get()->_platformViewsController.reset();
   });
   // END

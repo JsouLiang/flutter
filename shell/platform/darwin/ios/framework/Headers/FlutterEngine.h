@@ -58,8 +58,6 @@ extern NSString* const FlutterDefaultInitialRoute;
  * One of these methods must be invoked before calling `-setViewController:`.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
-FLUTTER_EXPORT
 // BD MOD: add FlutterImageLoaderRegistry
 @interface FlutterEngine : NSObject <FlutterBinaryMessenger, FlutterTextureRegistry, FlutterImageLoaderRegistry, FlutterPluginRegistry>
 
