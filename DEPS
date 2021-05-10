@@ -37,7 +37,7 @@ vars = {
   'tt_icu_git': 'ssh://git@code.byted.org/tech_client/icu',
   'tt_icu_revision': 'c2a4cae149aae7fd30c4cbe3cf1b30df03b386f1',
   'tt_harfbuzz_git': 'ssh://git@code.byted.org/tech_client/harfbuzz',
-  'tt_harfbuzz_revision': '9c55f4cf3313d68d68f68419e7a57fb0771fcf49',
+  'tt_harfbuzz_revision': 'a23ce52959a8f56d8472eaca5f107ad41d181400',
   # END
 
   # When updating the Dart revision, ensure that all entries that are
