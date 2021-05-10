@@ -35,7 +35,7 @@ vars = {
   'tt_skia_git': 'git@code.byted.org:tech_client/skia.git',
   'tt_skia_revision': '0ce73460b9213bbcdfe0b808fc00d47adeec1d0c',
   'tt_icu_git': 'ssh://git@code.byted.org/tech_client/icu',
-  'tt_icu_revision': 'c2a4cae149aae7fd30c4cbe3cf1b30df03b386f1',
+  'tt_icu_revision': '762a33cae3bcc7c6272d4ce5fc1aa2d5b76e60a8',
   'tt_harfbuzz_git': 'ssh://git@code.byted.org/tech_client/harfbuzz',
   'tt_harfbuzz_revision': 'a23ce52959a8f56d8472eaca5f107ad41d181400',
   # END
