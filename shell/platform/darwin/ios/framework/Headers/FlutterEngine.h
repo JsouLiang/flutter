@@ -162,19 +162,14 @@ FLUTTER_DARWIN_EXPORT
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
-          restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
+          restorationEnabled:(BOOL)restorationEnabled;
 
 // BD ADD: START
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
-  allowHeadlessExecution:(BOOL)allowHeadlessExecution
-  preLoad:(BOOL)preLoad;
-
-- (instancetype)initWithName:(NSString*)labelPrefix
-                     project:(nullable FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
           restorationEnabled:(BOOL)restorationEnabled
-                     preLoad:(BOOL)preLoad  NS_DESIGNATED_INITIALIZER;
+                     preLoad:(BOOL)preLoad;
 // END
 
 + (instancetype)new NS_UNAVAILABLE;

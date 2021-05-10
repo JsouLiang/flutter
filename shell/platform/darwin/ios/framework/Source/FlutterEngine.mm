@@ -111,17 +111,25 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
 }
 
-// BD MOD: START
-//- (instancetype)initWithName:(NSString*)labelPrefix
-//                     project:(FlutterDartProject*)project
-//      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   return [self initWithName:labelPrefix
                      project:project
       allowHeadlessExecution:allowHeadlessExecution
-          restorationEnabled:NO
+          restorationEnabled:NO];
+}
+
+
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FlutterDartProject*)project
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution
+          restorationEnabled:(BOOL)restorationEnabled {
+// BD MOD: START
+  return [self initWithName:labelPrefix
+                     project:project
+      allowHeadlessExecution:allowHeadlessExecution
+          restorationEnabled:restorationEnabled
                      preLoad:NO];
 }
 
@@ -129,7 +137,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                      project:(FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
           restorationEnabled:(BOOL)restorationEnabled
-                     preLoad:(BOOL)preLoad {
+                     preLoad:(BOOL)preLoad  {
 // END
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
@@ -708,7 +716,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   [self setupQualityOfService:task_runners];
   
   // Create the shell. This is a blocking operation.
-  _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
+  std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(std::move(task_runners),  // task runners
                                   std::move(platformData),  // window data
                                   std::move(settings),      // settings
                                   on_create_platform_view,  // platform view creation
@@ -717,7 +725,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                   preLoad
   );
 
-  if (_shell == nullptr) {
+  if (shell == nullptr) {
     // BD MOD: START
     // FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
     //                   << entrypoint.UTF8String;
