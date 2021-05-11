@@ -36,4 +36,4 @@ assets_deps = [
   "//third_party/zlib:minizip",
 ]
 
-skia_lite_libs = ["CoreGraphics.framework", "Metal.framework",]
+skia_lite_libs = ["CoreGraphics.framework", "Metal.framework", "CoreText.framework", ]
