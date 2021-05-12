@@ -31,7 +31,7 @@ vars = {
 
   # BD ADD: START
   'tt_dart_git': 'ssh://git@code.byted.org/tech_client/dart',
-  'tt_dart_revision': '7c8c6b3053d0ba91fcf15f81c45650184dc27e88',
+  'tt_dart_revision': 'e87d1e9bc32ec3d53060a6cf68958c9a2bef50a7',
   'tt_skia_git': 'git@code.byted.org:tech_client/skia.git',
   'tt_skia_revision': '60de759e095130e49905fbd368af84d1b359d100',
   'tt_icu_git': 'ssh://git@code.byted.org/tech_client/icu',

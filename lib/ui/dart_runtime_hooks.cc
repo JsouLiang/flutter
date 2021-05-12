@@ -52,7 +52,15 @@ namespace flutter {
   V(SaveCompilationTrace, 0)    \
   V(ScheduleMicrotask, 1)       \
   V(GetCallbackHandle, 1)       \
-  V(GetCallbackFromHandle, 1)
+  V(GetCallbackFromHandle, 1)   \
+  /** BD ADD: START **/         \
+  V(Reflect_reflectLibrary, 1)  \
+  V(Reflect_libraryInvoke, 5)   \
+  V(Reflect_reflectClass, 2)    \
+  V(Reflect_classInvoke, 5)     \
+  V(Reflect_instanceInvoke, 5)
+  /** END **/
+
 
 BUILTIN_NATIVE_LIST(DECLARE_FUNCTION);
 
@@ -362,5 +370,57 @@ void GetCallbackFromHandle(Dart_NativeArguments args) {
   int64_t handle = DartConverter<int64_t>::FromDart(h);
   Dart_SetReturnValue(args, DartCallbackCache::GetCallback(handle));
 }
+
+// BD ADD: START
+void Reflect_reflectLibrary(Dart_NativeArguments args){
+#if THIRD_PARTY_DART_BD
+  Dart_Handle lib = Dart_ReflectLibrary(Dart_GetNativeArgument(args, 0));
+  Dart_SetReturnValue(args, lib);
+#endif
+}
+
+void Reflect_libraryInvoke(Dart_NativeArguments args) {
+#if THIRD_PARTY_DART_BD
+  Dart_Handle lib = Dart_GetNativeArgument(args, 0);
+  Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
+  Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
+  Dart_Handle arguments = Dart_GetNativeArgument(args, 3);
+  Dart_Handle names = Dart_GetNativeArgument(args, 4);
+  Dart_Handle res = Dart_LibraryInvoke(lib, invokeType, functionName, arguments, names);
+  Dart_SetReturnValue(args, res);
+#endif
+}
+
+void Reflect_reflectClass(Dart_NativeArguments args){
+#if THIRD_PARTY_DART_BD
+  Dart_Handle cls = Dart_ReflectClass(Dart_GetNativeArgument(args, 0), Dart_GetNativeArgument(args, 1));
+  Dart_SetReturnValue(args, cls);
+#endif
+}
+
+void Reflect_classInvoke(Dart_NativeArguments args) {
+#if THIRD_PARTY_DART_BD
+  Dart_Handle cls = Dart_GetNativeArgument(args, 0);
+  Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
+  Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
+  Dart_Handle arguments = Dart_GetNativeArgument(args, 3);
+  Dart_Handle names = Dart_GetNativeArgument(args, 4);
+  Dart_Handle res = Dart_ClassInvoke(cls, invokeType, functionName, arguments, names);
+  Dart_SetReturnValue(args, res);
+#endif
+}
+
+void Reflect_instanceInvoke(Dart_NativeArguments args) {
+#if THIRD_PARTY_DART_BD
+  Dart_Handle instance = Dart_GetNativeArgument(args, 0);
+  Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
+  Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
+  Dart_Handle arguments = Dart_GetNativeArgument(args, 3);
+  Dart_Handle names = Dart_GetNativeArgument(args, 4);
+  Dart_Handle res = Dart_InstanceInvoke(instance, invokeType, functionName, arguments, names);
+  Dart_SetReturnValue(args, res);
+#endif
+}
+// BD END
 
 }  // namespace flutter

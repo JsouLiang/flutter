@@ -90,3 +90,15 @@ int? _isolateId; // ignore: unused_element
 Function _getPrintClosure() => _print;  // ignore: unused_element
 @pragma('vm:entry-point')
 Function _getScheduleMicrotaskClosure() => _scheduleMicrotask; // ignore: unused_element
+
+// BD ADD: START
+dynamic reflectLibrary(String libraryUrl) native 'Reflect_reflectLibrary';
+
+dynamic libraryInvoke(dynamic lib, int invokeType, String functionName, List arguments, List names) native 'Reflect_libraryInvoke';
+
+dynamic reflectClass(String libraryUrl, String className) native 'Reflect_reflectClass';
+
+dynamic classInvoke(dynamic cls, int invokeType, String functionName, List arguments, List names) native 'Reflect_classInvoke';
+
+dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, List arguments, List names) native 'Reflect_instanceInvoke';
+// BD END
