@@ -145,6 +145,9 @@ for liteMode in ${liteModes[@]}; do
 		# 多种引擎架构合成一个
 		lipo -create $iOSArm64Dir/Flutter.framework/Flutter $iOSArmV7Dir/Flutter.framework/Flutter $iOSSimDir/Flutter.framework/Flutter -output $cacheDir/Flutter
 
+		# 多种xcframework合并
+		./flutter/sky/tools/create_ios_framework.py --dst $cacheDir --arm64-out-dir $iOSArm64Dir --armv7-out-dir $iOSArmV7Dir --simulator-out-dir $iOSSimDir
+
 		# release模式引擎裁剪符号表
 		if [ "$mode" == "release" -o "$mode" == "release_dynamicart" ]
 		then
@@ -177,7 +180,7 @@ for liteMode in ${liteModes[@]}; do
 		    echo "Compile failed !"
             exit 1
         fi
-		zip -rq artifacts.zip Flutter.framework.zip gen_snapshot_arm64 gen_snapshot_armv7 Flutter.podspec snapshot.dart
+		zip -rq artifacts.zip Flutter.framework.zip gen_snapshot_arm64 gen_snapshot_armv7 Flutter.podspec snapshot.dart Flutter.xcframework
 		[ -e Flutter.framework.zip ] && rm -rf Flutter.framework.zip
 		[ -e gen_snapshot_arm64 ] && rm -rf gen_snapshot_arm64
 		[ -e gen_snapshot_armv7 ] && rm -rf gen_snapshot_armv7
