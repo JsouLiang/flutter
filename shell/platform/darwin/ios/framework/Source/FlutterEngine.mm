@@ -32,9 +32,6 @@
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
 
-// BD ADD:
-#include "flutter/bdflutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessengerProvider.h"
-
 NSString* const FlutterDefaultDartEntrypoint = nil;
 NSString* const FlutterDefaultInitialRoute = nil;
 NSString* const FlutterEngineWillDealloc = @"FlutterEngineWillDealloc";
@@ -45,9 +42,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (instancetype)initWithPlugin:(NSString*)pluginKey flutterEngine:(FlutterEngine*)flutterEngine;
 @end
 
-// BD MOD:
-// @interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger>
-@interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger, FlutterBinaryMessengerProvider>
+@interface FlutterEngine () <FlutterTextInputDelegate, FlutterBinaryMessenger>
 // Maintains a dictionary of plugin names that have registered with the engine.  Used by
 // FlutterEngineRegistrar to implement a FlutterPluginRegistrar.
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
