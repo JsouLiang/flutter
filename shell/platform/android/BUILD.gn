@@ -392,10 +392,6 @@ action("android_jar") {
           string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
   }
   # END
-
-  engine_artifact_id =
-      string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
-
   engine_jar_filename = "$engine_artifact_id.jar"
 
   outputs = [
@@ -444,9 +440,6 @@ action("pom_libflutter") {
   }
   # END
 
-  artifact_id =
-      string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
-
   outputs = [
     "$root_build_dir/$artifact_id.pom",
     "$root_build_dir/$artifact_id.maven-metadata.xml",
@@ -477,9 +470,6 @@ action("pom_embedding") {
     artifact_id = "flutter_embedding_$flutter_runtime_mode"
   }
   # END
-
-  artifact_id = "flutter_embedding_$flutter_runtime_mode"
-
   outputs = [
     "$root_build_dir/$artifact_id.pom",
     "$root_build_dir/$artifact_id.maven-metadata.xml",
