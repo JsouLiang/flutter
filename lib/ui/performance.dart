@@ -147,6 +147,9 @@ class Performance {
     int limit = _maxImageWidthByUser != 0 ? _maxImageWidthByUser : _maxImageWidthByViewport;
     return limit > 0 && width > limit;
   }
+
+  void enableBoostVSync(bool enable) native 'Performance_enableBoostVSync';
+  bool isEnableBoostVSync() native 'Performance_isEnableBoostVSync';
 }
 
 /// The [Performance] singleton.

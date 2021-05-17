@@ -7,8 +7,10 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
-// BD ADD:
+// BD ADD: START
 #include "flutter/bdflutter/lib/ui/performance/boost.h"
+#include "flutter/bdflutter/lib/ui/performance/performance.h"
+// END
 namespace flutter {
 
 namespace {
@@ -239,19 +241,33 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   //   TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
   //   self->AwaitVSync();
   // });
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetUITaskRunner(),
-      [self = weak_factory_.GetWeakPtr(),frame_number = frame_number_]() {
-        if (!self) {
-          return;
-        }
-        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
-        self->AwaitVSync();
-      });
+  if (Performance::GetInstance()->isEnableBoostVSync()) {
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetUITaskRunner(),
+        [self = weak_factory_.GetWeakPtr(),frame_number = frame_number_]() {
+          if (!self) {
+            return;
+          }
+          TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+          self->AwaitVSync(true);
+        });
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
+                                               frame_number = frame_number_]() {
+          if (!self) {
+            return;
+          }
+          TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+          self->AwaitVSync(false);
+        });
+  }
+  // END
   frame_scheduled_ = true;
 }
 
-void Animator::AwaitVSync() {
+// BD MOD:
+// void Animator::AwaitVSync() {
+void Animator::AwaitVSync(bool boostVSync) {
   waiter_->AsyncWaitForVsync(
       [self = weak_factory_.GetWeakPtr()](fml::TimePoint vsync_start_time,
                                           fml::TimePoint frame_target_time) {
@@ -266,15 +282,19 @@ void Animator::AwaitVSync() {
 
   // BD: MOD START
   // delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr(),
-       dart_frame_deadline = dart_frame_deadline_]() {
-        if (!self.get()) {
-          return;
-        }
-        self->delegate_.OnAnimatorNotifyIdle(dart_frame_deadline,
-                                             Boost::kVsyncIdle);
-      });
+  if (boostVSync) {
+    task_runners_.GetUITaskRunner()->PostTask(
+        [self = weak_factory_.GetWeakPtr(),
+            dart_frame_deadline = dart_frame_deadline_]() {
+          if (!self.get()) {
+            return;
+          }
+          self->delegate_.OnAnimatorNotifyIdle(dart_frame_deadline,
+                                               Boost::kVsyncIdle);
+        });
+  } else {
+    delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_, Boost::kVsyncIdle);
+  }
   // END
 }
 

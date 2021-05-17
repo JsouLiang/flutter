@@ -69,6 +69,8 @@ class Performance {
   void ClearHugeFontCache();
   void ClearAllFontCache();
   void ClearLayoutCache();
+  void EnableBoostVSync(bool enable);
+  bool isEnableBoostVSync();
 
  private:
   Performance();
@@ -109,6 +111,9 @@ class Performance {
   // record last layout time
   std::atomic_int64_t lastLayoutTime_;
 
+  // boost VSync
+  // request VSync immediately, when begin frame
+  std::atomic_bool boostVSync;
 };
 
 }

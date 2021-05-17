@@ -617,6 +617,14 @@ void Performance::ClearLayoutCache() {
   minikin::Layout::purgeCaches();
 }
 
+void Performance::EnableBoostVSync(bool enable) {
+  boostVSync = enable;
+}
+
+bool Performance::isEnableBoostVSync() {
+  return boostVSync;
+}
+
 void Performance_getRecordLastLayoutTime(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, Dart_NewInteger(Performance::GetInstance()->GetRecordLastLayoutTime()));
 }
@@ -631,6 +639,15 @@ void Performance_clearAllFontCache(Dart_NativeArguments args) {
 
 void Performance_clearLayoutCache(Dart_NativeArguments args) {
   Performance::GetInstance()->ClearLayoutCache();
+}
+
+void Performance_enableBoostVSync(Dart_NativeArguments args) {
+  bool enable = DartConverter<bool>::FromDart(Dart_GetNativeArgument(args, 1));
+  Performance::GetInstance()->EnableBoostVSync(enable);
+}
+
+void Performance_isEnableBoostVSync(Dart_NativeArguments args) {
+  Dart_SetBooleanReturnValue(args, Performance::GetInstance()->isEnableBoostVSync());
 }
 
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
@@ -663,6 +680,8 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_allocateScheduling", Performance_allocateScheduling, 4, true},
       {"Performance_allocateSchedulingStart", Performance_allocateSchedulingStart, 1, true},
       {"Performance_allocateSchedulingEnd", Performance_allocateSchedulingEnd, 1, true},
+      {"Performance_enableBoostVSync", Performance_enableBoostVSync, 2, true},
+      {"Performance_isEnableBoostVSync", Performance_isEnableBoostVSync, 1, true},
   });
 }
 

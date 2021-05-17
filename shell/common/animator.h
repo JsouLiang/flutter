@@ -95,7 +95,9 @@ class Animator final {
   bool CanReuseLastLayerTree();
   void DrawLastLayerTree();
 
-  void AwaitVSync();
+  // BD MOD:
+  // void AwaitVSync();
+  void AwaitVSync(bool boostVSync = false);
   // BD ADD
   void AwaitVSyncForBackground();
 
