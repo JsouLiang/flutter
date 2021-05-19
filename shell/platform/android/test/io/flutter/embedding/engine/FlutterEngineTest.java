@@ -56,7 +56,9 @@ public class FlutterEngineTest {
               }
             })
         .when(flutterJNI)
-        .attachToNative(false);
+        // BD MOD:
+        // .attachToNative(false);
+        .attachToNative(false, 0);
     GeneratedPluginRegistrant.clearRegisteredEngines();
   }
 

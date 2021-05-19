@@ -50,7 +50,9 @@ public class FlutterEngineGroupComponentTest {
     MockitoAnnotations.initMocks(this);
     jniAttached = false;
     when(mockflutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
-    doAnswer(invocation -> jniAttached = true).when(mockflutterJNI).attachToNative(false);
+    // BD MOD:
+    // doAnswer(invocation -> jniAttached = true).when(mockflutterJNI).attachToNative(false);
+    doAnswer(invocation -> jniAttached = true).when(mockflutterJNI).attachToNative(false, 0);
     GeneratedPluginRegistrant.clearRegisteredEngines();
 
     when(mockFlutterLoader.findAppBundlePath()).thenReturn("some/path/to/flutter_assets");
