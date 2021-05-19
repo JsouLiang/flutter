@@ -282,14 +282,6 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                  fml::FilePermission::kRead), false));
   }
   // END
-  std::unique_ptr<IsolateConfiguration> isolate_configuration;
-
-  // BD ADD: START
-  // Running in Dynamicart mode. 注意：仅Android调用
-  if (!ANDROID_SHELL_HOLDER->GetSettings().package_dill_path.empty()) {
-    isolate_configuration = IsolateConfiguration::CreateForDynamicart(ANDROID_SHELL_HOLDER->GetSettings(), *asset_manager);
-  }
-  // END
 
   auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
   auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);

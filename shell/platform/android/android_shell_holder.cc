@@ -305,7 +305,11 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     const std::string& entrypoint,
     const std::string& libraryUrl) const {
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  // BD ADD: START
+  // Running in Dynamicart mode. 注意：仅Android调用
+  if (!GetSettings().package_dill_path.empty()) {
+    isolate_configuration = IsolateConfiguration::CreateForDynamicart(GetSettings(), *asset_manager);
+  } else if (flutter::DartVM::IsRunningPrecompiledCode()) {
     isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
   } else {
     std::unique_ptr<fml::Mapping> kernel_blob =
