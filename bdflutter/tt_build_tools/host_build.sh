@@ -88,6 +88,15 @@ then
   cd ..
   bd_upload $cacheDir/flutter-web-sdk-darwin-x64.zip flutter/framework/$tosDir/flutter-web-sdk-darwin-x64.zip
 
+  # FlutterMacOS.framework.zip
+  cd out/host_debug
+  zip -rq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+  cd ..
+  cd ..
+  bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64/FlutterMacOS.framework.zip
+  # darwin-x64-profile/FlutterMacOS.framework
+  bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-profile/FlutterMacOS.framework.zip
+
   ./flutter/tools/gn --runtime-mode=release --no-lto
   ninja -C out/host_release -j $jcount
   checkResult
@@ -103,6 +112,13 @@ then
 
   bd_upload $cacheDir/flutter_patched_sdk_product.zip flutter/framework/$tosDir/flutter_patched_sdk_product.zip
 
+  # FlutterMacOS.framework.zip
+  cd out/host_release
+  zip -rq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+  cd ..
+  cd ..
+  bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-release/FlutterMacOS.framework.zip
+
   # darwin-x64.zip
   modeDir=darwin-x64
   rm -rf $cacheDir/$modeDir
@@ -114,6 +130,10 @@ then
   out/host_debug/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin out/host_debug/gen/const_finder.dart.snapshot $cacheDir/$modeDir/product_isolate_snapshot.bin \
   $cacheDir/$modeDir/product_vm_isolate_snapshot.bin out/host_debug/gen_snapshot
   bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/$modeDir/artifacts.zip
+  # darwin-x64-profile
+  bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/darwin-x64-profile/artifacts.zip
+  # darwin-x64-release
+  bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/darwin-x64-release/artifacts.zip
 
   rm -rf $cacheDir/pkg
   mkdir $cacheDir/pkg
