@@ -36,14 +36,13 @@ class MockDelegate : public PlatformView::Delegate {
 
   void LoadDartDeferredLibrary(intptr_t loading_unit_id,
                                std::unique_ptr<const fml::Mapping> snapshot_data,
-                               std::unique_ptr<const fml::Mapping> snapshot_instructions) override {
-
+                               std::unique_ptr<const fml::Mapping> snapshot_instructions) override {}
+  
   // BD ADD : START
   void OnPlatformViewRegisterImageLoader(std::shared_ptr<flutter::ImageLoader> imageLoader) override {}
   bool IsInShellNotBlockAndPosting() override { return false; }
   // END
   
-  }
   void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                     const std::string error_message,
                                     bool transient) override {}
