@@ -83,11 +83,7 @@ for liteMode in ${liteModes[@]}; do
         	iOSSimDir=${iOSSimDir}_${liteMode}
         	cacheDir=${cacheDir}_${liteMode}
         	modeSuffix=--${liteMode}
-<<<<<<< HEAD
-    	fi
-=======
     fi
->>>>>>> flutter_2.0_bd_for_merge
 
 		[ -d $cacheDir ] && rm -rf $cacheDir
 		mkdir $cacheDir
@@ -98,15 +94,6 @@ for liteMode in ${liteModes[@]}; do
 		# 编译各种架构引擎
         if [ "$mode" == "release_dynamicart" -o "$mode" == "profile_dynamicart" ]
         then
-<<<<<<< HEAD
-            ./flutter/tools/gn --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
-            ninja -C $iOSArm64Dir -j $jcount
-            checkResult
-
-            ./flutter/tools/gn --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
-            ninja -C $iOSArmV7Dir -j $jcount
-            checkResult
-=======
             if [ "$liteMode" != "normal" ]
             then
                 iOSArm64Dir=out/ios_release_${liteMode}_dynamicart
@@ -127,7 +114,6 @@ for liteMode in ${liteModes[@]}; do
                 ninja -C $iOSArmV7Dir -j $jcount
                 checkResult
             fi
->>>>>>> flutter_2.0_bd_for_merge
         else
             ./flutter/tools/gn --ios --runtime-mode=$mode $modeSuffix $modeSuffix
             ninja -C $iOSArm64Dir -j $jcount
