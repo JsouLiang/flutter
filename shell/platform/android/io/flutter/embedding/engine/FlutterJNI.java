@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
@@ -874,7 +875,7 @@ public class FlutterJNI {
         assetManager);
     // BD ADD: START
     FlutterJNI.nativeTraceEngineInitApmStartAndEnd("execute_dart_entry", startTimestamp);
-    FlutterLoader.getInstance().onBundleRun();
+    FlutterInjector.instance().flutterLoader().onBundleRun();
     // END
   }
 
