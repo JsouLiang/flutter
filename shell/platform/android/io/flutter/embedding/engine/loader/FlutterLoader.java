@@ -17,6 +17,9 @@ import android.text.TextUtils;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+// BD ADD:
+import io.flutter.BDFlutterInjector;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -168,7 +171,7 @@ public class FlutterLoader {
             // BD ADD:
             long initTaskStartTimestamp = System.currentTimeMillis() * 1000;
             // BD MOD: START
-            // System.loadLibrary("flutter");
+            // flutterJNI.loadLibrary();
             if (settings != null && settings.isDebugModeEnable()) {
                 copyDebugFiles(appContext);
                 File libsDir = appContext.getDir(DEBUG_FLUTTER_LIBS_DIR, Context.MODE_PRIVATE);
@@ -178,11 +181,12 @@ public class FlutterLoader {
             } else if (settings != null && settings.getSoLoader() != null) {
                 settings.getSoLoader().loadLibrary(appContext, "flutter");
             } else {
-                System.loadLibrary("flutter");
-              }
-
-            // BD ADD:
-            FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
+                flutterJNI.loadLibrary();
+            }
+            if (BDFlutterInjector.instance().shouldLoadNative()) {
+                FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
+            }
+            // END
 
             // Prefetch the default font manager as soon as possible on a background thread.
             // It helps to reduce time cost of engine setup that blocks the platform thread.
@@ -374,8 +378,11 @@ public class FlutterLoader {
           result.engineCachesPath,
           initTimeMillis);
 
-      // BD ADD:
-      FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
+      // BD ADD: START
+      if (BDFlutterInjector.instance().shouldLoadNative()) {
+          FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
+      }
+	  // END
 
       initialized = true;
       // BD ADD:START

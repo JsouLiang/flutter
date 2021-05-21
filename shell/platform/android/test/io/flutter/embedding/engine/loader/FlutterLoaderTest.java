@@ -17,6 +17,9 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
 import android.content.Context;
+
+// BD ADD:
+import io.flutter.BDFlutterInjector;
 import io.flutter.embedding.engine.FlutterJNI;
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +42,8 @@ public class FlutterLoaderTest {
 
   @Test
   public void itReportsInitializedAfterInitializing() {
+    // BD ADD:
+    BDFlutterInjector.setInstance(new BDFlutterInjector.Builder().setShouldLoadNative(false).build());
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 

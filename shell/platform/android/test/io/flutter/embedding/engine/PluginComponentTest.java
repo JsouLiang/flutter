@@ -10,6 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
+
+// BD ADD:
+import io.flutter.BDFlutterInjector;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -35,13 +38,17 @@ public class PluginComponentTest {
   @Test
   public void pluginsCanAccessFlutterAssetPaths() {
     // Setup test.
+	// BD ADD:
+    BDFlutterInjector.setInstance(new BDFlutterInjector.Builder().setShouldLoadNative(false).build());
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterInjector.setInstance(
         new FlutterInjector.Builder().setFlutterLoader(new FlutterLoader(mockFlutterJNI)).build());
     FlutterJNI flutterJNI = mock(FlutterJNI.class);
     jniAttached = false;
     when(flutterJNI.isAttached()).thenAnswer(invocation -> jniAttached);
-    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative(false);
+    // BD MOD:
+    // doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative(false);
+    doAnswer(invocation -> jniAttached = true).when(flutterJNI).attachToNative(false, 0);
 
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
 
