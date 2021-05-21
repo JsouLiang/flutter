@@ -373,14 +373,11 @@ void GetCallbackFromHandle(Dart_NativeArguments args) {
 
 // BD ADD: START
 void Reflect_reflectLibrary(Dart_NativeArguments args){
-#if THIRD_PARTY_DART_BD
   Dart_Handle lib = Dart_ReflectLibrary(Dart_GetNativeArgument(args, 0));
   Dart_SetReturnValue(args, lib);
-#endif
 }
 
 void Reflect_libraryInvoke(Dart_NativeArguments args) {
-#if THIRD_PARTY_DART_BD
   Dart_Handle lib = Dart_GetNativeArgument(args, 0);
   Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
   Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
@@ -388,18 +385,14 @@ void Reflect_libraryInvoke(Dart_NativeArguments args) {
   Dart_Handle names = Dart_GetNativeArgument(args, 4);
   Dart_Handle res = Dart_LibraryInvoke(lib, invokeType, functionName, arguments, names);
   Dart_SetReturnValue(args, res);
-#endif
 }
 
 void Reflect_reflectClass(Dart_NativeArguments args){
-#if THIRD_PARTY_DART_BD
   Dart_Handle cls = Dart_ReflectClass(Dart_GetNativeArgument(args, 0), Dart_GetNativeArgument(args, 1));
   Dart_SetReturnValue(args, cls);
-#endif
 }
 
 void Reflect_classInvoke(Dart_NativeArguments args) {
-#if THIRD_PARTY_DART_BD
   Dart_Handle cls = Dart_GetNativeArgument(args, 0);
   Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
   Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
@@ -407,11 +400,9 @@ void Reflect_classInvoke(Dart_NativeArguments args) {
   Dart_Handle names = Dart_GetNativeArgument(args, 4);
   Dart_Handle res = Dart_ClassInvoke(cls, invokeType, functionName, arguments, names);
   Dart_SetReturnValue(args, res);
-#endif
 }
 
 void Reflect_instanceInvoke(Dart_NativeArguments args) {
-#if THIRD_PARTY_DART_BD
   Dart_Handle instance = Dart_GetNativeArgument(args, 0);
   Dart_Handle invokeType = Dart_GetNativeArgument(args, 1);
   Dart_Handle functionName = Dart_GetNativeArgument(args, 2);
@@ -419,7 +410,6 @@ void Reflect_instanceInvoke(Dart_NativeArguments args) {
   Dart_Handle names = Dart_GetNativeArgument(args, 4);
   Dart_Handle res = Dart_InstanceInvoke(instance, invokeType, functionName, arguments, names);
   Dart_SetReturnValue(args, res);
-#endif
 }
 // BD END
 
