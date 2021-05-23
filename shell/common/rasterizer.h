@@ -455,7 +455,9 @@ class Rasterizer final : public SnapshotDelegate {
   ///          thread.
   /// @see     https://github.com/flutter/flutter/issues/73620
   ///
-  void BlockThreadMerging() { shared_engine_block_thread_merging_ = true; }
+  // BD MOD:
+  // void BlockThreadMerging() { shared_engine_block_thread_merging_ = true; }
+  void BlockThreadMerging() { shared_engine_block_thread_merging_ = false; }
 
  private:
   Delegate& delegate_;

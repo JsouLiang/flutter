@@ -459,8 +459,10 @@ public class FlutterEngine {
    *     AOT or snapshot.
    * @return a new {@link FlutterEngine}.
    */
+   // BD MOD
+   // /*package*/ FlutterEngine spawn(
   @NonNull
-  /*package*/ FlutterEngine spawn(
+  public FlutterEngine spawn(
       @NonNull Context context, @NonNull DartEntrypoint dartEntrypoint) {
     if (!isAttachedToJni()) {
       throw new IllegalStateException(
