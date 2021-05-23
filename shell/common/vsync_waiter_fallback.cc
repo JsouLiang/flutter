@@ -32,8 +32,15 @@ void VsyncWaiterFallback::AwaitVSync() {
 
   auto next =
       SnapToNextTick(fml::TimePoint::Now(), phase_, kSingleFrameInterval);
-
-  FireCallback(next, next + kSingleFrameInterval);
+  // BD MOD: START
+  // FireCallback(next, next + kSingleFrameInterval);
+  // Fix flutter test failed problem: "Shell subprocess crashed with segmentation fault after tests finished."
+  // Call FireCallback() in PostTask to avoid stack overflow
+  // View this wiki for more detail: https://bytedance.feishu.cn/wiki/wikcntkzgBuSIowTVUFZw62n64f
+  task_runners_.GetUITaskRunner()->PostTask([this, next, kSingleFrameInterval]() {
+    FireCallback(next, next + kSingleFrameInterval);
+  });
+  // END
 }
 
 }  // namespace flutter
