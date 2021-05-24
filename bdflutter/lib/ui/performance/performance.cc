@@ -211,9 +211,9 @@ void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
 }
 
 void Performance_heapInfo(Dart_NativeArguments args) {
-  #if THIRD_PARTY_DART_BD
+  //#if THIRD_PARTY_DART_BD
   Dart_SetReturnValue(args, Dart_HeapInfo());
-  #endif
+  //#endif
 }
 
 int64_t Performance::CurrentTimestamp() {
