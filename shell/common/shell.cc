@@ -390,9 +390,9 @@ std::unique_ptr<Shell> Shell::Create(
                        std::move(settings),                        //
                        std::move(on_create_platform_view),         //
                        std::move(on_create_rasterizer),            //
-                       is_gpu_disable,
                        // BD ADD:
-                       false
+                       false,
+                       is_gpu_disable
   );
 }
 
