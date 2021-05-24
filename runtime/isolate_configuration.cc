@@ -22,15 +22,16 @@ class DynamicartIsolateConfiguration : public IsolateConfiguration {
 public:
     DynamicartIsolateConfiguration(std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
                                    kernel_pieces, std::string package_preload_libs)
-            : kernel_pieces_(std::move(kernel_pieces)), package_preload_libs(package_preload_libs) {}
+            : kernel_piece_futures_(std::move(kernel_pieces)), package_preload_libs(package_preload_libs) {}
 
     // |IsolateConfiguration|
     bool DoPrepareIsolate(DartIsolate& isolate) override {
-        FML_LOG(ERROR)<<"kernel_pieces size:"<<kernel_pieces_.size()<<std::endl;
-        for (size_t i = 0; i < kernel_pieces_.size(); i++) {
-            bool last_piece = i + 1 == kernel_pieces_.size();
+      FML_LOG(ERROR)<<"kernel_pieces size:"<<kernel_piece_futures_.size()<<std::endl;
+      ResolveKernelPiecesIfNecessary();
+      for (size_t i = 0; i < resolved_kernel_pieces_.size(); i++) {
+            bool last_piece = i + 1 == resolved_kernel_pieces_.size();
 
-            if (!isolate.PrepareForRunningFromDynamicartKernel(kernel_pieces_[i].get(), package_preload_libs,
+            if (!isolate.PrepareForRunningFromDynamicartKernel(std::move(resolved_kernel_pieces_[i]), package_preload_libs,
                                                                last_piece)) {
                 return false;
             }
@@ -41,11 +42,29 @@ public:
 
     // |IsolateConfiguration|
     bool IsNullSafetyEnabled(const DartSnapshot& snapshot) override {
-        return false;
+      ResolveKernelPiecesIfNecessary();
+      const auto kernel = resolved_kernel_pieces_.empty()
+                          ? nullptr
+                          : resolved_kernel_pieces_.front().get();
+      return snapshot.IsNullSafetyEnabled(kernel);
     }
 
+  void ResolveKernelPiecesIfNecessary() {
+    if (resolved_kernel_pieces_.size() == kernel_piece_futures_.size()) {
+      return;
+    }
+
+    resolved_kernel_pieces_.clear();
+    for (auto& piece : kernel_piece_futures_) {
+      // The get() call will xfer the unique pointer out and leave an empty
+      // future in the original vector.
+      resolved_kernel_pieces_.emplace_back(piece.get());
+    }
+  }
 private:
-    std::vector<std::future<std::unique_ptr<const fml::Mapping>>> kernel_pieces_;
+    std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
+        kernel_piece_futures_;
+    std::vector<std::unique_ptr<const fml::Mapping>> resolved_kernel_pieces_;
     std::string package_preload_libs;
 
     FML_DISALLOW_COPY_AND_ASSIGN(DynamicartIsolateConfiguration);
