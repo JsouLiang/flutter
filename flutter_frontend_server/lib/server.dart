@@ -37,8 +37,8 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface {
       frontend.ProgramTransformer transformer})
       : _compiler = frontend.FrontendCompiler(output,
             // BD MOD:
-            // transformer: transformer,
-            transformer: RouteCreatorTracker(nextTransformer: transformer),
+            transformer: transformer,
+            //transformer: RouteCreatorTracker(nextTransformer: transformer),
             useDebuggerModuleNames: useDebuggerModuleNames,
             emitDebugMetadata: emitDebugMetadata,
             unsafePackageSerialization: unsafePackageSerialization);
