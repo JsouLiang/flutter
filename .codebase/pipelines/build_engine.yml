@@ -1,7 +1,7 @@
 name: Build Engine
 trigger:
   change:
-    branches: [ bd_1.22 ]
+    branches: [ bd_1.22, bd_2.0 ]
     types: [ submit ]
     notification:
       when: [ start, success, failure ]
