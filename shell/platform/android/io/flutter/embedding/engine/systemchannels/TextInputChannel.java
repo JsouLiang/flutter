@@ -22,6 +22,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+// BD ADD:
+
 /**
  * {@link TextInputChannel} is a platform channel between Android and Flutter that is used to
  * communicate information about the user's text input.
@@ -43,6 +45,8 @@ public class TextInputChannel {
 
   @NonNull public final MethodChannel channel;
   @Nullable private TextInputMethodHandler textInputMethodHandler;
+  // BD ADD:
+  private boolean isKeyBoardShow;
 
   @NonNull @VisibleForTesting
   final MethodChannel.MethodCallHandler parsingMethodHandler =
@@ -61,10 +65,14 @@ public class TextInputChannel {
           switch (method) {
             case "TextInput.show":
               textInputMethodHandler.show();
+              // BD ADD:
+              isKeyBoardShow = true;
               result.success(null);
               break;
             case "TextInput.hide":
               textInputMethodHandler.hide();
+              // BD ADD:
+              isKeyBoardShow = false;
               result.success(null);
               break;
             case "TextInput.setClient":
@@ -362,6 +370,17 @@ public class TextInputChannel {
    * from the underlying platform channel.
    */
   public void setTextInputMethodHandler(@Nullable TextInputMethodHandler textInputMethodHandler) {
+    // BD ADD: START
+    if (textInputMethodHandler == null && this.textInputMethodHandler != null && isKeyBoardShow) {
+      try {
+        isKeyBoardShow = false;
+        this.textInputMethodHandler.clearClient();
+        this.textInputMethodHandler.hide();
+      } catch (Throwable e) {
+        // ignore
+      }
+    }
+    // END
     this.textInputMethodHandler = textInputMethodHandler;
   }
 
