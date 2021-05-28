@@ -782,10 +782,23 @@ static BOOL IsScribbleAvailable() {
           [[[UIScribbleInteraction alloc] initWithDelegate:self] autorelease];
       [self addInteraction:interaction];
     }
+    // BD ADD: START
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self
+               selector:@selector(keyboardWillBeHidden:)
+                   name:UIKeyboardWillHideNotification
+                 object:nil];
+    // END
   }
 
   return self;
 }
+
+// BD ADD: START
+- (void)keyboardWillBeHidden:(NSNotification*)notification {
+  [_textInputDelegate notifyKeyboardHide:_textInputClient];
+}
+// END
 
 - (void)configureWithDictionary:(NSDictionary*)configuration {
   NSAssert(!_decommissioned, @"Attempt to reuse a decommissioned view, for %@", configuration);
@@ -898,6 +911,8 @@ static BOOL IsScribbleAvailable() {
   [_markedTextStyle release];
   [_textContentType release];
   [_textInteraction release];
+  // BD ADD:
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 

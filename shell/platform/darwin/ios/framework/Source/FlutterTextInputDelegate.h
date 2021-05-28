@@ -60,6 +60,8 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
                        withClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView removeTextPlaceholder:(int)client;
 
+// BD ADD:
+- (void)notifyKeyboardHide:(int)client;
 @end
 
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTDELEGATE_H_

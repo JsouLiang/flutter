@@ -837,6 +837,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                               arguments:@[ @(client), state ]];
 }
 
+// BD ADD: START
+- (void)notifyKeyboardHide:(int)client {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.notifyKeyboardHide"
+                              arguments:@[ @(client) ]];
+}
+// END
+
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
          updateEditingClient:(int)client
                    withState:(NSDictionary*)state
