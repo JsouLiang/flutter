@@ -466,10 +466,23 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
       _smartQuotesType = UITextSmartQuotesTypeYes;
       _smartDashesType = UITextSmartDashesTypeYes;
     }
+    // BD ADD: START
+    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+    [center addObserver:self
+               selector:@selector(keyboardWillBeHidden:)
+                   name:UIKeyboardWillHideNotification
+                 object:nil];
+    // END
   }
 
   return self;
 }
+
+// BD ADD: START
+- (void)keyboardWillBeHidden:(NSNotification*)notification {
+    [_textInputDelegate notifyKeyboardHide:_textInputClient];
+}
+// END
 
 - (void)configureWithDictionary:(NSDictionary*)configuration {
   NSDictionary* inputType = configuration[kKeyboardType];
@@ -530,6 +543,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
   [_selectedTextRange release];
   [_tokenizer release];
   [_autofillId release];
+  // BD ADD:
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 

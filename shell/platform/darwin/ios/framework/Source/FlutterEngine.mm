@@ -834,6 +834,13 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Text input delegate
 
+// BD ADD: START
+- (void)notifyKeyboardHide:(int)client {
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.notifyKeyboardHide"
+                              arguments:@[ @(client) ]];
+}
+// END
+
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
   [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState"
                               arguments:@[ @(client), state ]];
