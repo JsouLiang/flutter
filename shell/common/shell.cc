@@ -427,8 +427,10 @@ std::unique_ptr<Shell> Shell::Create(
                        on_create_rasterizer,           //
                        std::move(vm),                  //
                        CreateEngine,
-                       is_gpu_disable,
-                       preLoad
+                       // BD ADD:
+                       preLoad,
+                       is_gpu_disable
+                       
   );
 }
 
