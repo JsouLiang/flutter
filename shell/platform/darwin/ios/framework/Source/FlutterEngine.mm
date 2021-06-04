@@ -410,7 +410,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   // _profiler.reset();
   // _threadHost.Reset();
   // _platformViewsController.reset();
-  _shell->ExitApp([scoped_engine = fml::scoped_nsobject<FlutterEngine>([self retain])] {
+  _shell->ExitApp([scoped_engine = fml::scoped_nsobject<FlutterEngine>(self)] {
     [scoped_engine.get() resetChannels];
     scoped_engine.get().isolateId = nil;
     scoped_engine.get()->_shell.reset();
