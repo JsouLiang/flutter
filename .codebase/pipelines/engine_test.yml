@@ -5,7 +5,7 @@ trigger:
     types: [ submit ]
     notification:
       when: [ failure ]
-      to: ["6888970356313292802"]
+      to: ["6969779643066892291"]
 jobs:
   engine_test:
     name: Engine Test
