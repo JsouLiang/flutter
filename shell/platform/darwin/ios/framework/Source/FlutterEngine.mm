@@ -742,9 +742,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                   std::move(settings),      // settings
                                   on_create_platform_view,  // platform view creation
                                   on_create_rasterizer,      // rasterzier creation
-                                  /*is_gpu_disabled=*/_isGpuDisabled,
                                   // BD ADD:
-                                  preLoad
+                                  preLoad,
+                                  /*is_gpu_disabled=*/_isGpuDisabled
+                                  
   );
 
   if (shell == nullptr) {

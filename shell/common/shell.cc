@@ -80,9 +80,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     const Shell::EngineCreateCallback& on_create_engine,
-    bool is_gpu_disabled,
     // BD ADD:
-    bool preLoad) {
+    bool preLoad,
+    bool is_gpu_disabled) {
   if (!task_runners.IsValid()) {
     FML_LOG(ERROR) << "Task runners to run the shell were invalid.";
     return nullptr;
@@ -441,9 +441,9 @@ std::unique_ptr<Shell> Shell::Create(
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     DartVMRef vm,
     const Shell::EngineCreateCallback& on_create_engine,
-    bool is_gpu_disabled,
     // BD ADD:
-    bool preLoad) {
+    bool preLoad,
+    bool is_gpu_disabled) {
   PerformInitializationTasks(settings);
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
 
@@ -467,9 +467,10 @@ std::unique_ptr<Shell> Shell::Create(
                          on_create_platform_view,                 //
                          on_create_rasterizer,                    //
                          &on_create_engine,
-                         is_gpu_disabled,
                          // BD ADD:
-                         preLoad
+                         preLoad,
+                         is_gpu_disabled
+                         
   ]() mutable {
         auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
@@ -480,9 +481,9 @@ std::unique_ptr<Shell> Shell::Create(
                                             on_create_platform_view,      //
                                             on_create_rasterizer,         //
                                             on_create_engine,
-                                            is_gpu_disabled,
                                             // BD ADD:
-                                            preLoad
+                                            preLoad,
+                                            is_gpu_disabled
         );
         latch.Signal();
       }));
@@ -655,9 +656,10 @@ std::unique_ptr<Shell> Shell::Spawn(
                              /*settings=*/settings,
                              /*animator=*/std::move(animator));
       },
-      is_gpu_disable,
       // BD ADD
-      false));
+      false,
+      is_gpu_disable
+      ));
   result->shared_resource_context_ = io_manager_->GetSharedResourceContext();
   result->RunEngine(std::move(run_configuration));
 

@@ -209,9 +209,9 @@ class Shell final : public PlatformView::Delegate,
       const CreateCallback<Rasterizer>& on_create_rasterizer,
       DartVMRef vm,
       const EngineCreateCallback& on_create_engine,
-      bool is_gpu_disabled,
       // BD ADD:
-      bool preLoad);
+      bool preLoad,
+      bool is_gpu_disabled);
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the shell. This is a synchronous operation and
@@ -526,9 +526,9 @@ class Shell final : public PlatformView::Delegate,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       const EngineCreateCallback& on_create_engine,
-      bool is_gpu_disabled,
       // BD ADD:
-      bool preLoad);
+      bool preLoad,
+      bool is_gpu_disabled);
 
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,
