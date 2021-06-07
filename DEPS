@@ -36,6 +36,7 @@ vars = {
   'bd_skia_revision': '0ea60830e205df29f9d9c8c69e2076505128ab59',
   'bd_icu_git': 'ssh://git@code.byted.org/tech_client/icu.git',
   'bd_icu_revision': '28cf4895725bc4df73876dde55265d2e619cb998',
+  'bd_angle_git': 'ssh://git@code.byted.org/tech_client/angle',
   # END
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
@@ -443,7 +444,9 @@ deps = {
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd4130e9ac3675dadbec8442dc2310a80ea4ddfb2',
 
    'src/third_party/angle':
-   Var('github_git') + '/google/angle.git' + '@' + '06d194e2ae7b1d7e0eda0c0c911eff92dec7d3d1',
+   # BD MOD:
+   # Var('github_git') + '/google/angle.git' + '@' + '06d194e2ae7b1d7e0eda0c0c911eff92dec7d3d1',
+   Var('bd_angle_git') + '@' + '4e7f971b2e32cd302885bcd4c21c98e393dc7fe3',
 
    'src/third_party/angle/third_party/vulkan-deps/vulkan-headers/src':
    Var('fuchsia_git') + '/third_party/Vulkan-Headers.git' + '@' + '5de4e8fab88ef0bd6994d9ddbcc864e3179b9e79',

@@ -7,9 +7,14 @@ import("//flutter/common/config.gni")
 import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/sdk_args.gni")
 
+# BD MOD: START
+# is_aot_test =
+#    flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
 is_aot_test =
-    flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
+    (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") &&
+    (target_os != "win" || host_cpu != "x86")
 
+# END
 # Unit tests targets are only enabled for host machines and Fuchsia right now
 declare_args() {
   enable_unittests = current_toolchain == host_toolchain || is_fuchsia

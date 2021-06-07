@@ -37,6 +37,11 @@ GPUSurfaceGLDelegate::GLProcResolver GPUSurfaceGLDelegate::GetGLProcResolver()
 static bool IsProcResolverOpenGLES(
     GPUSurfaceGLDelegate::GLProcResolver proc_resolver) {
   // Version string prefix that identifies an OpenGL ES implementation.
+// BD ADD: START
+#ifdef FLUTTER_USE_OPENGLES_WIN_X86
+  return true;
+#else
+// END
 #define GPU_GL_VERSION 0x1F02
   constexpr char kGLESVersionPrefix[] = "OpenGL ES";
 
@@ -55,6 +60,8 @@ static bool IsProcResolverOpenGLES(
 
   return strncmp(gl_version_string, kGLESVersionPrefix,
                  strlen(kGLESVersionPrefix)) == 0;
+// BD ADD:
+#endif
 }
 
 static sk_sp<const GrGLInterface> CreateGLInterface(

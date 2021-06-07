@@ -64,6 +64,14 @@ if (flutter_runtime_mode == "debug") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
 }
 
+# BD ADD: START
+if ((flutter_runtime_mode == "release" || flutter_runtime_mode == "profile") &&
+    (target_os == "win" && host_cpu == "x86")) {
+  feature_defines_list += [ "FLUTTER_JIT_RUNTIME=1" ]
+}
+
+# END
+
 if (is_ios || is_mac) {
   flutter_cflags_objc = [
     "-Werror=overriding-method-mismatch",

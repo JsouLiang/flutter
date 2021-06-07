@@ -83,6 +83,10 @@ def cpu_for_target_arch(arch):
     return 'x86'
   if arch in ['x64', 'arm64', 'simarm64', 'simdbc64', 'armsimdbc64']:
     return 'x64'
+  # BD ADD: START
+  if arch == 'x86':
+    return 'x86'
+  # END
 
 def is_host_build(args):
     # If target_os == None, then this is a host build.
@@ -275,11 +279,21 @@ def to_gn_args(args):
     else:
         # Building host artifacts
         gn_args['target_cpu'] = 'x64'
+        # BD ADD: START
+        if sys.platform == 'win32':
+            gn_args['target_cpu'] = args.windows_cpu
+        # END
 
     # DBC is not supported anymore.
     if args.interpreter:
       raise Exception('--interpreter is no longer needed on any supported platform.')
-    gn_args['dart_target_arch'] = gn_args['target_cpu']
+    # BD MOD: START
+    # gn_args['dart_target_arch'] = gn_args['target_cpu']
+    if sys.platform == 'win32' and gn_args['target_cpu'] == 'x86':
+      gn_args['dart_target_arch'] = 'ia32'
+    else :
+      gn_args['dart_target_arch'] = gn_args['target_cpu']
+    # END
 
     if sys.platform.startswith(('cygwin', 'win')) and args.target_os != 'win':
       if 'target_cpu' in gn_args:
@@ -458,6 +472,12 @@ def to_gn_args(args):
       with open(os.path.join(os.path.dirname(__file__), 'fuchsia/target_api_level')) as f:
         gn_args['fuchsia_target_api_level'] = int(f.read().strip())
 
+    # BD ADD: START
+    if sys.platform == 'win32' and gn_args['target_cpu'] == 'x86':
+        gn_args['angle_skip_dxgi_1_2_check'] = True
+        if runtime_mode == 'profile':
+            gn_args['flutter_runtime_mode']='release'
+    # END
     return gn_args
 
 def parse_args(args):
@@ -491,7 +511,9 @@ def parse_args(args):
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
-  parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
+  # BD MOD:
+  # parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
+  parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default = 'x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default = 'x64')
   parser.add_argument('--arm-float-abi', type=str, choices=['hard', 'soft', 'softfp'])
 

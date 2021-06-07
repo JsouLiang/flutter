@@ -42,7 +42,15 @@ inline unsigned int clz_win(unsigned int num) {
 
 inline unsigned int clzl_win(unsigned long num) {
   unsigned long r = 0;
+
+// BD ADD: START
+#ifdef WIN_X86
+  _BitScanReverse(&r, num);
+#else
+  // END
   _BitScanReverse64(&r, num);
+// BD ADD:
+#endif
   return r;
 }
 

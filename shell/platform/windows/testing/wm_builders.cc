@@ -13,7 +13,14 @@ Win32Message WmKeyDownInfo::Build(LRESULT expected_result, HWND hWnd) {
   return Win32Message{
       .message = WM_KEYDOWN,
       .wParam = key,
+// BD MOD: START
+// .lParam = lParam,
+#ifdef WIN_X86
+      .lParam = (long)lParam,
+#else
       .lParam = lParam,
+#endif
+      // END
       .expected_result = expected_result,
       .hWnd = hWnd,
   };
@@ -26,7 +33,14 @@ Win32Message WmKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
   return Win32Message{
       .message = WM_KEYUP,
       .wParam = key,
+// BD MOD: START
+// .lParam = lParam,
+#ifdef WIN_X86
+      .lParam = (long)lParam,
+#else
       .lParam = lParam,
+#endif
+      // END
       .expected_result = expected_result,
       .hWnd = hWnd,
   };
@@ -38,7 +52,14 @@ Win32Message WmCharInfo::Build(LRESULT expected_result, HWND hWnd) {
   return Win32Message{
       .message = WM_CHAR,
       .wParam = char_code,
+// BD MOD: START
+// .lParam = lParam,
+#ifdef WIN_X86
+      .lParam = (long)lParam,
+#else
       .lParam = lParam,
+#endif
+      // END
       .expected_result = expected_result,
       .hWnd = hWnd,
   };
@@ -51,7 +72,14 @@ Win32Message WmSysKeyUpInfo::Build(LRESULT expected_result, HWND hWnd) {
   return Win32Message{
       .message = WM_SYSKEYUP,
       .wParam = key,
+// BD MOD: START
+// .lParam = lParam,
+#ifdef WIN_X86
+      .lParam = (long)lParam,
+#else
       .lParam = lParam,
+#endif
+      // END
       .expected_result = expected_result,
       .hWnd = hWnd,
   };
@@ -63,7 +91,14 @@ Win32Message WmDeadCharInfo::Build(LRESULT expected_result, HWND hWnd) {
   return Win32Message{
       .message = WM_DEADCHAR,
       .wParam = char_code,
+// BD MOD: START
+// .lParam = lParam,
+#ifdef WIN_X86
+      .lParam = (long)lParam,
+#else
       .lParam = lParam,
+#endif
+      // END
       .expected_result = expected_result,
       .hWnd = hWnd,
   };

@@ -25,7 +25,11 @@ source_set("test_font") {
 group("libdart") {
   public_deps = []
 
-  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+  # BD MOD:
+  # if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+  if ((flutter_runtime_mode == "profile" ||
+       flutter_runtime_mode == "release") &&
+      (target_os != "win" || host_cpu != "x86")) {
     public_deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
   } else {
     public_deps += [
