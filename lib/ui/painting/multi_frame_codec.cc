@@ -190,7 +190,11 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     generator_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
     duration = skFrameInfo.fDuration;
   }
-  nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
+
+  // BD ADD: Protect invalid image buffer.
+  if (frameCount_ > 0) {
+    nextFrameIndex_ = (nextFrameIndex_ + 1) % frameCount_;
+  }
 
   ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
                                               image = std::move(image),
