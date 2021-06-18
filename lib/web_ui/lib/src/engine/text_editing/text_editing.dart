@@ -373,11 +373,13 @@ class AutofillInfo {
 /// The current text and selection state of a text field.
 @visibleForTesting
 class EditingState {
-  EditingState({this.text, int? baseOffset, int? extentOffset}) :
-    // Don't allow negative numbers. Pick the smallest selection index for base.
-    baseOffset = math.max(0, math.min(baseOffset ?? 0, extentOffset ?? 0)),
-    // Don't allow negative numbers. Pick the greatest selection index for extent.
-    extentOffset = math.max(0, math.max(baseOffset ?? 0, extentOffset ?? 0));
+  EditingState({this.text, int? baseOffset, int? extentOffset})
+      :
+        // Don't allow negative numbers. Pick the smallest selection index for base.
+        baseOffset = math.max(0, math.min(baseOffset ?? 0, extentOffset ?? 0)),
+        // Don't allow negative numbers. Pick the greatest selection index for extent.
+        extentOffset =
+            math.max(0, math.max(baseOffset ?? 0, extentOffset ?? 0));
 
   /// Creates an [EditingState] instance using values from an editing state Map
   /// coming from Flutter.
@@ -816,6 +818,10 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     if (config.obscureText) {
       domElement.setAttribute('type', 'password');
+    }
+
+    if (config.inputType == EngineInputType.none) {
+      domElement.setAttribute('inputmode', 'none');
     }
 
     config.autofill?.applyToDomElement(domElement, focusedElement: true);
