@@ -16,9 +16,7 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 
 #include "flutter/bdflutter/shell/platform/darwin/ios/ios_external_image_loader_gl.h"
-#if FLUTTER_SHELL_ENABLE_METAL
 #include "flutter/bdflutter/shell/platform/darwin/ios/ios_external_image_loader_metal.h"
-#endif  // FLUTTER_SHELL_ENABLE_METAL
 #include "flutter/bdflutter/shell/platform/darwin/ios/ios_image_loader_callback_context.h"
 
 // BD ADD: START
@@ -26,10 +24,8 @@ namespace flutter {
 
     IOSExternalImageLoader* IOSExternalImageLoader::FromIOSRenderingAPI(IOSRenderingAPI renderingApi, NSObject<FlutterImageLoader> *imageLoader) {
         switch (renderingApi) {
-            #if FLUTTER_SHELL_ENABLE_METAL
             case IOSRenderingAPI::kMetal:
                 return new IOSMetalExternalImageLoader(imageLoader);
-            #endif  // FLUTTER_SHELL_ENABLE_METAL
             default:
                 return new IOSOpenGLExternalImageLoader(imageLoader);
         }
