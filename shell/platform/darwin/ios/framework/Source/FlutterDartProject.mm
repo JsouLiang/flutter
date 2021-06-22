@@ -28,6 +28,8 @@ extern const intptr_t kPlatformStrongDillSize;
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 // BD ADD: START
 static NSString* const kHostManifestJson = @"host_manifest.json";
+// for test
+//static NSString* const kDynamicZip = @"dynamic.zip";
 // END
 
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
@@ -369,6 +371,10 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   NSString *hostManifestPath = [flutterBundlePath stringByAppendingPathComponent:kHostManifestJson];
   NSFileManager *fileManager = [NSFileManager defaultManager];
   _settings.dynamicart_host = [fileManager fileExistsAtPath:hostManifestPath];
+
+//  for test
+//  NSString *dynamicZipPath = [[NSBundle mainBundle].bundlePath stringByAppendingPathComponent:kDynamicZip];
+//  [self setDillPath:dynamicZipPath];
 }
 // END
 
