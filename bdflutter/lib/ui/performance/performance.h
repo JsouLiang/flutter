@@ -76,6 +76,7 @@ class Performance {
   void ClearHugeFontCache();
   void ClearAllFontCache();
   void ClearLayoutCache();
+  void setDevicePixelRatio(float ratio);
 
  private:
   Performance();

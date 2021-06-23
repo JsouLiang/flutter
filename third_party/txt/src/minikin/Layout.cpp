@@ -1106,8 +1106,24 @@ void Layout::doLayoutRun(const uint16_t* buf,
               roundf(HBFixedToFloat(extents.x_bearing + extents.width));
           glyphBounds.mBottom =
               roundf(HBFixedToFloat(-extents.y_bearing - extents.height));
+
         } else {
-          ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+          // BD MOD: START
+          // ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+          if (ctx->paint.scaleMeasureByDensity && getDevicePixelRatio() > 1.0) {
+            float originSize = ctx->paint.size;
+            float scale = getDevicePixelRatio() * getDevicePixelRatio();
+            ctx->paint.size = originSize * scale;
+            ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+            ctx->paint.size = originSize;
+            glyphBounds.mTop = glyphBounds.mTop / scale;
+            glyphBounds.mLeft = glyphBounds.mLeft / scale;
+            glyphBounds.mBottom = glyphBounds.mBottom / scale;
+            glyphBounds.mRight = glyphBounds.mRight / scale;
+          } else {
+            ctx->paint.font->GetBounds(&glyphBounds, glyph_ix, ctx->paint);
+          }
+          // END
         }
         glyphBounds.offset(x + xoff, y + yoff);
         mBounds.join(glyphBounds);
@@ -1233,6 +1249,8 @@ void Layout::purgeAllFontCaches() {
   std::scoped_lock _l(gMinikinLock);
   purgeHbFontCacheLocked();
 }
+
+float Layout::sDevicePixelRatio = 1.0;
 // END
 
 }  // namespace minikin

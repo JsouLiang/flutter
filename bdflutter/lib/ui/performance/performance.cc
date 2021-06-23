@@ -641,6 +641,10 @@ void Performance::ClearLayoutCache() {
   minikin::Layout::purgeCaches();
 }
 
+void Performance::setDevicePixelRatio(float ratio) {
+  minikin::Layout::setDevicePixelRatio(ratio);
+}
+
 void Performance_getRecordLastLayoutTime(Dart_NativeArguments args) {
   Dart_SetReturnValue(
       args,

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// BD ADD:
 #include "flutter/lib/ui/window/window.h"
+#include <flutter/bdflutter/lib/ui/performance/performance.h>
 
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -41,6 +43,8 @@ void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
 
 void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
   viewport_metrics_ = metrics;
+  // BD ADD:
+  Performance::GetInstance()->setDevicePixelRatio(metrics.device_pixel_ratio);
 
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state) {

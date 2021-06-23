@@ -2080,6 +2080,10 @@ Int32List _encodeParagraphStyle(
   StrutStyle? strutStyle,
   String? ellipsis,
   Locale? locale,
+  // BD ADD: START
+  bool? drawMinHeight,
+  bool? forceVerticalCenter,
+  // END
 ) {
   final Int32List result = Int32List(7); // also update paragraph_builder.cc
   if (textAlign != null) {
@@ -2130,6 +2134,14 @@ Int32List _encodeParagraphStyle(
     result[0] |= 1 << 12;
     // Passed separately to native.
   }
+  // BD ADD:
+  if (drawMinHeight == true) {
+    result[0] |= 1 << 13;
+  }
+  if (forceVerticalCenter == true) {
+    result[0] |= 1 << 14;
+  }
+  // END
   return result;
 }
 
@@ -2208,6 +2220,10 @@ class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
+    // BD ADD: START
+    bool? drawMinHeight,
+    bool? forceVerticalCenter,
+    // END
   }) : _encoded = _encodeParagraphStyle(
          textAlign,
          textDirection,
@@ -2221,6 +2237,10 @@ class ParagraphStyle {
          strutStyle,
          ellipsis,
          locale,
+         // BD ADD: START
+         drawMinHeight,
+         forceVerticalCenter,
+         // END
        ),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
@@ -2228,7 +2248,11 @@ class ParagraphStyle {
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
        _locale = locale,
-       _leadingDistribution = textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional;
+       _leadingDistribution = textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional,
+       // BD ADD:
+       _drawMinHeight = drawMinHeight,
+       _forceVerticalCenter = forceVerticalCenter;
+       // END
 
   final Int32List _encoded;
   final String? _fontFamily;
@@ -2238,6 +2262,10 @@ class ParagraphStyle {
   final String? _ellipsis;
   final Locale? _locale;
   final TextLeadingDistribution _leadingDistribution;
+  // BD ADD: START
+  final bool? _drawMinHeight;
+  final bool? _forceVerticalCenter;
+  // END
 
   @override
   bool operator ==(Object other) {
@@ -2253,11 +2281,17 @@ class ParagraphStyle {
         && other._ellipsis == _ellipsis
         && other._locale == _locale
         && other._leadingDistribution == _leadingDistribution
+        // BD ADD: START
+        && other._drawMinHeight == _drawMinHeight
+        && other._forceVerticalCenter == _forceVerticalCenter
+        // END
         && _listEquals<int>(other._encoded, _encoded);
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution);
+  // BD MOD:
+  // int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _height, _ellipsis, _locale, _leadingDistribution,_drawMinHeight, _forceVerticalCenter);
 
   @override
   String toString() {
