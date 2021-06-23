@@ -32,6 +32,8 @@ vars = {
   # BD ADD: START
   'bd_dart_git': 'ssh://git@code.byted.org/tech_client/dart',
   'bd_dart_revision': '0d68847c30d4d7b1e66ac2d087e7bd39de505db2',
+  'bd_skia_git': 'ssh://git@code.byted.org/tech_client/skia',
+  'bd_skia_revision': '0ea60830e205df29f9d9c8c69e2076505128ab59',
   # END
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
@@ -382,7 +384,9 @@ deps = {
    Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
 
   'src/third_party/skia':
-   Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
+   # BD MOD:
+   # Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
+   Var('bd_skia_git') + '@' +  Var('bd_skia_revision'),
 
   'src/third_party/ocmock':
    Var('ocmock_git') + '@' +  Var('ocmock_tag'),
