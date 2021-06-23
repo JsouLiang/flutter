@@ -44,7 +44,9 @@ struct MinikinPaint {
         paintFlags(0),
         fakery(),
         hyphenEdit(),
-        fontFeatureSettings() {}
+        fontFeatureSettings(),
+        // BD ADD:
+        scaleMeasureByDensity(false) {}
 
   bool skipCache() const { return !fontFeatureSettings.empty(); }
 
@@ -58,6 +60,8 @@ struct MinikinPaint {
   FontFakery fakery;
   HyphenEdit hyphenEdit;
   std::string fontFeatureSettings;
+  // BD ADD:
+  bool scaleMeasureByDensity;
 };
 
 // Only a few flags affect layout, but those that do should have values

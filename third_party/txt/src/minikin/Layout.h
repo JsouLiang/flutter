@@ -119,6 +119,14 @@ class Layout {
   // BD ADD: START
   static void purgeHugeFontCaches();
   static void purgeAllFontCaches();
+  static float sDevicePixelRatio;
+  static void setDevicePixelRatio(float ratio) {
+    sDevicePixelRatio = ratio;
+  }
+  static float getDevicePixelRatio() {
+    return sDevicePixelRatio;
+  }
+  // END
 
  private:
   friend class LayoutCacheKey;

@@ -625,6 +625,10 @@ bool Performance::isEnableBoostVSync() {
   return boostVSync;
 }
 
+void Performance::setDevicePixelRatio(float ratio) {
+  minikin::Layout::setDevicePixelRatio(ratio);
+}
+
 void Performance_getRecordLastLayoutTime(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, Dart_NewInteger(Performance::GetInstance()->GetRecordLastLayoutTime()));
 }

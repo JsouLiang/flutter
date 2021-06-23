@@ -92,6 +92,12 @@ class ParagraphStyle {
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
+  // BD ADD: START
+  // Draw text in min height
+  bool drawMinHeight = false;
+  // Force text to be centered vertically
+  bool forceVerticalCenter = false;
+  // END
 
   // Default strategy is kBreakStrategy_Greedy. Sometimes,
   // kBreakStrategy_HighQuality will produce more desirable layouts (e.g., very

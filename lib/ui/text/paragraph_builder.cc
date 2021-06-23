@@ -84,6 +84,10 @@ const int psHeightIndex = 9;
 const int psStrutStyleIndex = 10;
 const int psEllipsisIndex = 11;
 const int psLocaleIndex = 12;
+// BD ADD: START
+const int psDrawMinHeightIndex = 13;
+const int psForceVerticalCenterIndex = 14;
+// END
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
 const int psTextDirectionMask = 1 << psTextDirectionIndex;
@@ -97,6 +101,10 @@ const int psTextHeightBehaviorMask = 1 << psTextHeightBehaviorIndex;
 const int psStrutStyleMask = 1 << psStrutStyleIndex;
 const int psEllipsisMask = 1 << psEllipsisIndex;
 const int psLocaleMask = 1 << psLocaleIndex;
+// BD ADD: START
+const int psDrawMinHeightMask = 1 << psDrawMinHeightIndex;
+const int psForceVerticalCenterMask = 1 << psForceVerticalCenterIndex;
+// END
 
 // TextShadows decoding
 
@@ -289,6 +297,16 @@ ParagraphBuilder::ParagraphBuilder(
   if (mask & psLocaleMask) {
     style.locale = locale;
   }
+
+  // BD ADD: START
+  if (mask & psDrawMinHeightMask) {
+    style.drawMinHeight = true;
+  }
+
+  if (mask & psForceVerticalCenterMask) {
+    style.forceVerticalCenter = true;
+  }
+  // END
 
   FontCollection& font_collection = UIDartState::Current()
                                         ->platform_configuration()

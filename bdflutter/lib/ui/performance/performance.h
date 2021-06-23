@@ -71,6 +71,7 @@ class Performance {
   void ClearLayoutCache();
   void EnableBoostVSync(bool enable);
   bool isEnableBoostVSync();
+  void setDevicePixelRatio(float ratio);
 
  private:
   Performance();

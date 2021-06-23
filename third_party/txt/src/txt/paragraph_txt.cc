@@ -307,6 +307,8 @@ bool ParagraphTxt::ComputeLineBreaks() {
 
       minikin::FontStyle font;
       minikin::MinikinPaint paint;
+      // BD ADD:
+      paint.scaleMeasureByDensity = paragraph_style_.drawMinHeight || paragraph_style_.forceVerticalCenter;
       GetFontAndMinikinPaint(run.style, &font, &paint);
       std::shared_ptr<minikin::FontCollection> collection =
           GetMinikinFontCollectionForStyle(run.style);
@@ -797,6 +799,12 @@ void ParagraphTxt::Layout(double width) {
     double justify_x_offset = 0;
     std::vector<PaintRecord> paint_records;
 
+    // BD ADD: START
+    minikin::MinikinRect rectForHeight;
+    rectForHeight.mTop = FLT_MAX;
+    rectForHeight.mBottom = -FLT_MAX;
+    bool shouldTextBounds =  paragraph_style_.drawMinHeight || paragraph_style_.forceVerticalCenter;
+    // END
     for (auto line_run_it = line_runs.begin(); line_run_it != line_runs.end();
          ++line_run_it) {
       const BidiRun& run = *line_run_it;
@@ -866,6 +874,14 @@ void ParagraphTxt::Layout(double width) {
 
       layout.doLayout(text_ptr, text_start, text_count, text_size, run.is_rtl(),
                       minikin_font, minikin_paint, minikin_font_collection);
+      // BD ADD: START
+      if (shouldTextBounds) {
+        minikin::MinikinRect subRect;
+        layout.getBounds(&subRect);
+        rectForHeight.mTop = std::min(rectForHeight.mTop, subRect.mTop);
+        rectForHeight.mBottom = std::max(rectForHeight.mBottom, subRect.mBottom);
+      }
+      // END
 
       if (layout.nGlyphs() == 0)
         continue;
@@ -1129,6 +1145,17 @@ void ParagraphTxt::Layout(double width) {
                         max_unscaled_ascent, nullptr, line_number, line_limit);
     }
 
+    // BD ADD: START
+    if (paragraph_style_.drawMinHeight) {
+      max_ascent = -rectForHeight.mTop;
+      max_descent = rectForHeight.mBottom;
+    } else if (paragraph_style_.forceVerticalCenter) {
+      double height = max_ascent + max_descent;
+      double leading = (height - (-rectForHeight.mTop + rectForHeight.mBottom)) / 2.0;
+      max_ascent = leading - rectForHeight.mTop;
+      max_descent = height - max_ascent;
+    }
+    // END
     // Calculate the baselines. This is only done on the first line.
     if (line_number == 0) {
       alphabetic_baseline_ = max_ascent;
@@ -1138,12 +1165,26 @@ void ParagraphTxt::Layout(double width) {
       ideographic_baseline_ = (max_ascent + max_descent);
     }
 
-    line_metrics.height =
-        (line_number == 0 ? 0 : line_metrics_[line_number - 1].height) +
-        round(max_ascent + max_descent);
+    // BD ADD: START
+    // line_metrics.height =
+    //     (line_number == 0 ? 0 : line_metrics_[line_number - 1].height) +
+    //     round(max_ascent + max_descent);
+    //
+    if (shouldTextBounds) {
+      line_metrics.height =
+           (line_number == 0 ? 0 : line_metrics_[line_number - 1].height) +
+           (max_ascent + max_descent);
+      y_offset += max_ascent + prev_max_descent;
+    } else {
+      line_metrics.height =
+           (line_number == 0 ? 0 : line_metrics_[line_number - 1].height) +
+           round(max_ascent + max_descent);
+      y_offset += round(max_ascent + prev_max_descent);
+    }
     line_metrics.baseline = line_metrics.height - max_descent;
 
-    y_offset += round(max_ascent + prev_max_descent);
+    // BD DEL:
+    // y_offset += round(max_ascent + prev_max_descent);
     prev_max_descent = max_descent;
 
     line_metrics.line_number = line_number;
