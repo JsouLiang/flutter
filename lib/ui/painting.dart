@@ -2015,9 +2015,9 @@ Future<Codec> instantiateImageCodec(
  * BD ADD:
  *
  */
-Future<Image> getNativeImage(String url, {int width = 0, int height = 0, double scale = 1.0}) {
+Future<Image?> getNativeImage(String url, {int width = 0, int height = 0, double scale = 1.0}) {
   return _futurize(
-        (_Callback<Image> callback) => _getNativeImage(url, callback, width, height, scale),
+        (_Callback<Image?> callback) => _getNativeImage(url, callback, width, height, scale),
   );
 }
 
@@ -2025,7 +2025,7 @@ Future<Image> getNativeImage(String url, {int width = 0, int height = 0, double 
  * BD ADD:
  *
  */
-String? _getNativeImage(String url, _Callback<Image> callback, int width, int height, double scale)
+String? _getNativeImage(String url, _Callback<Image?> callback, int width, int height, double scale)
   native 'getNativeImage';
 
 
@@ -2033,9 +2033,9 @@ String? _getNativeImage(String url, _Callback<Image> callback, int width, int he
  * BD ADD:
  *
  */
-Future<Codec> instantiateNativeImageCodec(String url, {int width = 0, int height = 0, double scale = 1.0}) {
+Future<Codec?> instantiateNativeImageCodec(String url, {int width = 0, int height = 0, double scale = 1.0}) {
   return _futurize(
-        (_Callback<Codec> callback) => _instantiateNativeImageCodec(url, callback, width, height, scale),
+        (_Callback<Codec?> callback) => _instantiateNativeImageCodec(url, callback, width, height, scale),
   );
 }
 
@@ -2043,7 +2043,7 @@ Future<Codec> instantiateNativeImageCodec(String url, {int width = 0, int height
  * BD ADD:
  *
  */
-String? _instantiateNativeImageCodec(String url, _Callback<Codec> callback, int width, int height, double scale)
+String? _instantiateNativeImageCodec(String url, _Callback<Codec?> callback, int width, int height, double scale)
 native 'instantiateNativeImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
@@ -5313,7 +5313,8 @@ typedef _Callbacker<T> = String? Function(_Callback<T> callback);
 /// ```
 Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   final Completer<T> completer = Completer<T>.sync();
-  final String? error = callbacker((T t) {
+  // BD MOD:
+  final String? error = callbacker((T? t) {
     if (t == null) {
       completer.completeError(Exception('operation failed'));
     } else {
