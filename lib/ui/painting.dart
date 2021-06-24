@@ -2025,7 +2025,7 @@ Future<Image> getNativeImage(String url, {int width = 0, int height = 0, double 
  * BD ADD:
  *
  */
-String _getNativeImage(String url, _Callback<Image> callback, int width, int height, double scale)
+String? _getNativeImage(String url, _Callback<Image> callback, int width, int height, double scale)
   native 'getNativeImage';
 
 
@@ -2043,7 +2043,7 @@ Future<Codec> instantiateNativeImageCodec(String url, {int width = 0, int height
  * BD ADD:
  *
  */
-String _instantiateNativeImageCodec(String url, _Callback<Codec> callback, int width, int height, double scale)
+String? _instantiateNativeImageCodec(String url, _Callback<Codec> callback, int width, int height, double scale)
 native 'instantiateNativeImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
