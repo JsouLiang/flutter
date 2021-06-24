@@ -199,14 +199,14 @@ void Performance_getStackTraceSamples(Dart_NativeArguments args) {
   #endif
 }
 
-void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
-  const char* filePath = nullptr;
-  Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
-  #if THIRD_PARTY_DART_BD
-  Dart_Handle res = Dart_RequestSnapshot(filePath);
-  Dart_SetReturnValue(args, res);
-  #endif
-}
+//void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
+//  const char* filePath = nullptr;
+//  Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
+//  #if THIRD_PARTY_DART_BD
+//  Dart_Handle res = Dart_RequestSnapshot(filePath);
+//  Dart_SetReturnValue(args, res);
+//  #endif
+//}
 
 void Performance_heapInfo(Dart_NativeArguments args) {
   #if THIRD_PARTY_DART_BD
@@ -601,7 +601,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_startStackTraceSamples", Performance_startStackTraceSamples, 1, true},
       {"Performance_stopStackTraceSamples", Performance_stopStackTraceSamples, 1, true},
       {"Performance_getStackTraceSamples", Performance_getStackTraceSamples, 2, true},
-      {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
+      // {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
       {"Performance_heapInfo", Performance_heapInfo, 1, true},
       {"Performance_getEngineInitApmInfo", Performance_getEngineInitApmInfo, 1, true},
       {"Performance_getTotalExtMemInfo", Performance_getTotalExtMemInfo, 2, true},
