@@ -33,7 +33,7 @@ vars = {
   'tt_dart_git': 'ssh://git@code.byted.org/tech_client/dart',
   'tt_dart_revision': '179a0b070b35df1d787a3cd88b491761a255ee44',
   'tt_skia_git': 'git@code.byted.org:tech_client/skia.git',
-  'tt_skia_revision': '4950f09e58f81c4750e6f58bfdc8cc96e8081dc0',
+  'tt_skia_revision': 'a40b1de009e18159a021f368d73e39cc8558a3b2',
   'tt_icu_git': 'ssh://git@code.byted.org/tech_client/icu',
   'tt_icu_revision': '762a33cae3bcc7c6272d4ce5fc1aa2d5b76e60a8',
   'tt_harfbuzz_git': 'ssh://git@code.byted.org/tech_client/harfbuzz',
