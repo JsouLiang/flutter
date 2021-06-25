@@ -157,6 +157,14 @@ for liteMode in ${liteModes[@]}; do
 			zip -rq Flutter.dSYM.zip Flutter.dSYM
 			[ -e Flutter.dSYM ] && rm -rf Flutter.dSYM
 			xcrun strip -x -S Flutter
+			echo "strip xcframework"
+			for file in Flutter.xcframework/*
+			do
+				if test -d $file
+				then
+					xcrun strip -x -S $file/Flutter.framework/Flutter
+				fi
+			done
 			cd -
 		fi
 
