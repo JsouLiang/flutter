@@ -87,7 +87,7 @@ class ResourceExtractor {
       }
 
       //BD ADD: START
-      if (mSettings.getOnInitResourcesCallback() != null) {
+      if (mSettings!=null && mSettings.getOnInitResourcesCallback() != null) {
           mSettings.getOnInitResourcesCallback().run();
       }
       //END
