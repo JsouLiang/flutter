@@ -74,6 +74,10 @@ struct Settings {
   std::string vm_snapshot_instr_path;  // deprecated
   MappingCallback vm_snapshot_instr;
 
+  // BD ADD:
+  std::string package_dill_path; // 本次启动所使用的动态包路径
+  std::string package_preload_libs;
+
   std::string isolate_snapshot_data_path;  // deprecated
   MappingCallback isolate_snapshot_data;
   std::string isolate_snapshot_instr_path;  // deprecated
@@ -213,6 +217,8 @@ struct Settings {
   bool icu_initialization_required = true;
   std::string icu_data_path;
   MappingCallback icu_mapper;
+  // BD ADD: START
+  bool dynamicart_host = false;
 
   // Assets settings
   fml::UniqueFD::element_type assets_dir =

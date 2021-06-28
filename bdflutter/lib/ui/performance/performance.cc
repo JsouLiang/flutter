@@ -201,19 +201,20 @@ void Performance_getStackTraceSamples(Dart_NativeArguments args) {
   #endif
 }
 
-void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
-  const char* filePath = nullptr;
-  Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
-  #if THIRD_PARTY_DART_BD
-  Dart_Handle res = Dart_RequestSnapshot(filePath);
-  Dart_SetReturnValue(args, res);
-  #endif
-}
+
+//void Performance_requestHeapSnapshot(Dart_NativeArguments args) {
+//  const char* filePath = nullptr;
+//  Dart_StringToCString(Dart_GetNativeArgument(args, 0), &filePath);
+//  #if THIRD_PARTY_DART_BD
+//  Dart_Handle res = Dart_RequestSnapshot(filePath);
+//  Dart_SetReturnValue(args, res);
+//  #endif
+//}
 
 void Performance_heapInfo(Dart_NativeArguments args) {
-  //#if THIRD_PARTY_DART_BD
+  #if THIRD_PARTY_DART_BD
   Dart_SetReturnValue(args, Dart_HeapInfo());
-  //#endif
+  #endif
 }
 
 int64_t Performance::CurrentTimestamp() {
@@ -504,6 +505,25 @@ bool Performance::IsExitApp() {
   return isExitApp_;
 }
 
+void Performance_allocateScheduling(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  int dis_ygc = tonic::DartConverter<int>::FromArguments(args, 1, exception);
+  int dis_ygc_start = tonic::DartConverter<int>::FromArguments(args, 2, exception);
+  int dis_ygc_end = tonic::DartConverter<int>::FromArguments(args, 3, exception);
+  // int new_gen_size = tonic::DartConverter<int>::FromArguments(args, 4, exception);
+  // int old_gen_size = tonic::DartConverter<int>::FromArguments(args, 5, exception);
+  // Dart_DelayGc(dis_ygc, dis_ygc_start, dis_ygc_end, new_gen_size, old_gen_size);
+  Dart_AllocateScheduling(dis_ygc, dis_ygc_start, dis_ygc_end);
+}
+
+void Performance_allocateSchedulingStart(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingStart();
+}
+
+void Performance_allocateSchedulingEnd(Dart_NativeArguments args) {
+  Dart_AllocateSchedulingEnd();
+}
+
 void Performance::UpdateGpuCacheUsageKB(flutter::Rasterizer* rasterizer) {
 
     size_t totalBytes = 0;
@@ -629,7 +649,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_startStackTraceSamples", Performance_startStackTraceSamples, 1, true},
       {"Performance_stopStackTraceSamples", Performance_stopStackTraceSamples, 1, true},
       {"Performance_getStackTraceSamples", Performance_getStackTraceSamples, 2, true},
-      {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
+      // {"Performance_requestHeapSnapshot", Performance_requestHeapSnapshot, 2, true},
       {"Performance_heapInfo", Performance_heapInfo, 1, true},
       {"Performance_getEngineInitApmInfo", Performance_getEngineInitApmInfo, 1, true},
       {"Performance_getTotalExtMemInfo", Performance_getTotalExtMemInfo, 2, true},
@@ -640,6 +660,9 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_clearHugeFontCache", Performance_clearHugeFontCache, 1, true},
       {"Performance_clearAllFontCache", Performance_clearAllFontCache, 1, true},
       {"Performance_clearLayoutCache", Performance_clearLayoutCache, 1, true},
+      {"Performance_allocateScheduling", Performance_allocateScheduling, 4, true},
+      {"Performance_allocateSchedulingStart", Performance_allocateSchedulingStart, 1, true},
+      {"Performance_allocateSchedulingEnd", Performance_allocateSchedulingEnd, 1, true},
   });
 }
 

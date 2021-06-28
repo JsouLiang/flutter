@@ -148,6 +148,11 @@ FLUTTER_DARWIN_EXPORT
 + (NSString *)flutterAssetAbsolutePath:(NSString*)asset fromPackage:(NSString*)package fromBundle:(nullable NSBundle*)bundle;
 
 // END
+/**
+ * Package settings
+ */
+- (void)setDillPath:(NSString*)path;    // 动态App压缩包路径
+- (void)setEnginePath:(NSString*)path;  // 动态Engine文件夹路径
 
 @end
 

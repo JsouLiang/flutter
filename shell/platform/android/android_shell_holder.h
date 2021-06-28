@@ -116,10 +116,12 @@ class AndroidShellHolder {
 
   const int FLAG_ENGINE_PRELOAD = 1;
   const int FLAG_ENGINE_MULTI_CHANNEL = 1 << 2;
+  // BD ADD: START
+  void UpdateSettings(const std::string& package_dill_path, const std::string& package_preload_libs);
   // END
 
  private:
-  const flutter::Settings settings_;
+  flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::shared_ptr<ThreadHost> thread_host_;

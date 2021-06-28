@@ -54,7 +54,7 @@ class ZipAssetStore final : public AssetResolver {
 
   // |AssetResolver|
   AssetResolver::AssetResolverType GetType() const override;
-  
+
   // BD DEL: START
   // |AssetResolver|
   //  std::unique_ptr<fml::Mapping> GetAsMapping(

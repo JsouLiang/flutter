@@ -27,6 +27,7 @@ class ResourceExtractor {
   private static final String TAG = "ResourceExtractor";
   private static final String TIMESTAMP_PREFIX = "res_timestamp-";
   private static final String[] SUPPORTED_ABIS = getSupportedAbis();
+  private static final int MAX_COPY_RETRY_COUNT = 1;
 
   @SuppressWarnings("deprecation")
   static long getVersionCode(@NonNull PackageInfo packageInfo) {
@@ -60,18 +61,22 @@ class ResourceExtractor {
     @NonNull private final AssetManager mAssetManager;
     @NonNull private final String mPackageName;
     @NonNull private final PackageManager mPackageManager;
+    // BD ADD
+    private FlutterLoader.Settings mSettings;
 
     ExtractTask(
         @NonNull String dataDirPath,
         @NonNull HashSet<String> resources,
         @NonNull String packageName,
         @NonNull PackageManager packageManager,
-        @NonNull AssetManager assetManager) {
+        @NonNull AssetManager assetManager,
+        FlutterLoader.Settings settings) {
       mDataDirPath = dataDirPath;
       mResources = resources;
       mAssetManager = assetManager;
       mPackageName = packageName;
       mPackageManager = packageManager;
+      mSettings = settings;
     }
 
     @Override
@@ -96,6 +101,12 @@ class ResourceExtractor {
         }
       }
 
+      //BD ADD: START
+      if (mSettings!=null && mSettings.getOnInitResourcesCallback() != null) {
+          mSettings.getOnInitResourcesCallback().run();
+      }
+      //END
+
       return null;
     }
 
@@ -114,10 +125,50 @@ class ResourceExtractor {
             output.getParentFile().mkdirs();
           }
 
-          try (InputStream is = mAssetManager.open(asset);
-              OutputStream os = new FileOutputStream(output)) {
-            copy(is, os);
-          }
+          int copyRetryCount = 0;
+            boolean error = true;
+            do {
+                InputStream is = null;
+                OutputStream os = null;
+                try {
+                    is = mAssetManager.open(asset);
+                    os = new FileOutputStream(output);
+                    copy(is, os);
+                    error = false;
+                }catch (FileNotFoundException fnfe) {
+                    throw fnfe;
+                } catch (IOException ioe) {
+                    error = true;
+                    if (copyRetryCount == MAX_COPY_RETRY_COUNT) {
+                        throw ioe;
+                    }
+                    copyRetryCount++;
+                    Log.w(TAG,"copy retry1:"+resource);
+                    if (mSettings.getInitExceptionCallback() != null) {
+                        mSettings.getInitExceptionCallback().onRetryException(ioe);
+                    }
+                } finally {
+                    try {
+                        if (is != null) {
+                            is.close();
+                        }
+                        if (os != null) {
+                            os.close();
+                        }
+                    } catch (IOException ioe) {
+                        error = true;
+                        if (copyRetryCount == MAX_COPY_RETRY_COUNT) {
+                            throw ioe;
+                        }
+                        copyRetryCount++;
+                        Log.w(TAG,"copy retry2:"+resource);
+                        if (mSettings.getInitExceptionCallback() != null) {
+                            mSettings.getInitExceptionCallback().onRetryException(ioe);
+                        }
+                    }
+                }
+            } while (error);
+
           if (BuildConfig.DEBUG) {
             Log.i(TAG, "Extracted baseline resource " + resource);
           }
@@ -141,12 +192,15 @@ class ResourceExtractor {
   @NonNull private final AssetManager mAssetManager;
   @NonNull private final HashSet<String> mResources;
   private ExtractTask mExtractTask;
+  // BD ADD
+  private FlutterLoader.Settings mSettings;
 
   ResourceExtractor(
       @NonNull String dataDirPath,
       @NonNull String packageName,
       @NonNull PackageManager packageManager,
-      @NonNull AssetManager assetManager) {
+      @NonNull AssetManager assetManager,
+      FlutterLoader.Settings settings) {
     mDataDirPath = dataDirPath;
     mPackageName = packageName;
     mPackageManager = packageManager;
@@ -169,8 +223,7 @@ class ResourceExtractor {
       Log.e(
           TAG, "Attempted to start resource extraction while another extraction was in progress.");
     }
-    mExtractTask =
-        new ExtractTask(mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager);
+    mExtractTask = new ExtractTask(mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager, mSettings);
     mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     return this;
   }

@@ -32,6 +32,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+// BD ADD:
+import io.flutter.embedding.engine.FlutterShellArgs;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -55,6 +57,12 @@ public class FlutterLoader {
 
   // BD ADD
   private static final String DEBUG_FLUTTER_LIBS_DIR = "flutter_libs";
+
+  private static final String DEFAULT_HOST_MANIFEST_JSON = "host_manifest.json";
+  private static final String DEFAULT_OPTI_PROPS = "optimize.properties";
+  private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
+  private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
+
 
   private static FlutterLoader instance;
 
@@ -80,6 +88,16 @@ public class FlutterLoader {
   public FlutterLoader() {
     this(new FlutterJNI());
   }
+
+  // BD ADD START:
+  public interface SoLoader {
+    void loadLibrary(Context context, String libraryName);
+  }
+
+  public interface MonitorCallback {
+    void onMonitor(String event, long cost);
+  }
+  // END
 
   /**
    * Creates a {@code FlutterLoader} with the specified {@link FlutterJNI}.
@@ -249,6 +267,7 @@ public class FlutterLoader {
         nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
       }
       // END
+
       // BD MOD: START
       // shellArgs.add(
       //           "--icu-native-lib-path="
@@ -263,6 +282,7 @@ public class FlutterLoader {
                         + DEFAULT_LIBRARY);
       }
       // END
+
       if (args != null) {
         Collections.addAll(shellArgs, args);
       }
@@ -318,6 +338,11 @@ public class FlutterLoader {
                 + nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
+      }
+
+      String hostManifestJson = PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir + File.separator + DEFAULT_HOST_MANIFEST_JSON;
+      if(new File(hostManifestJson).exists()) {
+          shellArgs.add("--dynamicart-host");
       }
 
       shellArgs.add("--cache-dir-path=" + result.engineCachesPath);
@@ -456,15 +481,16 @@ public class FlutterLoader {
       final String packageName = applicationContext.getPackageName();
       final PackageManager packageManager = applicationContext.getPackageManager();
       final AssetManager assetManager = applicationContext.getResources().getAssets();
-      resourceExtractor =
-          new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
+      resourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager, settings);
 
       // In debug/JIT mode these assets will be written to disk and then
       // mapped into memory so they can be provided to the Dart VM.
       resourceExtractor
           .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
           .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
-          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
+          .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB))
+          .addResource(fullAssetPathFrom(DEFAULT_HOST_MANIFEST_JSON))
+          .addResource(fullAssetPathFrom2(DEFAULT_OPTI_PROPS));
 
       resourceExtractor.start();
     }
@@ -551,13 +577,17 @@ public class FlutterLoader {
               Log.i(TAG, "DebugMode: copy new" + file.getName() + " success");
           }
       }
+
+  @NonNull
+  private String fullAssetPathFrom2(@NonNull String filePath) {
+    return filePath;
+
   }
 
   public interface InitExceptionCallback {
       void onRetryException(Throwable t);
       void onInitException(Throwable t);
   }
-
 
   public static class Settings {
     private String logTag;
@@ -578,6 +608,22 @@ public class FlutterLoader {
     // 页面退出后，FlutterEngine默认是不销毁VM的，disableLeakVM设置在所有页面退出后销毁VM
     public void disableLeakVM() {
         disableLeakVM = true;
+
+    public Runnable getOnInitResourcesCallback() {
+         return onInitResources;
+     }
+
+    public void setOnInitResourcesCallback(Runnable callback) {
+         onInitResources = callback;
+    }
+
+     public InitExceptionCallback getInitExceptionCallback() {
+         return initExceptionCallback;
+    }
+
+    public void setInitExceptionCallback(InitExceptionCallback iec) {
+           initExceptionCallback = iec;
+
     }
 
     public String getNativeLibraryDir() {
@@ -596,6 +642,7 @@ public class FlutterLoader {
       soLoader = loader;
     }
 
+
     public void setMonitorCallback(MonitorCallback monitorCallback) {
       this.monitorCallback = monitorCallback;
     }
@@ -608,6 +655,7 @@ public class FlutterLoader {
         this.enableDebugMode = enableDebugMode;
     }
     // END
+
 
     @Nullable
     public String getLogTag() {

@@ -830,6 +830,7 @@ public class FlutterJNI {
   private native void nativeUnregisterTexture(long nativeShellHolderId, long textureId);
   // ------ Start Texture Registration Support -----
 
+
   // BD ADD: START
   public void scheduleBackgroundFrame() {
     ensureAttachedToNative();
@@ -849,6 +850,22 @@ public class FlutterJNI {
 
   private native void nativeScheduleFrameNow(long nativePlatformViewId);
   // END
+
+  //BD ADD: START
+  @UiThread
+  public void updateNative(String assetsPath) {
+    ensureAttachedToNative();
+    nativeUpdateSettings(nativeShellHolderId, assetsPath, null);
+  }
+
+  @UiThread
+  public void updateNative(String assetsPath, String preloadLibs) {
+    ensureAttachedToNative();
+    nativeUpdateSettings(nativeShellHolderId, assetsPath, preloadLibs);
+  }
+
+  private native void nativeUpdateSettings(long nativeShellHolderId, String assetsPath, String preloadLibs);
+
 
   // ------ Start Dart Execution Support -------
   /**

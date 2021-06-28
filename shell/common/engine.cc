@@ -581,6 +581,16 @@ const std::string& Engine::GetLastEntrypointLibrary() const {
   return last_entry_point_library_;
 }
 
+// BD ADD: START
+void Engine::ExitApp() {
+    runtime_controller_->ExitApp();
+}
+
+void Engine::NotifyLowMemoryWarning() {
+    runtime_controller_->NotifyLowMemoryWarning();
+}
+// END
+
 // |RuntimeDelegate|
 void Engine::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
   return delegate_.RequestDartDeferredLibrary(loading_unit_id);

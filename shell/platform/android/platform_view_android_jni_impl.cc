@@ -572,6 +572,20 @@ static void ScheduleBackgroundFrame(JNIEnv *env, jobject jcaller, jlong shell_ho
 static void ScheduleFrameNow(JNIEnv *env, jobject jcaller, jlong shell_holder) {
   ANDROID_SHELL_HOLDER->ScheduleFrameNow();
 }
+// TODO ZXY
+//static void UpdateSettings(JNIEnv *env, jobject jcaller, jlong shell_holder, jstring package_dill_path, jstring package_preload_libs) {
+//    // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
+//    ANDROID_SHELL_HOLDER->UpdateSettings(fml::jni::JavaStringToString(env, package_dill_path), fml::jni::JavaStringToString(env, package_preload_libs));
+//}
+//
+//static void ScheduleBackgroundFrame(JNIEnv *env, jobject jcaller, jlong shell_holder) {
+//    // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
+//    ANDROID_SHELL_HOLDER->ScheduleBackgroundFrame();
+//}
+//
+//static void ScheduleFrameNow(JNIEnv *env, jobject jcaller, jlong shell_holder) {
+//    ANDROID_SHELL_HOLDER->ScheduleFrameNow();
+//}
 // END
 
 static void SurfaceCreated(JNIEnv* env,
@@ -628,6 +642,14 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
       jAssetManager,                                   // asset manager
       fml::jni::JavaStringToString(env, jBundlePath))  // apk asset dir
   );
+
+  // BD ADD: START
+  if (!ANDROID_SHELL_HOLDER->GetSettings().zip_assets_directory.empty()) {
+      asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
+              fml::OpenDirectory(ANDROID_SHELL_HOLDER->GetSettings().zip_assets_directory.c_str(), false,
+                                 fml::FilePermission::kRead), false));
+  }
+  // END
 
   auto entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
   auto libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);
@@ -1238,6 +1260,22 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleFrameNow),
       },
+      // TODO ZXY
+//      {
+//              .name = "nativeUpdateSettings",
+//              .signature = "(JLjava/lang/String;Ljava/lang/String;)V",
+//              .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
+//      },
+//      {
+//              .name = "nativeScheduleBackgroundFrame",
+//              .signature = "(J)V",
+//              .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
+//      },
+//      {
+//              .name = "nativeScheduleFrameNow",
+//              .signature = "(J)V",
+//              .fnPtr = reinterpret_cast<void*>(&ScheduleFrameNow),
+//      },
       // END
       {
           .name = "nativeDestroy",

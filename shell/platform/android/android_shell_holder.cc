@@ -341,12 +341,51 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
   shell_->NotifyLowMemoryWarning();
 }
 
+// BD ADD: START
+void AndroidShellHolder::UpdateSettings(const std::string& package_dill_path, const std::string& package_preload_libs) {
+    if (!IsValid()) {
+        return;
+    }
+    std::string a = "bc";
+    std::string b = "cd";
+    a = b;
+    settings_.package_dill_path = package_dill_path;
+    settings_.package_preload_libs = package_preload_libs;
+}
+
+// BD ADD: START
+void AndroidShellHolder::ScheduleBackgroundFrame() {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ScheduleBackgroundFrame();
+}
+
+void AndroidShellHolder::ScheduleFrameNow() {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ScheduleFrameNow();
+}
+
+void AndroidShellHolder::ExitApp(fml::closure closure) {
+    if (!IsValid()) {
+        return;
+    }
+    shell_->ExitApp(std::move(closure));
+}
+// END
+
 std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     std::shared_ptr<flutter::AssetManager> asset_manager,
     const std::string& entrypoint,
     const std::string& libraryUrl) const {
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  // BD ADD: START
+  // Running in Dynamicart mode. 注意：仅Android调用
+  if (!GetSettings().package_dill_path.empty()) {
+    isolate_configuration = IsolateConfiguration::CreateForDynamicart(GetSettings(), *asset_manager);
+  } else if (flutter::DartVM::IsRunningPrecompiledCode()) {
     isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
   } else {
     std::unique_ptr<fml::Mapping> kernel_blob =

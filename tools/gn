@@ -108,6 +108,10 @@ def to_gn_args(args):
         gn_args['bitcode_marker'] = True
 
     gn_args['enable_bitcode'] = args.bitcode
+    # check dynamicart arg
+    if args.dynamicart and runtime_mode not in ['profile', 'release']:
+        raise Exception('--dynamicart is only supported on --release or --profile')
+    gn_args['dynamicart'] = args.dynamicart # Enable dynamicart Mode.
 
     # check dynamicart arg
     if args.dynamicart and runtime_mode not in ['profile', 'release']:
@@ -199,6 +203,11 @@ def to_gn_args(args):
     enable_lto = args.lto
     if args.unoptimized:
       # There is no point in enabling LTO in unoptimized builds.
+      enable_lto = False
+
+    #if args.dynamicart == 'dynamicart' and args.runtime_mode == 'profile':
+    if args.dynamicart and args.runtime_mode == 'profile':
+      print("enable_lto")
       enable_lto = False
 
     if not sys.platform.startswith('win'):

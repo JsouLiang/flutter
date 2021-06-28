@@ -62,6 +62,15 @@ bool ShouldCreateLogMessage(LogSeverity severity);
 #define FML_LOG_IS_ON(severity) \
   (::fml::ShouldCreateLogMessage(::fml::LOG_##severity))
 
+#define DEBUG_ENGINE
+#if defined(DEBUG_ENGINE)
+#define FML_DEBUG(severity) \
+  FML_LAZY_STREAM(FML_LOG_STREAM(severity), FML_LOG_IS_ON(severity))
+#else
+#define FML_DEBUG(severity) \
+  FML_LAZY_STREAM(FML_LOG_STREAM(severity), 0)
+#endif
+
 #define FML_LOG(severity) \
   FML_LAZY_STREAM(FML_LOG_STREAM(severity), FML_LOG_IS_ON(severity))
 
@@ -94,5 +103,9 @@ bool ShouldCreateLogMessage(LogSeverity severity);
     FML_LOG(ERROR) << "Reached unreachable code."; \
     ::fml::KillProcess();                          \
   }
+
+// BD ADD: START
+#define TT_LOG() FML_LOG(ERROR)
+// END
 
 #endif  // FLUTTER_FML_LOGGING_H_
