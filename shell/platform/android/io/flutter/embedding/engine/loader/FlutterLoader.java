@@ -533,6 +533,11 @@ public class FlutterLoader {
     return flutterApplicationInfo.flutterAssetsDir + File.separator + filePath;
   }
 
+  @NonNull
+  private String fullAssetPathFrom2(@NonNull String filePath) {
+    return filePath;
+  }
+
   /**
    * BD ADD
    */
@@ -577,11 +582,6 @@ public class FlutterLoader {
               Log.i(TAG, "DebugMode: copy new" + file.getName() + " success");
           }
       }
-
-  @NonNull
-  private String fullAssetPathFrom2(@NonNull String filePath) {
-    return filePath;
-
   }
 
   public interface InitExceptionCallback {
@@ -608,7 +608,7 @@ public class FlutterLoader {
     // 页面退出后，FlutterEngine默认是不销毁VM的，disableLeakVM设置在所有页面退出后销毁VM
     public void disableLeakVM() {
         disableLeakVM = true;
-
+    }
     public Runnable getOnInitResourcesCallback() {
          return onInitResources;
      }
