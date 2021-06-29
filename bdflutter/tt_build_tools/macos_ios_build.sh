@@ -49,7 +49,7 @@ echo "IOS build modes: ${liteModes[@]}"
 releaseModeArg=$4
 releaseModes=(${releaseModeArg//,/ })
 if [ ${#releaseModes[@]} == 0 ];then
-    releaseModes=('debug' 'profile' 'release' 'release_dynamicart' 'profile_dynamicart')
+    releaseModes=('debug' 'profile' 'release' 'release_dynamicart')
 fi
 echo "Android release modes: ${releaseModes[@]}"
 

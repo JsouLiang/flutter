@@ -112,7 +112,7 @@ for liteMode in ${liteModes[@]}; do
 
             # dynamicart只打release
             if [ $dynamic = 'dynamicart' ]; then
-                if [ $mode = 'release' -o $mode = 'profile' ]; then
+                if [ $mode = 'release' ]; then
                     ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix --only-gen-snapshot
                     androidDir=out/android_${mode}${platformPostFix}_dynamicart
                     modeDir=$modeDir-dynamicart
