@@ -427,6 +427,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
 + (void)setThreadHighQoS:(BOOL)enabled {
   highQoS = enabled;
+}
 - (void)setDillPath:(NSString*)path {
   if (!(path && [path isKindOfClass:[NSString class]] && path.length > 0)) {
     return;

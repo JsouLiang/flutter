@@ -32,8 +32,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-// BD ADD:
-import io.flutter.embedding.engine.FlutterShellArgs;
 
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
@@ -88,16 +86,6 @@ public class FlutterLoader {
   public FlutterLoader() {
     this(new FlutterJNI());
   }
-
-  // BD ADD START:
-  public interface SoLoader {
-    void loadLibrary(Context context, String libraryName);
-  }
-
-  public interface MonitorCallback {
-    void onMonitor(String event, long cost);
-  }
-  // END
 
   /**
    * Creates a {@code FlutterLoader} with the specified {@link FlutterJNI}.
