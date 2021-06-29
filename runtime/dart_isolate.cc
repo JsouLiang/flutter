@@ -623,11 +623,9 @@ bool DartIsolate::LoadKernelFromDynamicartKernel(std::shared_ptr<const fml::Mapp
 
     Dart_Handle library;
     if (DartVM::IsRunningPrecompiledCode()) {
-        FML_DEBUG(ERROR) << "==0519== load by Dart_LoadLibraryFromKernel2" << std::endl;
         library =
                 Dart_LoadLibraryFromKernel2(mapping->GetMapping(), mapping->GetSize());
     }else{
-        FML_DEBUG(ERROR) << "==0519== load by Dart_LoadLibraryFromKernel" << std::endl;
         library =
                 Dart_LoadLibraryFromKernel(mapping->GetMapping(), mapping->GetSize());
     }
