@@ -63,6 +63,10 @@ function checkResult() {
 cd ..
 for liteMode in ${liteModes[@]}; do
 	for mode in ${releaseModes[@]}; do
+	  if [[ $mode == *"profile_dynamicart"* ]]; then
+	    echo 'profile dynamicart is not supported yet!'
+	    continue
+    fi
 		# lite only build for release mode
 		if [ $mode == 'debug' ] || [ $mode == 'profile' ] || [[ $mode == *"profile_dynamicart"* ]]; then
 		  if [ $liteMode != 'normal' ]; then
