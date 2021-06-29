@@ -253,6 +253,8 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       return textType;
     } else if (type.type == TextInputChannel.TextInputType.PHONE) {
       return InputType.TYPE_CLASS_PHONE;
+    } else if (type.type == TextInputChannel.TextInputType.NONE) {
+      return InputType.TYPE_NULL;
     }
 
     int textType = InputType.TYPE_CLASS_TEXT;
@@ -366,9 +368,21 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mImm.sendAppPrivateCommand(mView, action, data);
   }
 
-  private void showTextInput(View view) {
-    view.requestFocus();
-    mImm.showSoftInput(view, 0);
+  private boolean canShowTextInput() {
+    if (configuration == null || configuration.inputType == null) {
+      return true;
+    }
+    return configuration.inputType.type != TextInputChannel.TextInputType.NONE;
+  }
+
+  @VisibleForTesting
+  void showTextInput(View view) {
+    if (canShowTextInput()) {
+      view.requestFocus();
+      mImm.showSoftInput(view, 0);
+    } else {
+      hideTextInput(view);
+    }
   }
 
   private void hideTextInput(View view) {
@@ -386,7 +400,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   void setTextInputClient(int client, TextInputChannel.Configuration configuration) {
     // Call notifyViewExited on the previous field.
     notifyViewExited();
-    inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+    this.configuration = configuration;
+    if (canShowTextInput()) {
+      inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+    } else {
+      inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, client);
+    }
 
     if (mEditable != null) {
       mEditable.removeEditingStateListener(this);
@@ -394,7 +413,6 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mEditable =
         new ListenableEditingState(
             configuration.autofill != null ? configuration.autofill.editState : null, mView);
-    this.configuration = configuration;
     updateAutofillConfigurationIfNeeded(configuration);
 
     // setTextInputClient will be followed by a call to setTextInputEditingState.
