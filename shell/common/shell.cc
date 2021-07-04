@@ -234,14 +234,17 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         //                     snapshot_delegate_future.get(),  //
         //                     shell->volatile_path_tracker_));
         if (preLoad) {
+          PlatformData pd = PlatformData(platform_data);
           latch.Signal();
+          // Test point
+          // sleep(5);
           auto engine = on_create_engine(
             *shell,                         //
             dispatcher_maker,               //
             *shell->GetDartVM(),            //
             std::move(isolate_snapshot),    //
             task_runners,                   //
-            platform_data,                  //
+            pd,                  //
             shell->GetSettings(),           //
             std::move(animator),            //
             weak_io_manager,   //
