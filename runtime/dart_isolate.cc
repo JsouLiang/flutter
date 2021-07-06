@@ -30,6 +30,11 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
+// BD ADD: START
+#include "flutter/bdflutter/assets/zip_asset_store.h"
+#include "flutter/assets/directory_asset_bundle.h"
+#include <string>
+// END
 
 namespace flutter {
 
@@ -649,6 +654,81 @@ bool DartIsolate::LoadKernelFromDynamicartKernel(std::shared_ptr<const fml::Mapp
 
     FML_LOG(ERROR)<<"kb load success"<<std::endl;
     return true;
+}
+
+Dart_Handle DartIsolate::LoadDynamicPage(const char* pathStr){
+  FML_LOG(ERROR)<<"LoadDynamicPage："<<pathStr<<std::endl;
+  auto asset_manager = GetAssetManager();
+  std::string packagePath = pathStr;
+  size_t file_ext_index = packagePath.rfind('.');
+  if (file_ext_index == std::string::npos ||
+      packagePath.substr(file_ext_index) != ".zip") {
+    asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
+        fml::OpenDirectory(packagePath.c_str(), false,
+                           fml::FilePermission::kRead),true));
+  } else {
+    asset_manager->PushFront(std::make_unique<ZipAssetStore>(
+        packagePath.c_str(), "flutter_assets"));
+  }
+
+  std::unique_ptr<fml::Mapping> kernelMapping =
+      asset_manager->GetAsMapping("kb.origin");
+  if (kernelMapping == nullptr || kernelMapping->GetSize() == 0) {
+    kernelMapping = asset_manager->GetAsMapping("kb");
+    if (kernelMapping != nullptr && kernelMapping->GetSize() > 0) {
+      std::unique_ptr<fml::Mapping> encrypt = asset_manager->GetAsMapping("encrypt.txt");
+      if (encrypt != nullptr) {
+        const uint8_t *encodeData = kernelMapping->GetMapping();
+        size_t encodeSize = kernelMapping->GetSize();
+        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        );
+        long start = ms.count();
+        TT_LOG() << "begin decode kb:" << encodeSize << std::endl;
+        std::vector<uint8_t> decodeData;
+        const size_t space = 8;
+        size_t spaceCount = encodeSize / space;
+        for (size_t i = 0; i < spaceCount; i++) {
+          for (size_t j = 0; j < space; j++) {
+            decodeData.push_back(encodeData[i * space + j] ^ (i % space));
+          }
+        }
+        for (size_t i = (spaceCount * space); i < encodeSize; i++) {
+          decodeData.push_back(encodeData[i] ^ 2);
+        }
+        std::unique_ptr<fml::Mapping> decodeKernel(new fml::DataMapping(decodeData));
+        ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        );
+        long end = ms.count();
+        TT_LOG() << "finish decode kb:" << decodeKernel->GetSize() << ",time:" << (end - start) << std::endl;
+        kernelMapping = std::move(decodeKernel);
+      }
+    }
+  }
+
+  if (kernelMapping== nullptr || !Dart_IsKernel(kernelMapping->GetMapping(), kernelMapping->GetSize())) {
+    FML_LOG(ERROR)<<"LoadDynamicPage kb is null"<<std::endl;
+    return Dart_Null();
+  }
+  // Mapping must be retained until isolate shutdown.
+  std::shared_ptr<const fml::Mapping> kernelMapping2 = std::move(kernelMapping);
+  kernel_buffers_.push_back(kernelMapping2);
+
+  std::unique_ptr<fml::Mapping> pageMapping =
+      asset_manager->GetAsMapping("page.txt");
+  std::string pageContent = "";
+  if(pageMapping != nullptr && pageMapping->GetSize()>0){
+    std::string tmpStr(pageMapping->GetMapping(), pageMapping->GetMapping()+pageMapping->GetSize());
+    pageContent = tmpStr;
+    FML_LOG(ERROR)<<"pageContent:"<<pageContent<<std::endl;
+  }
+  Dart_Handle mainFunc =
+      Dart_DynamicPageLoad(kernelMapping2->GetMapping(), kernelMapping2->GetSize(), pageContent.c_str());
+  if (tonic::LogIfError(mainFunc)) {
+    return Dart_Null();
+  }
+  return mainFunc;
 }
 // END
 

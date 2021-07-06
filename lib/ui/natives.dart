@@ -101,4 +101,7 @@ dynamic reflectClass(String libraryUrl, String className) native 'Reflect_reflec
 dynamic classInvoke(dynamic cls, int invokeType, String functionName, List arguments, List names) native 'Reflect_classInvoke';
 
 dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, List arguments, List names) native 'Reflect_instanceInvoke';
+
+Function loadDynamicPage(String zipPath) native 'DynamicPage_load';
+
 // BD END

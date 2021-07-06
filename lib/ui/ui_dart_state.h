@@ -26,6 +26,9 @@
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/dart_state.h"
+// BD ADD: START
+#include <flutter/assets/asset_manager.h>
+// END
 
 namespace flutter {
 class FontSelector;
@@ -78,6 +81,12 @@ class UIDartState : public tonic::DartState {
                                 const std::string& stack_trace);
 
   bool enable_skparagraph() const;
+
+  // BD ADD: START
+  void SetAssetManager(std::shared_ptr<AssetManager> am);
+  std::shared_ptr<AssetManager> GetAssetManager() const;
+  virtual Dart_Handle LoadDynamicPage(const char* pathStr);
+  // END
 
   template <class T>
   static flutter::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
@@ -140,6 +149,9 @@ class UIDartState : public tonic::DartState {
   UnhandledExceptionCallback unhandled_exception_callback_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
   const bool enable_skparagraph_;
+  // BD ADD: START
+  std::shared_ptr<AssetManager> asset_manager_;
+  // END
 
   void AddOrRemoveTaskObserver(bool add);
 };

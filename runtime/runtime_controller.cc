@@ -487,6 +487,12 @@ uint64_t RuntimeController::GetRootIsolateGroup() const {
   }
 }
 
+// BD ADD: START
+std::weak_ptr<DartIsolate> RuntimeController::GetRootIsolate() {
+  return root_isolate_;
+}
+// END
+
 void RuntimeController::LoadDartDeferredLibrary(
     intptr_t loading_unit_id,
     std::unique_ptr<const fml::Mapping> snapshot_data,

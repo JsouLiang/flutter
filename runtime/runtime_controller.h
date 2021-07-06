@@ -504,6 +504,10 @@ class RuntimeController : public PlatformConfigurationClient {
   ///             be established.
   uint64_t GetRootIsolateGroup() const;
 
+  // BD ADD: START
+  std::weak_ptr<DartIsolate> GetRootIsolate();
+  // END
+
   //--------------------------------------------------------------------------
   /// @brief      Loads the Dart shared library into the Dart VM. When the
   ///             Dart library is loaded successfully, the Dart future

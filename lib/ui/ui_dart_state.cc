@@ -110,6 +110,21 @@ fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
   return skia_unref_queue_;
 }
 
+// BD ADD: START
+void UIDartState::SetAssetManager(std::shared_ptr<AssetManager> am){
+  asset_manager_ = am;
+}
+
+std::shared_ptr<AssetManager> UIDartState::GetAssetManager() const{
+  return asset_manager_;
+}
+
+Dart_Handle UIDartState::LoadDynamicPage(const char* pathStr){
+  return Dart_Null();
+}
+
+// END
+
 std::shared_ptr<VolatilePathTracker> UIDartState::GetVolatilePathTracker()
     const {
   return volatile_path_tracker_;

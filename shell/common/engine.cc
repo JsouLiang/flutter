@@ -203,6 +203,14 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
     return RunStatus::Failure;
   }
 
+  std::shared_ptr<DartIsolate> isolate =
+      runtime_controller_->GetRootIsolate().lock();
+  // BD ADD: START
+  if(isolate){
+    isolate->SetAssetManager(asset_manager_);
+  }
+  // END
+
   auto service_id = runtime_controller_->GetRootIsolateServiceID();
   if (service_id.has_value()) {
     fml::RefPtr<PlatformMessage> service_id_message =

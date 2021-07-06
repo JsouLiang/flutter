@@ -58,7 +58,8 @@ namespace flutter {
   V(Reflect_libraryInvoke, 5)   \
   V(Reflect_reflectClass, 2)    \
   V(Reflect_classInvoke, 5)     \
-  V(Reflect_instanceInvoke, 5)
+  V(Reflect_instanceInvoke, 5)  \
+  V(DynamicPage_load, 1)
   /** END **/
 
 
@@ -409,6 +410,15 @@ void Reflect_instanceInvoke(Dart_NativeArguments args) {
   Dart_Handle arguments = Dart_GetNativeArgument(args, 3);
   Dart_Handle names = Dart_GetNativeArgument(args, 4);
   Dart_Handle res = Dart_InstanceInvoke(instance, invokeType, functionName, arguments, names);
+  Dart_SetReturnValue(args, res);
+}
+
+void DynamicPage_load(Dart_NativeArguments args) {
+  Dart_Handle pathHandle = Dart_GetNativeArgument(args, 0);
+  const char* pathStr;
+  Dart_StringToCString(pathHandle, &pathStr);
+  UIDartState* dartIsolate = UIDartState::Current();
+  Dart_Handle res = dartIsolate->LoadDynamicPage(pathStr);
   Dart_SetReturnValue(args, res);
 }
 // BD END

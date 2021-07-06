@@ -433,6 +433,9 @@ class DartIsolate : public UIDartState {
   void LoadLoadingUnitError(intptr_t loading_unit_id,
                             const std::string error_message,
                             bool transient);
+  // BD ADD: START
+  Dart_Handle LoadDynamicPage(const char* pathStr) override;
+  // END
 
  private:
   friend class IsolateConfiguration;
