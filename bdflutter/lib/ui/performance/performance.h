@@ -114,7 +114,7 @@ class Performance {
 
   // boost VSync
   // request VSync immediately, when begin frame
-  std::atomic_bool boostVSync;
+  std::atomic_bool boostVSync = true;
 };
 
 }
