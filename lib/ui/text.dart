@@ -854,8 +854,8 @@ Int32List _encodeParagraphStyle(
   String? ellipsis,
   Locale? locale,
   // BD ADD: START
-  bool? drawMinHeight,
-  bool? forceVerticalCenter,
+  bool drawMinHeight,
+  bool forceVerticalCenter,
   // END
 ) {
   final Int32List result = Int32List(7); // also update paragraph_builder.cc
@@ -908,10 +908,10 @@ Int32List _encodeParagraphStyle(
     // Passed separately to native.
   }
   // BD ADD:
-  if (drawMinHeight == true) {
+  if (drawMinHeight) {
     result[0] |= 1 << 13;
   }
-  if (forceVerticalCenter == true) {
+  if (forceVerticalCenter) {
     result[0] |= 1 << 14;
   }
   // END
@@ -990,8 +990,8 @@ class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     // BD ADD: START
-    bool? drawMinHeight,
-    bool? forceVerticalCenter,
+    bool drawMinHeight = false,
+    bool forceVerticalCenter = false,
     // END
   }) : _encoded = _encodeParagraphStyle(
          textAlign,
@@ -1030,8 +1030,8 @@ class ParagraphStyle {
   final String? _ellipsis;
   final Locale? _locale;
   // BD ADD: START
-  final bool? _drawMinHeight;
-  final bool? _forceVerticalCenter;
+  final bool _drawMinHeight;
+  final bool _forceVerticalCenter;
   // END
 
   @override
@@ -1074,7 +1074,11 @@ class ParagraphStyle {
              'fontSize: ${      _encoded[0] & 0x100 == 0x100 ? _fontSize                         : "unspecified"}, '
              'height: ${        _encoded[0] & 0x200 == 0x200 ? "${_height}x"                     : "unspecified"}, '
              'ellipsis: ${      _encoded[0] & 0x400 == 0x400 ? "\"$_ellipsis\""                  : "unspecified"}, '
-             'locale: ${        _encoded[0] & 0x800 == 0x800 ? _locale                           : "unspecified"}'
+             'locale: ${        _encoded[0] & 0x800 == 0x800 ? _locale                           : "unspecified"}, '
+              // BD ADD: START
+             'forceVerticalCenter: ${_forceVerticalCenter                                                       }, '
+             'drawMinHeight: ${  _drawMinHeight                                                                 }'
+              // END
            ')';
   }
 }
