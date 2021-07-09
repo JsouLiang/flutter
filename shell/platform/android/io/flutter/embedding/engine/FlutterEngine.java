@@ -479,6 +479,27 @@ public class FlutterEngine {
         newFlutterJNI); // FlutterJNI.
   }
 
+  // BD ADD: START
+  // 扩展spawn接口支持BD定制化功能
+  @NonNull
+  public FlutterEngine spawn(
+      @NonNull Context context,
+      @NonNull DartEntrypoint dartEntrypoint,
+      @Nullable FlutterLoader flutterLoader,
+      @Nullable String[] dartVmArgs,
+      boolean automaticallyRegisterPlugins) {
+    if (!isAttachedToJni()) {
+      throw new IllegalStateException(
+          "Spawn can only be called on a fully constructed FlutterEngine");
+    }
+
+    FlutterJNI newFlutterJNI =
+        flutterJNI.spawn(
+            dartEntrypoint.dartEntrypointFunctionName, dartEntrypoint.dartEntrypointLibrary);
+    return new FlutterEngine(context, flutterLoader, newFlutterJNI,  dartVmArgs, automaticallyRegisterPlugins);
+  }
+  // END
+
   /**
    * Registers all plugins that an app lists in its pubspec.yaml.
    *
