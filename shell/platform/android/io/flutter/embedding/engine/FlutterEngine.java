@@ -37,6 +37,7 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -413,6 +414,31 @@ public class FlutterEngine {
         // FlutterInjector.
         newFlutterJNI); // FlutterJNI.
   }
+
+  // BD ADD: START
+  // 扩展spawn接口支持BD定制化功能
+  @NonNull
+  public FlutterEngine spawn(
+      @NonNull Context context,
+      @NonNull DartEntrypoint dartEntrypoint,
+      @Nullable FlutterLoader flutterLoader,
+      @Nullable String[] dartVmArgs,
+      boolean automaticallyRegisterPlugins) {
+    if (!isAttachedToJni()) {
+      throw new IllegalStateException(
+          "Spawn can only be called on a fully constructed FlutterEngine");
+    }
+
+    FlutterJNI newFlutterJNI =
+        flutterJNI.spawn(
+            dartEntrypoint.dartEntrypointFunctionName,
+            dartEntrypoint.dartEntrypointLibrary,
+            dartEntrypoint.dartEntrypointLibrary,
+            new ArrayList<>());
+    return new FlutterEngine(
+        context, flutterLoader, newFlutterJNI, dartVmArgs, automaticallyRegisterPlugins);
+  }
+  // END
 
   /**
    * Cleans up all components within this {@code FlutterEngine} and destroys the associated Dart
