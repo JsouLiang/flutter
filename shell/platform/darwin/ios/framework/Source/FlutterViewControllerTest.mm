@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/lib/ui/window/viewport_metrics.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -21,6 +22,8 @@ class PointerDataPacket {};
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
+- (void)attachView;
 @end
 
 @interface FlutterEngine (TestLowMemory)
@@ -70,6 +73,7 @@ typedef enum UIAccessibilityContrast : NSInteger {
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
 - (void)dispatchPresses:(NSSet<UIPress*>*)presses;
 - (void)scrollEvent:(UIPanGestureRecognizer*)recognizer;
+- (void)updateViewportMetrics;
 @end
 
 @implementation FlutterViewControllerTest
@@ -111,6 +115,63 @@ typedef enum UIAccessibilityContrast : NSInteger {
   [viewController viewDidDisappear:NO];
   OCMVerify([lifecycleChannel sendMessage:@"AppLifecycleState.paused"]);
   OCMVerify([viewControllerMock surfaceUpdated:NO]);
+}
+
+- (void)testUpdateViewportMetricsDoesntInvokeEngineWhenNotTheViewController {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  mockEngine.viewController = nil;
+  FlutterViewController* viewControllerB = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  mockEngine.viewController = viewControllerB;
+  [viewControllerA updateViewportMetrics];
+  flutter::ViewportMetrics viewportMetrics;
+  OCMVerify(never(), [mockEngine updateViewportMetrics:viewportMetrics]);
+}
+
+- (void)testUpdateViewportMetricsDoesInvokeEngineWhenIsTheViewController {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  [viewController updateViewportMetrics];
+  flutter::ViewportMetrics viewportMetrics;
+  OCMVerify([mockEngine updateViewportMetrics:viewportMetrics]);
+}
+
+- (void)testViewDidLoadDoesntInvokeEngineWhenNotTheViewController {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  FlutterViewController* viewControllerA = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  mockEngine.viewController = nil;
+  FlutterViewController* viewControllerB = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  mockEngine.viewController = viewControllerB;
+  UIView* view = viewControllerA.view;
+  XCTAssertNotNil(view);
+  OCMVerify(never(), [mockEngine attachView]);
+}
+
+- (void)testViewDidLoadDoesInvokeEngineWhenIsTheViewController {
+  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
+  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
+  mockEngine.viewController = nil;
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  mockEngine.viewController = viewController;
+  UIView* view = viewController.view;
+  XCTAssertNotNil(view);
+  OCMVerify([mockEngine attachView]);
 }
 
 - (void)testBinaryMessenger {
