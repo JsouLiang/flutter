@@ -14,6 +14,7 @@
 
 #include <cstring>
 
+#include <iostream>
 #include "dpi_utils_win32.h"
 #include "keyboard_win32_common.h"
 
@@ -295,7 +296,17 @@ WindowWin32::HandleMessage(UINT const message,
       current_dpi_ = GetDpiForHWND(window_handle_);
       OnDpiScale(current_dpi_);
       return 0;
+    // BD ADD: START
+    case WM_ERASEBKGND:
+      if (!last_win_size_change_ && current_width_ > 0 && current_height_ > 0) {
+        HandleResize(current_width_, current_height_);
+      }
+      last_win_size_change_ = false;
+      break;
+    // END
     case WM_SIZE:
+      // BD ADD:
+      last_win_size_change_ = true;
       width = LOWORD(lparam);
       height = HIWORD(lparam);
 

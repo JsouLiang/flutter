@@ -251,6 +251,10 @@ class WindowWin32 : public KeyboardManagerWin32::WindowDelegate {
 
   // Generates touch point IDs for touch events.
   SequentialIdGenerator touch_id_generator_;
+  // BD ADD: START
+  // Mark whether a WM_SIZE has occurred
+  bool last_win_size_change_ = true;
+  // END
 };
 
 }  // namespace flutter
