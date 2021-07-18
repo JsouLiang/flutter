@@ -78,6 +78,8 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
       isolate_shutdown_callback, persistent_isolate_data,
       volatile_path_tracker_);
   result->spawning_isolate_ = root_isolate_;
+  // BD ADD
+  result->platform_data_.viewport_metrics.ResetForSpawn();
   return result;
 }
 

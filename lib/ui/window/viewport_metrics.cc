@@ -51,6 +51,13 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
       physical_system_gesture_inset_left(p_physical_system_gesture_inset_left) {
 }
 
+//BD ADD: START
+void ViewportMetrics::ResetForSpawn() {
+    physical_width = 0;
+    physical_height = 0;
+}
+// END
+
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
          a.physical_width == b.physical_width &&
