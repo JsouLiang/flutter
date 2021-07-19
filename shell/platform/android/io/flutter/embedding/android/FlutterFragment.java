@@ -122,6 +122,8 @@ public class FlutterFragment extends Fragment
    * {@code FlutterFragment}
    */
   protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
+  // BD ADD
+  protected static final String ARG_FLUTTERVIEW_WRAP_ORIENTATION = "flutterview_wrap_orientaion";
   /**
    * {@link TransparencyMode} to be used for the {@link io.flutter.embedding.android.FlutterView} in
    * this {@code FlutterFragment}
@@ -228,6 +230,8 @@ public class FlutterFragment extends Fragment
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
+    // BD ADD
+    private WrapOrientation wrapOrientation;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
     private boolean shouldAutomaticallyHandleOnBackPressed = false;
@@ -305,6 +309,18 @@ public class FlutterFragment extends Fragment
       this.renderMode = renderMode;
       return this;
     }
+
+    // BD ADD: START
+    /**
+     * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method. And
+     * should Use RootWrapContentWidget in Dart
+     */
+    @NonNull
+    public NewEngineFragmentBuilder wrapOrientation(@NonNull WrapOrientation orientation) {
+      this.wrapOrientation = orientation;
+      return this;
+    }
+    // END
 
     /**
      * Support a {@link TransparencyMode#transparent} background within {@link
@@ -418,6 +434,10 @@ public class FlutterFragment extends Fragment
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
+      // BD ADD
+      if (wrapOrientation != null) {
+        args.putString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, wrapOrientation.name());
+      }
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
           transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
@@ -513,6 +533,8 @@ public class FlutterFragment extends Fragment
     private boolean shouldAttachEngineToActivity = true;
     private boolean shouldAutomaticallyHandleOnBackPressed = false;
     private boolean shouldDelayFirstAndroidViewDraw = false;
+    // BD ADD
+    private WrapOrientation wrapOrientation;
 
     private CachedEngineFragmentBuilder(@NonNull String engineId) {
       this(FlutterFragment.class, engineId);
@@ -547,6 +569,18 @@ public class FlutterFragment extends Fragment
       this.renderMode = renderMode;
       return this;
     }
+
+    // BD ADD: START
+    /**
+     * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method. And
+     * should Use RootWrapContentWidget in Dart
+     */
+    @NonNull
+    public CachedEngineFragmentBuilder wrapOrientation(@NonNull WrapOrientation orientation) {
+      this.wrapOrientation = orientation;
+      return this;
+    }
+    // END
 
     /**
      * Support a {@link TransparencyMode#transparent} background within {@link
@@ -665,6 +699,11 @@ public class FlutterFragment extends Fragment
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
+      // BD ADD: START
+      if (wrapOrientation != null) {
+        args.putString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, wrapOrientation.name());
+      }
+      // END
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
           transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
@@ -1069,6 +1108,15 @@ public class FlutterFragment extends Fragment
         getArguments().getString(ARG_FLUTTERVIEW_RENDER_MODE, RenderMode.surface.name());
     return RenderMode.valueOf(renderModeName);
   }
+
+  // BD ADD: START
+  @Override
+  @Nullable
+  public WrapOrientation getWrapOrientation() {
+    String wrapOrientation = getArguments().getString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, null);
+    return wrapOrientation == null ? null : WrapOrientation.valueOf(wrapOrientation);
+  }
+  // END
 
   /**
    * Returns the desired {@link TransparencyMode} for the {@link

@@ -323,6 +323,14 @@ public class FlutterAndroidComponentTest {
       return RenderMode.surface;
     }
 
+    // BD ADD: START
+    @Nullable
+    @Override
+    public WrapOrientation getWrapOrientation() {
+      return null;
+    }
+    // END
+
     @NonNull
     @Override
     public TransparencyMode getTransparencyMode() {

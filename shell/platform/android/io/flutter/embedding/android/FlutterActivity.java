@@ -924,6 +924,14 @@ public class FlutterActivity extends Activity
     return getBackgroundMode() == BackgroundMode.opaque ? RenderMode.surface : RenderMode.texture;
   }
 
+  // BD ADD: START
+  @Nullable
+  @Override
+  public WrapOrientation getWrapOrientation() {
+    return null;
+  }
+  // END
+
   /**
    * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by {@link
    * FlutterActivityAndFragmentDelegate} to obtain the desired {@link TransparencyMode} that should
