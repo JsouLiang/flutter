@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStructure;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -39,12 +40,17 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.AccessibilityBridge;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 // BD ADD:
@@ -399,6 +405,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     }
   }
 
+  // BD MOD: START
   /**
    * Invoked when this {@code FlutterView} changes size, including upon initial measure.
    *
@@ -410,6 +417,16 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
    */
   @Override
   protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+    if (wrapOrientation != null && !isListening) {
+      preLayout(width, height, null);
+    } else {
+      officialOnSizeChanged(width, height, oldWidth, oldHeight);
+    }
+  }
+
+  // 官方原来的onSizeChanged方法
+  private void officialOnSizeChanged(
+          int width, int height, int oldWidth, int oldHeight) {
     super.onSizeChanged(width, height, oldWidth, oldHeight);
     Log.v(
         TAG,
@@ -425,6 +442,7 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
     viewportMetrics.height = height;
     sendViewportMetricsToFlutter();
   }
+  // END
 
   // TODO(garyq): Add support for notch cutout API: https://github.com/flutter/flutter/issues/56592
   // Decide if we want to zero the padding of the sides. When in Landscape orientation,
@@ -1315,4 +1333,91 @@ public class FlutterView extends FrameLayout implements MouseCursorPlugin.MouseC
      */
     void onFlutterEngineDetachedFromFlutterView();
   }
+  
+  
+  // BD ADD: START
+  /************************* Support wrap content **************************/
+
+  public interface LayoutCallBack {
+    void onLayout(int width, int height);
+  }
+
+  private WrapOrientation wrapOrientation;
+  private final List<LayoutCallBack> callBackList = new ArrayList<>();
+  private int flutterWidth, flutterHeight;
+  boolean isListening = false;
+
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    if (flutterWidth > 0 || flutterHeight > 0) {
+      super.onMeasure(MeasureSpec.makeMeasureSpec(flutterWidth, MeasureSpec.EXACTLY),
+              MeasureSpec.makeMeasureSpec(flutterHeight, MeasureSpec.EXACTLY));
+    } else {
+      super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+  }
+
+  public void setWrapOrientation(WrapOrientation orientation) {
+    wrapOrientation = orientation;
+  }
+
+  public void addLayoutCallback(LayoutCallBack callBack) {
+    if (callBack == null) {
+      return;
+    }
+    callBackList.add(callBack);
+  }
+
+  public void preLayout(int width, int height, LayoutCallBack callBack) {
+    if (wrapOrientation == null) {
+      throw new IllegalStateException("wrapOrientation can't be null, call setWrapOrientation first");
+    }
+    addLayoutCallback(callBack);
+    listenLayout();
+    if (width == 0 && wrapOrientation != WrapOrientation.WrapHeight) {
+      width = Integer.MAX_VALUE;
+    }
+    if (height == 0 && wrapOrientation != WrapOrientation.WrapWidth) {
+      height = Integer.MAX_VALUE;
+    }
+    onSizeChanged(width, height, 0, 0);
+  }
+
+  private void listenLayout() {
+    if (isListening) {
+      return;
+    }
+    isListening = true;
+    float density = getResources().getDisplayMetrics().density;
+    MethodChannel viewSizeChannel = new MethodChannel(getAttachedFlutterEngine().getDartExecutor().getBinaryMessenger(), "flutter-view-size");
+    viewSizeChannel.setMethodCallHandler((methodCall, result) -> {
+      if ("size".equals(methodCall.method)) {
+        Map<String, Double> data = (Map<String, Double>) methodCall.arguments;
+        Log.v(TAG, "size:" + data.toString());
+        double widthDouble = density * data.getOrDefault("width", (double) 0);
+        int widthInt = (int) Math.ceil(widthDouble);
+        double heightDouble = density * data.getOrDefault("height", (double) 0);
+        int heightInt = (int) Math.ceil(heightDouble);
+        setViewSize(widthInt, heightInt);
+        for (LayoutCallBack callBack : callBackList) {
+          callBack.onLayout(widthInt, heightInt);
+        }
+        result.success(null);
+      }
+    });
+  }
+
+  private void setViewSize(int width, int height) {
+    ViewGroup.LayoutParams params = getLayoutParams();
+    if (params == null) {
+      flutterWidth = width;
+      flutterHeight = height;
+    } else {
+      params.width = width;
+      params.height = height;
+      setLayoutParams(params);
+    }
+  }
+  /**************************** Support wrap content ************************************/
+  // END
 }

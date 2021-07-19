@@ -285,6 +285,8 @@ import java.util.Arrays;
       // Create the FlutterView that owns the FlutterTextureView.
       flutterView = new FlutterView(host.getActivity(), flutterTextureView);
     }
+    // BD ADD
+    flutterView.setWrapOrientation(host.getWrapOrientation());
 
     // Add listener to be notified when Flutter renders its first frame.
     flutterView.addOnFirstFrameRenderedListener(flutterUiDisplayListener);
@@ -837,6 +839,12 @@ import java.util.Arrays;
      */
     @NonNull
     RenderMode getRenderMode();
+
+    // BD ADD: START
+    @Nullable
+    WrapOrientation getWrapOrientation();
+    // END
+
 
     /**
      * Returns the {@link TransparencyMode} used by the {@link FlutterView} that displays the {@link

@@ -96,6 +96,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
   /** {@link RenderMode} to be used for the {@link FlutterView} in this {@code FlutterFragment} */
   protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
+  // BD ADD
+  protected static final String ARG_FLUTTERVIEW_WRAP_ORIENTATION = "flutterview_wrap_orientaion";
   /**
    * {@link TransparencyMode} to be used for the {@link FlutterView} in this {@code FlutterFragment}
    */
@@ -191,6 +193,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
     private RenderMode renderMode = RenderMode.surface;
+    // BD ADD
+    private WrapOrientation wrapOrientation;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
 
@@ -263,6 +267,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     @NonNull
     public NewEngineFragmentBuilder renderMode(@NonNull RenderMode renderMode) {
       this.renderMode = renderMode;
+      return this;
+    }
+
+    /**
+     * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method.
+     * And should Use RootWrapContentWidget in Dart
+     */
+    @NonNull
+    public NewEngineFragmentBuilder wrapOrientation(@NonNull WrapOrientation orientation) {
+      this.wrapOrientation = orientation;
       return this;
     }
 
@@ -340,6 +354,10 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
+      // BD ADD
+      if (wrapOrientation != null) {
+        args.putString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, wrapOrientation.name());
+      }
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
           transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
@@ -427,6 +445,8 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     private RenderMode renderMode = RenderMode.surface;
     private TransparencyMode transparencyMode = TransparencyMode.transparent;
     private boolean shouldAttachEngineToActivity = true;
+    // BD ADD
+    private WrapOrientation wrapOrientation;
 
     private CachedEngineFragmentBuilder(@NonNull String engineId) {
       this(FlutterFragment.class, engineId);
@@ -459,6 +479,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
     @NonNull
     public CachedEngineFragmentBuilder renderMode(@NonNull RenderMode renderMode) {
       this.renderMode = renderMode;
+      return this;
+    }
+
+    /**
+     * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method.
+     * And should Use RootWrapContentWidget in Dart
+     */
+    @NonNull
+    public CachedEngineFragmentBuilder wrapOrientation(@NonNull WrapOrientation orientation) {
+      this.wrapOrientation = orientation;
       return this;
     }
 
@@ -541,6 +571,9 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
+      if (wrapOrientation != null) {
+        args.putString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, wrapOrientation.name());
+      }
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
           transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
@@ -907,6 +940,16 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
         getArguments().getString(ARG_FLUTTERVIEW_RENDER_MODE, RenderMode.surface.name());
     return RenderMode.valueOf(renderModeName);
   }
+
+  // BD ADD: START
+  @Override
+  @Nullable
+  public WrapOrientation getWrapOrientation() {
+    String wrapOrientation =
+            getArguments().getString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, null);
+    return wrapOrientation == null ? null : WrapOrientation.valueOf(wrapOrientation);
+  }
+  // END
 
   /**
    * Returns the desired {@link TransparencyMode} for the {@link FlutterView} displayed in this
