@@ -391,9 +391,15 @@ public class FlutterJNI {
     ensureAttachedToNative();
     FlutterJNI spawnedJNI =
         nativeSpawn(nativeShellHolderId, entrypointFunctionName, pathToEntrypointFunction);
+    // BD MOD START:
+    // Preconditions.checkState(
+    //     spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId > 0,
+    //     "Failed to spawn new JNI connected shell from existing shell.");
+    //native返回的是AAndroidShellHolder的指针不能使用>0判断
     Preconditions.checkState(
-        spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId > 0,
+        spawnedJNI.nativeShellHolderId != null && spawnedJNI.nativeShellHolderId != 0,
         "Failed to spawn new JNI connected shell from existing shell.");
+    // END
 
     return spawnedJNI;
   }
