@@ -557,7 +557,12 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       // gained focus as part of the same focus event.
       return;
     }
-    mEditable.removeEditingStateListener(this);
+    // BD MOD: START
+    // mEditable.removeEditingStateListener(this);
+    if (mEditable != null) {
+      mEditable.removeEditingStateListener(this);
+    }
+    // END
     notifyViewExited();
     updateAutofillConfigurationIfNeeded(null);
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
