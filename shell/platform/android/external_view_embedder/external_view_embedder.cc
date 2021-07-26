@@ -227,8 +227,10 @@ PostPrerollResult AndroidExternalViewEmbedder::PostPrerollAction(
     //
     // Eventually, the frame is submitted once this method returns `kSuccess`.
     // At that point, the raster tasks are handled on the platform thread.
-    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
+    
+    // BD MOD:
     CancelFrame();
+    raster_thread_merger->MergeWithLease(kDefaultMergedLeaseDuration);
     return PostPrerollResult::kSkipAndRetryFrame;
   }
   raster_thread_merger->ExtendLeaseTo(kDefaultMergedLeaseDuration);
