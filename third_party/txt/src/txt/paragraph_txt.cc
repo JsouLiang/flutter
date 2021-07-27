@@ -1146,14 +1146,22 @@ void ParagraphTxt::Layout(double width) {
     }
 
     // BD ADD: START
-    if (paragraph_style_.drawMinHeight) {
-      max_ascent = -rectForHeight.mTop;
-      max_descent = rectForHeight.mBottom;
-    } else if (paragraph_style_.forceVerticalCenter) {
-      double height = max_ascent + max_descent;
-      double leading = (height - (-rectForHeight.mTop + rectForHeight.mBottom)) / 2.0;
-      max_ascent = leading - rectForHeight.mTop;
-      max_descent = height - max_ascent;
+    // fix Text("a\n", forceVerticalCenter: true),
+    shouldTextBounds = shouldTextBounds
+                       && -max_ascent <= rectForHeight.mTop
+                       && max_descent >= rectForHeight.mTop
+                       && -max_ascent <= rectForHeight.mBottom
+                       && max_descent >= rectForHeight.mBottom;
+    if (shouldTextBounds) {
+      if (paragraph_style_.drawMinHeight) {
+        max_ascent = -rectForHeight.mTop;
+        max_descent = rectForHeight.mBottom;
+      } else if (paragraph_style_.forceVerticalCenter) {
+        double height = max_ascent + max_descent;
+        double leading = (height - (-rectForHeight.mTop + rectForHeight.mBottom)) / 2.0;
+        max_ascent = leading - rectForHeight.mTop;
+        max_descent = height - max_ascent;
+      }
     }
     // END
     // Calculate the baselines. This is only done on the first line.
