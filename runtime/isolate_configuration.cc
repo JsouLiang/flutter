@@ -378,6 +378,13 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForDynamicart(
             pieces.push_back(std::move(kernel_blob));
         }
 
+        // 忽略热更新包
+        std::unique_ptr<fml::Mapping> pageMapping =
+            asset_manager.GetAsMapping("page.txt");
+        if(pageMapping != nullptr){
+          return IsolateConfiguration::CreateForDynamicartKernel(std::move(pieces), settings.package_preload_libs);
+        }
+
         std::unique_ptr<fml::Mapping> kernel =
                 asset_manager.GetAsMapping("kb.origin");
         if (kernel != nullptr && kernel->GetSize() > 0) {
@@ -427,7 +434,7 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForDynamicart(
         }
         return IsolateConfiguration::CreateForDynamicartKernel(std::move(pieces), settings.package_preload_libs);
     }
-    return nullptr;
+    return CreateForAppSnapshot();
 }
 
 std::unique_ptr<IsolateConfiguration>
