@@ -179,7 +179,7 @@ void Performance_disableMips(Dart_NativeArguments args) {
 
 void Performance_startStackTraceSamples(Dart_NativeArguments args) {
   #if THIRD_PARTY_DART_BD
-  Dart_StartProfiling2();
+//  Dart_StartProfiling2();
   #else
   Dart_StartProfiling();
   #endif
@@ -187,7 +187,7 @@ void Performance_startStackTraceSamples(Dart_NativeArguments args) {
 
 void Performance_stopStackTraceSamples(Dart_NativeArguments args) {
   #if THIRD_PARTY_DART_BD
-  Dart_StopProfiling2();
+//  Dart_StopProfiling2();
   #else
   Dart_StopProfiling();
   #endif
@@ -195,9 +195,9 @@ void Performance_stopStackTraceSamples(Dart_NativeArguments args) {
 
 void Performance_getStackTraceSamples(Dart_NativeArguments args) {
   #if THIRD_PARTY_DART_BD
-  int64_t microseconds = (int64_t)DartConverter<int64_t>::FromDart(Dart_GetNativeArgument(args, 0));
-  Dart_Handle res = Dart_GetStackSamples(microseconds);
-  Dart_SetReturnValue(args, res);
+//  int64_t microseconds = (int64_t)DartConverter<int64_t>::FromDart(Dart_GetNativeArgument(args, 0));
+//  Dart_Handle res = Dart_GetStackSamples(microseconds);
+//  Dart_SetReturnValue(args, res);
   #endif
 }
 
