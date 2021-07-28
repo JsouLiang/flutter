@@ -102,6 +102,6 @@ dynamic classInvoke(dynamic cls, int invokeType, String functionName, List argum
 
 dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, List arguments, List names) native 'Reflect_instanceInvoke';
 
-Function loadDynamicPage(String zipPath) native 'DynamicPage_load';
+bool loadDynamicPage(String zipPath) native 'DynamicPage_load';
 
 // BD END

@@ -709,7 +709,7 @@ Dart_Handle DartIsolate::LoadDynamicPage(const char* pathStr){
 
   if (kernelMapping== nullptr || !Dart_IsKernel(kernelMapping->GetMapping(), kernelMapping->GetSize())) {
     FML_LOG(ERROR)<<"LoadDynamicPage kb is null"<<std::endl;
-    return Dart_Null();
+    return Dart_False();
   }
   // Mapping must be retained until isolate shutdown.
   std::shared_ptr<const fml::Mapping> kernelMapping2 = std::move(kernelMapping);
@@ -723,12 +723,12 @@ Dart_Handle DartIsolate::LoadDynamicPage(const char* pathStr){
     pageContent = tmpStr;
     FML_LOG(ERROR)<<"pageContent:"<<pageContent<<std::endl;
   }
-  Dart_Handle mainFunc =
+  Dart_Handle res =
       Dart_DynamicPageLoad(kernelMapping2->GetMapping(), kernelMapping2->GetSize(), pageContent.c_str());
-  if (tonic::LogIfError(mainFunc)) {
-    return Dart_Null();
+  if (tonic::LogIfError(res)) {
+    return Dart_False();
   }
-  return mainFunc;
+  return res;
 }
 // END
 
