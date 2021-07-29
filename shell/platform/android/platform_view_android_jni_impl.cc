@@ -2011,6 +2011,9 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureAttachToGLContext(
 
   env->CallVoidMethod(surface_texture_local_ref.obj(),
                       g_attach_to_gl_context_method, textureId);
+  // BD ADD: 路由的截图逻辑会额外触发一次SurfaceTextureAttachToGLContext，导致Java层调用一个
+  // 已经释放掉的surfaceTexture的attachToGLContext方法从而发生异常，这里先清掉
+  fml::jni::ClearException(env);
 
   FML_CHECK(CheckException(env));
 }
