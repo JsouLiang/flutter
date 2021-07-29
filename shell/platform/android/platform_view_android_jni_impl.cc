@@ -2035,6 +2035,12 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureAttachToGLContext(
 
   env->CallVoidMethod(surface_texture_local_ref.obj(),
                       g_attach_to_gl_context_method, textureId);
+  // BD ADD:
+  // The screenshot logic of the route will trigger a
+  // SurfaceTextureAttachToGLContext additionally, causing the Java layer to
+  // call an AttachToGLContext method of the released SurfaceTexture, resulting
+  // in an exception. Clear it here first.
+  fml::jni::ClearException(env);
 
   FML_CHECK(fml::jni::CheckException(env));
 }
