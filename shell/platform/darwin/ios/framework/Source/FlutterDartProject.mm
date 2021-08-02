@@ -208,9 +208,11 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 
   if (self) {
     _settings = FLTDefaultSettingsForBundle(bundle);
-    // BD ADD: START
+      // BD ADD: START
     [self checkIsDynamicHost];
-    // END
+    [[FlutterCompressSizeModeManager sharedInstance] updateSettingsIfNeeded:_settings
+                                                                    monitor:kFlutterCompressSizeModeMonitor];
+      // END
   }
 
   return self;
@@ -222,6 +224,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   if (self) {
     _settings = settings;
     // BD ADD: START
+    [self checkIsDynamicHost];
     [[FlutterCompressSizeModeManager sharedInstance]
         updateSettingsIfNeeded:_settings
                        monitor:kFlutterCompressSizeModeMonitor];
