@@ -26,10 +26,28 @@ typedef enum {
   kFlutterDesktopPixelBufferTexture
 } FlutterDesktopTextureType;
 
+// BD ADD: START
+typedef enum { kBD_RGBA, kBD_BGRA, kBD_YUV420 } FlutterDesktopTextureFormat;
+// END
+
 // An image buffer object.
 typedef struct {
   // The pixel data buffer.
   const uint8_t* buffer;
+  // BD ADD: START
+  // The pixel data for u buffer.
+  uint8_t* ubuffer;
+  // The pixel data for v buffer.
+  uint8_t* vbuffer;
+  // Flutter desktop texture format
+  FlutterDesktopTextureFormat format;
+  // YUV yStride
+  size_t yStride;
+  // YUV uStride
+  size_t uStride;
+  // YUV vStride
+  size_t vStride;
+  // END
   // Width of the pixel buffer.
   size_t width;
   // Height of the pixel buffer.

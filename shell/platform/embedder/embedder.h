@@ -280,6 +280,12 @@ typedef struct {
   size_t width;
   /// Height of the texture.
   size_t height;
+  // BD ADD: START
+  /// Texture size
+  size_t tex_size;
+  /// uv Textures
+  uint32_t* uv;
+  // END
 } FlutterOpenGLTexture;
 
 typedef struct {
