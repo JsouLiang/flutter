@@ -69,10 +69,13 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     const std::function<void(int64_t)>& idle_notification_callback,
     const fml::closure& isolate_create_callback,
     const fml::closure& isolate_shutdown_callback,
-    std::shared_ptr<const fml::Mapping> persistent_isolate_data) const {
+    std::shared_ptr<const fml::Mapping> persistent_isolate_data,
+    fml::WeakPtr<IOManager> io_manager,
+    fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
   auto result = std::make_unique<RuntimeController>(
-      client, vm_, isolate_snapshot_, task_runners_, snapshot_delegate_,
-      hint_freed_delegate_, io_manager_, unref_queue_, image_decoder_,
+      client, vm_, isolate_snapshot_, task_runners_, std::move(snapshot_delegate),
+      hint_freed_delegate_, std::move(io_manager), unref_queue_, std::move(image_decoder),
       advisory_script_uri, advisory_script_entrypoint,
       idle_notification_callback, platform_data_, isolate_create_callback,
       isolate_shutdown_callback, persistent_isolate_data,
