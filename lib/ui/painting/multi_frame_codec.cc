@@ -15,14 +15,40 @@
 
 namespace flutter {
 
+// BD MOD: START
+//MultiFrameCodec::MultiFrameCodec(
+//    std::shared_ptr<SkCodecImageGenerator> generator)
+//    : state_(new State(std::move(generator))) {}
 MultiFrameCodec::MultiFrameCodec(
-    std::shared_ptr<SkCodecImageGenerator> generator)
-    : state_(new State(std::move(generator))) {}
+    std::shared_ptr<SkCodecImageGenerator> generator, std::string key)
+    : state_(new State(std::move(generator), key)) {
+    codec_recorder.insert(std::make_pair(state_->key_, this));
+}
+// END
 
-MultiFrameCodec::~MultiFrameCodec() = default;
+/**
+ * BD ADD
+ * @param codec
+ */
+MultiFrameCodec::MultiFrameCodec(Codec* codec) {
+    real_codec = codec;
+    real_codec->RetainDartWrappableReference();
+}
 
-MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator)
-    : generator_(std::move(generator)),
+// BD MOD: START
+// MultiFrameCodec::~MultiFrameCodec() = default;
+MultiFrameCodec::~MultiFrameCodec() {
+    if (real_codec == nullptr) {
+        codec_recorder.erase(state_->key_);
+    } else {
+        real_codec->ReleaseDartWrappableReference();
+    }
+}
+// END
+
+MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator, std::string key)
+    : key_(std::move(key)),
+      generator_(std::move(generator)),
       frameCount_(generator_->getFrameCount()),
       repetitionCount_(generator_->getRepetitionCount()),
       nextFrameIndex_(0) {}
@@ -182,13 +208,16 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
   fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue = io_manager->GetSkiaUnrefQueue();
   // END
   if (skImage) {
-    image = CanvasImage::Create();
+    // BD MOD
+    // image = CanvasImage::Create();
+    image = CanvasImage::Create(key_);
     // BD ADD:
     image->setMips(!Performance::GetInstance()->IsDisableMips());
     image->set_image({skImage, std::move(unref_queue)});
     SkCodec::FrameInfo skFrameInfo{0};
     generator_->getFrameInfo(nextFrameIndex_, &skFrameInfo);
     duration = skFrameInfo.fDuration;
+    image->duration = duration;
   }
 
   // BD ADD: Protect invalid image buffer.
@@ -198,23 +227,76 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
 
   ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
                                               image = std::move(image),
-                                              duration, trace_id]() mutable {
+                                              duration, trace_id, this]() mutable {
+    // BD ADD:START
+    inProgress = false;
+    if (!pending_callbacks_.empty()) {
+        for (const DartPersistentValue &callback_item : pending_callbacks_) {
+            auto dart_state = callback_item.dart_state().lock();
+            if (!dart_state) {
+                continue;
+            }
+            tonic::DartState::Scope scope(dart_state);
+            tonic::DartInvoke(callback_item.value(),
+                    {tonic::ToDart(CanvasImage::Create(image.get())), tonic::ToDart(duration)});
+        }
+        pending_callbacks_.clear();
+    }
+    // END
     InvokeNextFrameCallback(std::move(image), duration, std::move(callback),
                             trace_id);
   }));
 }
 
-Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
-  static size_t trace_counter = 1;
-  const size_t trace_id = trace_counter++;
+/**
+ * BD ADD
+ * @param args
+ * @param requireIndex
+ * @return
+ */
+int MultiFrameCodec::getNextFrameWithCount(Dart_Handle args, int requireIndex) {
+    if (requireIndex > currentIndex_) {
+        realGetFrame(args);
+    } else {
+        auto it_find = CanvasImage::image_recorder.find(state_->key_);
+        if (it_find != CanvasImage::image_recorder.end()) {
+            tonic::DartInvoke(args,
+                              {tonic::ToDart(CanvasImage::Create(it_find->second)),
+                               tonic::ToDart(it_find->second->duration)});
+        } else {
+            if (state_->inProgress) {
+                auto dart_state = UIDartState::Current();
+                state_->pending_callbacks_.emplace_back(dart_state, args);
+            } else {
+                realGetFrame(args);
+            }
+        }
+    }
+    return currentIndex_;
+}
 
+Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   if (!Dart_IsClosure(callback_handle)) {
     return tonic::ToDart("Callback must be a function");
   }
 
-  auto* dart_state = UIDartState::Current();
+  requireIndex_++;
+  if (real_codec != nullptr) {
+      requireIndex_ = ((MultiFrameCodec *) real_codec)->getNextFrameWithCount(callback_handle, requireIndex_);
+  } else {
+     requireIndex_ = getNextFrameWithCount(callback_handle, requireIndex_);
+  }
+  return Dart_Null();
+}
 
-  const auto& task_runners = dart_state->GetTaskRunners();
+void MultiFrameCodec::realGetFrame(Dart_Handle callback_handle) {
+    static size_t trace_counter = 1;
+    const size_t trace_id = trace_counter++;
+    currentIndex_++;
+    state_->inProgress = true;
+    auto* dart_state = UIDartState::Current();
+
+    const auto& task_runners = dart_state->GetTaskRunners();
 
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [callback = std::make_unique<DartPersistentValue>(
@@ -222,11 +304,29 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
        weak_state = std::weak_ptr<MultiFrameCodec::State>(state_), trace_id,
        ui_task_runner = task_runners.GetUITaskRunner(),
        io_manager = dart_state->GetIOManager()]() mutable {
+
         auto state = weak_state.lock();
         if (!state) {
           ui_task_runner->PostTask(fml::MakeCopyable(
               [callback = std::move(callback)]() { callback->Clear(); }));
           return;
+        }
+        while (io_manager.get() == nullptr && (!state->pending_callbacks_.empty())) {
+            auto otherCallback = state->pending_callbacks_.begin();
+            auto otherState = (*otherCallback).dart_state().lock();
+            if (otherState) {
+                io_manager = (static_cast<UIDartState *>(otherState.get()))->GetIOManager();
+            } else {
+                ui_task_runner->PostTask(fml::MakeCopyable(
+                        [otherCallback]() { otherCallback->Clear(); }));
+            }
+        }
+        if (io_manager.get() == nullptr) {
+            ui_task_runner->PostTask(fml::MakeCopyable(
+                    [callback = std::move(callback)]() { callback->Clear(); }));
+            state->inProgress = false;
+            FML_LOG(ERROR) << " No io_manager, Engine maybe destroyed";
+            return;
         }
         state->GetNextFrameAndInvokeCallback(
             std::move(callback), std::move(ui_task_runner),
@@ -235,16 +335,32 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
             io_manager,
             trace_id);
       }));
-
-  return Dart_Null();
 }
 
 int MultiFrameCodec::frameCount() const {
+    // BD ADD: START
+    if (real_codec!= nullptr){
+        return real_codec->frameCount();
+    }
+    // END
   return state_->frameCount_;
 }
 
 int MultiFrameCodec::repetitionCount() const {
+    // BD ADD:START
+    if (real_codec!=nullptr){
+        return real_codec->repetitionCount();
+    }
+    // END
   return state_->repetitionCount_;
+}
+
+/**
+ * BD ADD
+ * @return
+ */
+CodecType MultiFrameCodec::getClassType() const {
+    return CodecType::MultiFrame;
 }
 
 }  // namespace flutter

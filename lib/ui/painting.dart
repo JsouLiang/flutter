@@ -1991,6 +1991,7 @@ class Codec extends NativeFieldWrapperClass2 {
 /// failed.
 Future<Codec> instantiateImageCodec(
   Uint8List list, {
+  String? key,
   int? targetWidth,
   int? targetHeight,
   bool allowUpscaling = true,
@@ -2006,10 +2007,27 @@ Future<Codec> instantiateImageCodec(
     }
   }
   return descriptor.instantiateCodec(
+    key: key,
     targetWidth: targetWidth,
     targetHeight: targetHeight,
   );
 }
+
+Future<Codec?> getCachedImageCodec(String key) {
+  return _futurize(
+        (_Callback<Codec?> callback) => _getCachedImageCodec(key, callback),
+  );
+}
+
+String? _getCachedImageCodec(String key, _Callback<Codec?> callback)
+  native 'getCachedImageCodec';
+
+void registerImageCacheCallBack(Function removeCacheCallback, Function getKeyCallback)
+  native 'registerImageCacheCallBack';
+
+void setImageCacheSize(int size) native 'setImageCacheSize';
+
+void notifyUseImage(String key, int imageSize) native 'notifyUseImage';
 
 /**
  * BD ADD:
@@ -5244,7 +5262,7 @@ class ImageDescriptor extends NativeFieldWrapperClass2 {
   ///
   /// If either targetWidth or targetHeight is less than or equal to zero, it
   /// will be treated as if it is null.
-  Future<Codec> instantiateCodec({int? targetWidth, int? targetHeight}) async {
+  Future<Codec> instantiateCodec({String? key, int? targetWidth, int? targetHeight}) async {
     if (targetWidth != null && targetWidth <= 0) {
       targetWidth = null;
     }
@@ -5275,10 +5293,10 @@ class ImageDescriptor extends NativeFieldWrapperClass2 {
     assert(targetHeight != null);
 
     final Codec codec = Codec._();
-    _instantiateCodec(codec, targetWidth!, targetHeight!);
+    _instantiateCodec(codec, key, targetWidth!, targetHeight!);
     return codec;
   }
-  void _instantiateCodec(Codec outCodec, int targetWidth, int targetHeight) native 'ImageDescriptor_instantiateCodec';
+  void _instantiateCodec(Codec outCodec, String? key, int targetWidth, int targetHeight) native 'ImageDescriptor_instantiateCodec';
 }
 
 /// Generic callback signature, used by [_futurize].

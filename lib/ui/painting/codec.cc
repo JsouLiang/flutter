@@ -10,10 +10,13 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/typed_list.h"
 
-//BD: ADD @tanhaiyang@bytedance.com
+//BD ADD: START @tanhaiyang@bytedance.com
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/native_codec.h"
 #include "flutter/lib/ui/painting/image.h"
+#include "multi_frame_codec.h"
+#include "single_frame_codec.h"
+// END
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
@@ -21,8 +24,15 @@ using tonic::ToDart;
 
 namespace flutter {
 
-// BD ADD:
+// BD ADD: START
 static constexpr const char* kGetNativeImageTraceTag FML_ALLOW_UNUSED_TYPE = "GetNativeImage";
+
+std::map<std::string, Codec *> Codec::codec_recorder;
+std::vector<std::pair<std::string, int>> Codec::cached_images;
+std::vector<DartPersistentValue> Codec::dart_remove_cache_callbacks;
+std::vector<DartPersistentValue> Codec::dart_get_keys_callbacks;
+int Codec::max_cache_size = 100 * 1024 * 1024;
+// END
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Codec);
 
@@ -38,10 +48,7 @@ void Codec::dispose() {
   ClearDartWrapper();
 }
 
-/**
- * BD ADD:
- *
- */
+// BD ADD: START
 static void InvokeGetNativeImageCallback(fml::RefPtr<CanvasImage> image,
                                          std::unique_ptr<DartPersistentValue> callback,
                                          size_t trace_id) {
@@ -59,10 +66,6 @@ static void InvokeGetNativeImageCallback(fml::RefPtr<CanvasImage> image,
     TRACE_FLOW_END("flutter", kGetNativeImageTraceTag, trace_id);
 }
   
-/**
- * BD ADD:
- *
- */
 static void InvokeGetNativeInitCodecCallback(
         fml::RefPtr<NativeCodec> codec,
         std::unique_ptr<DartPersistentValue> callback,
@@ -81,10 +84,6 @@ static void InvokeGetNativeInitCodecCallback(
   TRACE_FLOW_END("flutter", kGetNativeImageTraceTag, trace_id);
 }
 
-/**
- * BD ADD:
- *
- */
 void GetNativeImage(Dart_NativeArguments args) {
   static size_t trace_counter = 1;
   const size_t trace_id = trace_counter++;
@@ -232,16 +231,150 @@ static void InstantiateNativeImageCodec(Dart_NativeArguments args) {
         }));
     }));
 }
+
+/**
+ * 查找是否已有缓存的Codec，已有则给Dart返回缓存，否则返回null
+ * @param args
+ */
+static void GetCachedImageCodec(Dart_NativeArguments args) {
+    Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
+    if (!Dart_IsClosure(callback_handle)) {
+        Dart_SetReturnValue(args, tonic::ToDart("Callback must be a function"));
+        return;
+    }
+    std::string key = tonic::DartConverter<std::string>::FromDart(Dart_GetNativeArgument(args, 0));
+    if (key.empty()) {
+        DartInvoke(callback_handle, {Dart_Null()});
+        return;
+    }
+    auto it_find = Codec::codec_recorder.find(key);
+    if (it_find != Codec::codec_recorder.end()) {
+        Codec *codec = it_find->second;
+        fml::RefPtr<Codec> ui_codec;
+        if (codec->getClassType() == CodecType::SingleFrame) {
+            ui_codec = fml::MakeRefCounted<SingleFrameCodec>(codec, key);
+        } else if (codec->getClassType() == CodecType::MultiFrame) {
+            ui_codec = fml::MakeRefCounted<MultiFrameCodec>(codec);
+        }
+        DartInvoke(callback_handle, {ToDart(ui_codec)});
+    } else {
+        DartInvoke(callback_handle, {Dart_Null()});
+    }
+}
+
+/**
+ * 记录Dart侧的回调
+ * dart_remove_cache_callbacks：通知Dart侧移除相应Key的Cache
+ * dart_get_keys_callbacks：获取Dart目前所有的ImageCache的Key
+ * @param args
+ */
+static void RegisterImageCacheCallBack(Dart_NativeArguments args) {
+    auto dart_state = UIDartState::Current();
+    Dart_Handle remove_callback_handle = Dart_GetNativeArgument(args, 0);
+    Dart_Handle get_key_call_handle = Dart_GetNativeArgument(args, 1);
+    Codec::dart_remove_cache_callbacks.emplace_back(dart_state, remove_callback_handle);
+    Codec::dart_get_keys_callbacks.emplace_back(dart_state, get_key_call_handle);
+}
+
+static void NotifyRemoveCache(const std::vector<std::string>& keys) {
+  for (auto &item :Codec::dart_remove_cache_callbacks) {
+      auto state = item.dart_state().lock();
+      if (!state) {
+          continue;
+      }
+      tonic::DartState::Scope scope(state.get());
+      tonic::DartInvoke(item.value(), {tonic::ToDart(keys)});
+  }
+}
+
+static bool CacheContainsKey(std::string &key) {
+    for (auto iter = Codec::cached_images.begin(); iter != Codec::cached_images.end(); iter++) {
+        if ((*iter).first == key) {
+            std::string cacheKey = (*iter).first;
+            int cacheSize = (*iter).second;
+            // 缓存命中,item 放到队尾，执行LRU策略
+            Codec::cached_images.erase(iter);
+            Codec::cached_images.emplace_back(cacheKey,cacheSize);
+            return true;
+        }
+    }
+    return false;
+}
+
+static void CheckCacheSize() {
+    // 修正Key（read from dart）
+    std::vector<std::string> allKeys;
+    for (auto &item :Codec::dart_get_keys_callbacks) {
+        auto state = item.dart_state().lock();
+        if (!state) {
+            continue;
+        }
+        tonic::DartState::Scope scope(state.get());
+        Dart_Handle result = tonic::DartInvoke(item.value(), {});
+        auto keys = tonic::DartConverter<std::vector<std::string>>::FromDart(result);
+        allKeys.insert(allKeys.end(), keys.begin(), keys.end());
+    }
+    auto iter = Codec::cached_images.begin();
+    int totalSize = 0;
+    while (iter != Codec::cached_images.end()) {
+        if (std::find(allKeys.begin(), allKeys.end(), (*iter).first) == allKeys.end()) {
+            // noEngine Use
+            iter = Codec::cached_images.erase(iter);
+        } else {
+            totalSize += (*iter).second;
+            iter++;
+        }
+    }
+    // checkSize->NotifyRemove
+    if (totalSize > Codec::max_cache_size) {
+        iter = Codec::cached_images.begin();
+        std::vector<std::string> toRemove;
+        while (totalSize > Codec::max_cache_size && iter!=Codec::cached_images.end()){
+            toRemove.push_back((*iter).first);
+            totalSize-=(*iter).second;
+            iter = Codec::cached_images.erase(iter);
+        }
+        NotifyRemoveCache(toRemove);
+    }
+}
+
+/**
+ * Dart侧ImageCacheSize发生变动
+ * @param args
+ */
+static void SetImageCacheSize(Dart_NativeArguments args) {
+    Codec::max_cache_size = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 0));
+    if (Codec::max_cache_size == 0) {
+        std::vector<std::string> toRemove;
+        for (const auto &item:Codec::cached_images) {
+            toRemove.push_back(item.first);
+        }
+        NotifyRemoveCache(toRemove);
+        Codec::cached_images.clear();
+    } else {
+        CheckCacheSize();
+    }
+}
+
+static void NotifyUseImage(Dart_NativeArguments args) {
+    std::string key = tonic::DartConverter<std::string>::FromDart(Dart_GetNativeArgument(args, 0));
+    int size = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 1));
+    if (!CacheContainsKey(key)) {
+        Codec::cached_images.emplace_back(key, size);
+        CheckCacheSize();
+    }
+}
 // END
 
-void Codec::RegisterNatives(tonic::DartLibraryNatives* natives) {
+void Codec::RegisterNatives(tonic::DartLibraryNatives *natives) {
   // BD ADD: START
   natives->Register({
-      {"getNativeImage", GetNativeImage, 5, true},
-  });
-
-  natives->Register({
-    {"instantiateNativeImageCodec", InstantiateNativeImageCodec, 5, true},
+      {"getCachedImageCodec",               GetCachedImageCodec,               2, true},
+      {"registerImageCacheCallBack",        RegisterImageCacheCallBack,        2, true},
+      {"setImageCacheSize",                 SetImageCacheSize,                 1, true},
+      {"notifyUseImage",                    NotifyUseImage,                    2, true},
+      {"getNativeImage",                    GetNativeImage,                    5, true},
+      {"instantiateNativeImageCodec",       InstantiateNativeImageCodec,       5, true},
     });
   // END
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});

@@ -375,7 +375,9 @@ class Engine final : public RuntimeDelegate,
       Delegate& delegate,
       const PointerDataDispatcherMaker& dispatcher_maker,
       Settings settings,
-      std::unique_ptr<Animator> animator) const;
+      std::unique_ptr<Animator> animator,
+      fml::WeakPtr<IOManager> io_manager,
+      fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys the engine engine. Called by the shell on the UI task
@@ -386,6 +388,7 @@ class Engine final : public RuntimeDelegate,
   ///
   ~Engine() override;
 
+  fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
   //----------------------------------------------------------------------------
   /// @return     The pointer to this instance of the engine. The engine may
   ///             only be accessed safely on the UI task runner.

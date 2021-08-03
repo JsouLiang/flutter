@@ -155,15 +155,17 @@ void ImageDescriptor::initRaw(Dart_Handle descriptor_handle,
 }
 
 void ImageDescriptor::instantiateCodec(Dart_Handle codec_handle,
+                                       // BD ADD
+                                       std::string key,
                                        int target_width,
                                        int target_height) {
   fml::RefPtr<Codec> ui_codec;
   if (!generator_ || generator_->getFrameCount() == 1) {
     ui_codec = fml::MakeRefCounted<SingleFrameCodec>(
         static_cast<fml::RefPtr<ImageDescriptor>>(this), target_width,
-        target_height);
+        target_height, key);
   } else {
-    ui_codec = fml::MakeRefCounted<MultiFrameCodec>(generator_);
+    ui_codec = fml::MakeRefCounted<MultiFrameCodec>(generator_, key);
   }
   ui_codec->AssociateWithDartWrapper(codec_handle);
 }

@@ -147,6 +147,7 @@ class EngineTest : public testing::FixtureTest {
   Settings settings_;
   std::unique_ptr<Animator> animator_;
   fml::WeakPtr<IOManager> io_manager_;
+  fml::WeakPtr<SnapshotDelegate> snapshot_delegate;
   std::unique_ptr<RuntimeController> runtime_controller_;
   std::shared_ptr<fml::ConcurrentTaskRunner> image_decoder_task_runner_;
 };
@@ -278,7 +279,7 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*runtime_controller=*/std::move(mock_runtime_controller));
 
     auto spawn =
-        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr);
+        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr, io_manager_, snapshot_delegate);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });

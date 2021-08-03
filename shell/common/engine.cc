@@ -106,7 +106,9 @@ std::unique_ptr<Engine> Engine::Spawn(
     Delegate& delegate,
     const PointerDataDispatcherMaker& dispatcher_maker,
     Settings settings,
-    std::unique_ptr<Animator> animator) const {
+    std::unique_ptr<Animator> animator,
+    fml::WeakPtr<IOManager> io_manager,
+    fml::WeakPtr<SnapshotDelegate> snapshot_delegate) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
       /*dispatcher_maker=*/dispatcher_maker,
@@ -115,7 +117,8 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*task_runners=*/task_runners_,
       /*settings=*/settings,
       /*animator=*/std::move(animator),
-      /*io_manager=*/runtime_controller_->GetIOManager(),
+//      /*io_manager=*/runtime_controller_->GetIOManager(),
+      /*io_manager=*/io_manager,
       /*font_collection=*/font_collection_,
       /*runtime_controller=*/nullptr);
   result->runtime_controller_ = runtime_controller_->Spawn(
@@ -125,12 +128,19 @@ std::unique_ptr<Engine> Engine::Spawn(
       settings_.idle_notification_callback,  // idle notification callback
       settings_.isolate_create_callback,     // isolate create callback
       settings_.isolate_shutdown_callback,   // isolate shutdown callback
-      settings_.persistent_isolate_data      // persistent isolate data
+      settings_.persistent_isolate_data,      // persistent isolate data
+      io_manager,
+      result->GetImageDecoder(),
+      snapshot_delegate
   );
   return result;
 }
 
 Engine::~Engine() = default;
+
+fml::WeakPtr<ImageDecoder> Engine::GetImageDecoder() const {
+    return image_decoder_.GetWeakPtr();
+}
 
 fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
