@@ -72,6 +72,7 @@ DartIsolate::Flags::Flags(const Dart_IsolateFlags* flags) {
 DartIsolate::Flags::~Flags() = default;
 
 void DartIsolate::Flags::SetNullSafetyEnabled(bool enabled) {
+  FML_LOG(ERROR)<<"NullSafetyEnabled:"<<enabled<<std::endl;
   flags_.null_safety = enabled;
 }
 
