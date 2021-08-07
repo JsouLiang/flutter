@@ -30,6 +30,8 @@ class MockDelegate : public Rasterizer::Delegate {
                        return std::make_shared<fml::SyncSwitch>();
   }
   // END
+  MOCK_CONST_METHOD0(GetParentRasterThreadMerger,
+                     const fml::RefPtr<fml::RasterThreadMerger>());
 };
 
 class MockSurface : public Surface {

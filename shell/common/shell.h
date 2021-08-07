@@ -203,6 +203,7 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> Create(
       TaskRunners task_runners,
       const PlatformData platform_data,
+      fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const CreateCallback<PlatformView>& on_create_platform_view,
@@ -275,6 +276,16 @@ class Shell final : public PlatformView::Delegate,
   /// @return     The task runners current in use by the shell.
   ///
   const TaskRunners& GetTaskRunners() const override;
+
+  //------------------------------------------------------------------------------
+  /// @brief      Getting the raster thread merger from parent shell, it can be
+  ///             a null RefPtr when it's a root Shell or the
+  ///             embedder_->SupportsDynamicThreadMerging() returns false.
+  ///
+  /// @return     The raster thread merger used by the parent shell.
+  ///
+  const fml::RefPtr<fml::RasterThreadMerger> GetParentRasterThreadMerger()
+      const override;
 
   //----------------------------------------------------------------------------
   /// @brief      Rasterizers may only be accessed on the raster task runner.
@@ -436,6 +447,7 @@ class Shell final : public PlatformView::Delegate,
                          rapidjson::Document*)>;
 
   const TaskRunners task_runners_;
+  const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -513,12 +525,14 @@ class Shell final : public PlatformView::Delegate,
 
   Shell(DartVMRef vm,
         TaskRunners task_runners,
+        fml::RefPtr<fml::RasterThreadMerger> parent_merger,
         Settings settings,
         std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
         bool is_gpu_disabled);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
+      fml::RefPtr<fml::RasterThreadMerger> parent_merger,
       TaskRunners task_runners,
       const PlatformData platform_data,
       Settings settings,
