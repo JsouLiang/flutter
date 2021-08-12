@@ -349,24 +349,27 @@ public class FlutterLoader {
       }
       // END
 
-      ApplicationInfo applicationInfo =
-          applicationContext
-              .getPackageManager()
-              .getApplicationInfo(
-                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-      Bundle metaData = applicationInfo.metaData;
-      int oldGenHeapSizeMegaBytes =
-          metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
-      if (oldGenHeapSizeMegaBytes == 0) {
-        // default to half of total memory.
-        ActivityManager activityManager =
-            (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
-        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-        activityManager.getMemoryInfo(memInfo);
-        oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
-      }
-
-      shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
+      // BD MOD: START
+//      ApplicationInfo applicationInfo =
+//          applicationContext
+//              .getPackageManager()
+//              .getApplicationInfo(
+//                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+//      Bundle metaData = applicationInfo.metaData;
+//      int oldGenHeapSizeMegaBytes =
+//          metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
+//      if (oldGenHeapSizeMegaBytes == 0) {
+//        // default to half of total memory.
+//        ActivityManager activityManager =
+//            (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
+//        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+//        activityManager.getMemoryInfo(memInfo);
+//        oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+//      }
+//
+//      shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
+      // TODO: Re-enable after fixing this issue: https://github.com/flutter/flutter/issues/86855
+      // END
 
 
       if (metaData != null && metaData.getBoolean(ENABLE_SKPARAGRAPH_META_DATA_KEY)) {
