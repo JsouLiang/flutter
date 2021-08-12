@@ -1148,10 +1148,8 @@ void ParagraphTxt::Layout(double width) {
     // BD ADD: START
     // fix Text("a\n", forceVerticalCenter: true),
     shouldTextBounds = shouldTextBounds
-                       && -max_ascent <= rectForHeight.mTop
-                       && max_descent >= rectForHeight.mTop
-                       && -max_ascent <= rectForHeight.mBottom
-                       && max_descent >= rectForHeight.mBottom;
+                       && rectForHeight.mTop != FLT_MAX
+                       && rectForHeight.mBottom != -FLT_MAX;
     if (shouldTextBounds) {
       if (paragraph_style_.drawMinHeight) {
         max_ascent = -rectForHeight.mTop;
