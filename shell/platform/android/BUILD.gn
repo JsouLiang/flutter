@@ -277,8 +277,10 @@ android_java_sources = [
   # END
 ]
 
-# BD ADD:
+# BD ADD: START
 android_java_sources += android_image_loader_java_sources
+android_java_sources += android_lib_loader
+# END
 
 list_script = rebase_path("//build/ls.py", ".", "//")
 embedding_dependencies_jars =

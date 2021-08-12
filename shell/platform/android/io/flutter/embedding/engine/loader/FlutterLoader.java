@@ -25,6 +25,7 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 // BD ADD:
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.SafelyLibraryLoader;
 import io.flutter.util.PathUtils;
 import io.flutter.view.VsyncWaiter;
 import java.io.File;
@@ -189,6 +190,12 @@ public class FlutterLoader {
             } else {
                 flutterJNI.loadLibrary();
             }
+
+            if (settings != null && settings.isSafeLoadAppSO()) {
+              settings.setApplicationLibraryPath(SafelyLibraryLoader.loadLibrary(appContext, "app"));
+              Log.d(TAG, "SafeLoad app path: "+settings.getApplicationLibraryPath());
+            }
+
             if (BDFlutterInjector.instance().shouldLoadNative()) {
                 FlutterJNI.nativeTraceEngineInitApmStartAndEnd("init_task", initTaskStartTimestamp);
             }
@@ -254,6 +261,8 @@ public class FlutterLoader {
       if (nativeLibraryDir == null) {
         nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
       }
+
+      String applicationLibraryPath = settings.getApplicationLibraryPath();
       // END
 
       // BD MOD: START
@@ -326,6 +335,10 @@ public class FlutterLoader {
                 + nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
+      }
+
+      if (applicationLibraryPath != null) {
+          shellArgs.add("--application_library_path=" + applicationLibraryPath);
       }
 
       String hostManifestJson = PathUtils.getDataDirectory(applicationContext) + File.separator + flutterAssetsDir + File.separator + DEFAULT_HOST_MANIFEST_JSON;
@@ -590,6 +603,8 @@ public class FlutterLoader {
     private Runnable onInitResources;
     private InitExceptionCallback initExceptionCallback;
     private boolean enableDebugMode = false;
+    private String applicationLibraryPath;
+    private boolean enableSafeLoadAppSO = true;
 
 
     public boolean isDisableLeakVM() {
@@ -621,12 +636,20 @@ public class FlutterLoader {
       return nativeLibraryDir;
     }
 
+    public String getApplicationLibraryPath() {
+      return applicationLibraryPath;
+    }
+
     public SoLoader getSoLoader() {
       return soLoader;
     }
 
     public void setNativeLibraryDir(String dir) {
       nativeLibraryDir = dir;
+    }
+
+    public void setApplicationLibraryPath(String path) {
+      applicationLibraryPath = path;
     }
 
     public void setSoLoader(SoLoader loader) {
@@ -644,6 +667,14 @@ public class FlutterLoader {
 
     public void setEnableDebugMode(boolean enableDebugMode) {
         this.enableDebugMode = enableDebugMode;
+    }
+
+    public boolean isSafeLoadAppSO() {
+      return enableSafeLoadAppSO;
+    }
+
+    public void setEnableSafeLoadAppSO(boolean enableSafeLoadAppSO) {
+      this.enableSafeLoadAppSO = enableSafeLoadAppSO;
     }
     // END
 

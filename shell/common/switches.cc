@@ -374,6 +374,11 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                                 &settings.package_preload_libs);
   settings.dynamicart_host =
           command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
+  
+  std::string appSoPath;
+  command_line.GetOptionValue(FlagForSwitch(Switch::ApplicationLibraryPath), &appSoPath);
+  if(appSoPath.size()!=0)
+    settings.application_library_path.push_back(appSoPath);
   // END
 
   if (settings.icu_initialization_required) {
