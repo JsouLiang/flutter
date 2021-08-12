@@ -349,13 +349,13 @@ public class FlutterLoader {
       }
       // END
 
+      ApplicationInfo applicationInfo =
+          applicationContext
+              .getPackageManager()
+              .getApplicationInfo(
+                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+      Bundle metaData = applicationInfo.metaData;
       // BD MOD: START
-//      ApplicationInfo applicationInfo =
-//          applicationContext
-//              .getPackageManager()
-//              .getApplicationInfo(
-//                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-//      Bundle metaData = applicationInfo.metaData;
 //      int oldGenHeapSizeMegaBytes =
 //          metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
 //      if (oldGenHeapSizeMegaBytes == 0) {
