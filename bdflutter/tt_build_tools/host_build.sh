@@ -90,7 +90,7 @@ then
 
   # FlutterMacOS.framework.zip
   cd out/host_debug
-  zip -rq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+  zip -ryq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
   cd ..
   cd ..
   bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64/FlutterMacOS.framework.zip
@@ -114,7 +114,7 @@ then
 
   # FlutterMacOS.framework.zip
   cd out/host_release
-  zip -rq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+  zip -ryq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
   cd ..
   cd ..
   bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-release/FlutterMacOS.framework.zip
