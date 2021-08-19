@@ -810,11 +810,11 @@ static void sendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)applicationBecameActive:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationBecameActive");
-  bool optimiseEnabled = [[NSUserDefaults standardUserDefaults]
-      boolForKey:@"flutter_optimise_enter_foreground_surface_enabled"];
-    
-  if (_viewportMetrics.physical_width &&
-      ((optimiseEnabled && self.view.window) || !optimiseEnabled)) {
+  // BD MOD
+  // 当使用multiple flutter的时候避免切回前台Engines同时更新操作线程导致死锁
+  // 只对当前正在显示surface进行更新
+  // if (_viewportMetrics.physical_width)
+  if (_viewportMetrics.physical_width && self.view.window) {
       [self surfaceUpdated:YES];
   }
   [self goToApplicationLifecycle:@"AppLifecycleState.resumed"];
