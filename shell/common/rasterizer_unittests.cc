@@ -31,8 +31,9 @@ class MockDelegate : public Rasterizer::Delegate {
                        return std::make_shared<fml::SyncSwitch>();
   }
   // END
-  MOCK_CONST_METHOD0(GetShellGroupContext,
-                     const fml::RefPtr<ShellGroupContext>());
+  const fml::RefPtr<ShellGroupContext> GetShellGroupContext() const {
+    return fml::MakeRefCounted<ShellGroupContext>();
+  }
 };
 
 class MockSurface : public Surface {
