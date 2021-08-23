@@ -4,6 +4,7 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/shell_group_context.h"
 
 #include <memory>
 #include <sstream>
@@ -73,7 +74,7 @@ std::unique_ptr<Engine> CreateEngine(
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
-    fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+    fml::RefPtr<ShellGroupContext> shell_group_context,
     TaskRunners task_runners,
     const PlatformData platform_data,
     Settings settings,
@@ -90,7 +91,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   }
 
   auto shell = std::unique_ptr<Shell>(
-      new Shell(std::move(vm), task_runners, parent_merger, settings,
+      new Shell(std::move(vm), task_runners, shell_group_context, settings,
                 std::make_shared<VolatilePathTracker>(
                     task_runners.GetUITaskRunner(),
                     !settings.skia_deterministic_rendering_on_cpu),
@@ -419,12 +420,12 @@ std::unique_ptr<Shell> Shell::Create(
   // BD ADD:
   Performance::GetInstance()->TraceApmStartAndEnd("dartvm_create", dartvmCreateStartTimestamp);
   FML_CHECK(vm) << "Must be able to initialize the VM.";
-
+  fml::RefPtr<ShellGroupContext> shell_group_context = fml::MakeRefCounted<ShellGroupContext>();
   auto vm_data = vm->GetVMData();
 
   return Shell::Create(std::move(task_runners),        //
                        std::move(platform_data),       //
-                       /*parent_merger=*/nullptr,      //
+                       std::move(shell_group_context), //
                        std::move(settings),            //
                        vm_data->GetIsolateSnapshot(),  // isolate snapshot
                        on_create_platform_view,        //
@@ -441,7 +442,7 @@ std::unique_ptr<Shell> Shell::Create(
 std::unique_ptr<Shell> Shell::Create(
     TaskRunners task_runners,
     const PlatformData platform_data,
-    fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
+    fml::RefPtr<ShellGroupContext> shell_group_context,
     Settings settings,
     fml::RefPtr<const DartSnapshot> isolate_snapshot,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
@@ -468,7 +469,7 @@ std::unique_ptr<Shell> Shell::Create(
       fml::MakeCopyable([&latch,                                  //
                          vm = std::move(vm),                      //
                          &shell,                                  //
-                         parent_thread_merger,                    //
+                         shell_group_context,                     //
                          task_runners = std::move(task_runners),  //
                          platform_data,                           //
                          settings,                                //
@@ -482,7 +483,7 @@ std::unique_ptr<Shell> Shell::Create(
   ]() mutable {
         auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
-                                            parent_thread_merger,         //
+                                            shell_group_context,          //
                                             std::move(task_runners),      //
                                             platform_data,                //
                                             settings,                     //
@@ -502,12 +503,12 @@ std::unique_ptr<Shell> Shell::Create(
 
 Shell::Shell(DartVMRef vm,
              TaskRunners task_runners,
-             fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+             fml::RefPtr<ShellGroupContext> shell_group_context,
              Settings settings,
              std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
              bool is_gpu_disabled)
     : task_runners_(std::move(task_runners)),
-      parent_raster_thread_merger_(parent_merger),
+      shell_group_context_(shell_group_context),
       settings_(std::move(settings)),
       vm_(std::move(vm)),
       is_gpu_disabled_sync_switch_(new fml::SyncSwitch(is_gpu_disabled)),
@@ -649,7 +650,7 @@ std::unique_ptr<Shell> Shell::Spawn(
           .SetIfTrue([&] { is_gpu_disable = true; }));
   // BD END
   std::unique_ptr<Shell> result(Shell::Create(
-      task_runners_, PlatformData{}, rasterizer_->GetRasterThreadMerger(), GetSettings(),
+      task_runners_, PlatformData{}, shell_group_context_, GetSettings(),
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer, vm_,
       [engine = this->engine_.get()](
@@ -902,9 +903,9 @@ const TaskRunners& Shell::GetTaskRunners() const {
   return task_runners_;
 }
 
-const fml::RefPtr<fml::RasterThreadMerger> Shell::GetParentRasterThreadMerger()
+const fml::RefPtr<ShellGroupContext> Shell::GetShellGroupContext()
     const {
-  return parent_raster_thread_merger_;
+  return shell_group_context_;
 }
 
 fml::TaskRunnerAffineWeakPtr<Rasterizer> Shell::GetRasterizer() const {

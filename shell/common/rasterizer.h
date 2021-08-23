@@ -23,6 +23,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
+#include "flutter/shell/common/shell_group_context.h"
 
 namespace flutter {
 
@@ -82,9 +83,9 @@ class Rasterizer final : public SnapshotDelegate {
     /// Task runners used by the shell.
     virtual const TaskRunners& GetTaskRunners() const = 0;
 
-    /// The raster thread merger from parent shell's rasterizer.
-    virtual const fml::RefPtr<fml::RasterThreadMerger>
-    GetParentRasterThreadMerger() const = 0;
+    /// The context
+    virtual const fml::RefPtr<ShellGroupContext>
+    GetShellGroupContext() const = 0;
 
     /// Accessor for the shell's GPU sync switch, which determines whether GPU
     /// operations are allowed on the current thread.
@@ -377,14 +378,6 @@ class Rasterizer final : public SnapshotDelegate {
   flutter::CompositorContext* compositor_context() {
     return compositor_context_.get();
   }
-
-  //----------------------------------------------------------------------------
-  /// @brief      Returns the raster thread merger used by this rasterizer.
-  ///             This may be `nullptr`.
-  ///
-  /// @return     The raster thread merger used by this rasterizer.
-  ///
-  fml::RefPtr<fml::RasterThreadMerger> GetRasterThreadMerger();
 
   //----------------------------------------------------------------------------
   /// @brief      Skia has no notion of time. To work around the performance

@@ -36,6 +36,7 @@
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/shell_group_context.h"
 #include "flutter/shell/common/shell_io_manager.h"
 
 namespace flutter {
@@ -203,7 +204,7 @@ class Shell final : public PlatformView::Delegate,
   static std::unique_ptr<Shell> Create(
       TaskRunners task_runners,
       const PlatformData platform_data,
-      fml::RefPtr<fml::RasterThreadMerger> parent_thread_merger,
+      fml::RefPtr<ShellGroupContext> shell_group_context,
       Settings settings,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       const CreateCallback<PlatformView>& on_create_platform_view,
@@ -278,13 +279,10 @@ class Shell final : public PlatformView::Delegate,
   const TaskRunners& GetTaskRunners() const override;
 
   //------------------------------------------------------------------------------
-  /// @brief      Getting the raster thread merger from parent shell, it can be
-  ///             a null RefPtr when it's a root Shell or the
-  ///             embedder_->SupportsDynamicThreadMerging() returns false.
+  /// @brief      Getting the shell group context
+  /// @return     The context data shared with shell group.
   ///
-  /// @return     The raster thread merger used by the parent shell.
-  ///
-  const fml::RefPtr<fml::RasterThreadMerger> GetParentRasterThreadMerger()
+  const fml::RefPtr<ShellGroupContext> GetShellGroupContext()
       const override;
 
   //----------------------------------------------------------------------------
@@ -447,7 +445,7 @@ class Shell final : public PlatformView::Delegate,
                          rapidjson::Document*)>;
 
   const TaskRunners task_runners_;
-  const fml::RefPtr<fml::RasterThreadMerger> parent_raster_thread_merger_;
+  const fml::RefPtr<ShellGroupContext> shell_group_context_;
   const Settings settings_;
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
@@ -525,14 +523,14 @@ class Shell final : public PlatformView::Delegate,
 
   Shell(DartVMRef vm,
         TaskRunners task_runners,
-        fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+        fml::RefPtr<ShellGroupContext> shell_group_context,
         Settings settings,
         std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
         bool is_gpu_disabled);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
       DartVMRef vm,
-      fml::RefPtr<fml::RasterThreadMerger> parent_merger,
+      fml::RefPtr<ShellGroupContext> shell_group_context,
       TaskRunners task_runners,
       const PlatformData platform_data,
       Settings settings,

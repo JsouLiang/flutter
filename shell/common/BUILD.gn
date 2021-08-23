@@ -83,6 +83,8 @@ source_set("common") {
     "serialization_callbacks.h",
     "shell.cc",
     "shell.h",
+    "shell_group_context.cc",
+    "shell_group_context.h",
     "shell_io_manager.cc",
     "shell_io_manager.h",
     "skia_event_tracer_impl.cc",

@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/shell_group_context.h"
 
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
@@ -30,8 +31,8 @@ class MockDelegate : public Rasterizer::Delegate {
                        return std::make_shared<fml::SyncSwitch>();
   }
   // END
-  MOCK_CONST_METHOD0(GetParentRasterThreadMerger,
-                     const fml::RefPtr<fml::RasterThreadMerger>());
+  MOCK_CONST_METHOD0(GetShellGroupContext,
+                     const fml::RefPtr<ShellGroupContext>());
 };
 
 class MockSurface : public Surface {

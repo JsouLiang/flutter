@@ -87,8 +87,9 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
         delegate_.GetTaskRunners().GetPlatformTaskRunner()->GetTaskQueueId();
     const auto gpu_id =
         delegate_.GetTaskRunners().GetRasterTaskRunner()->GetTaskQueueId();
-    raster_thread_merger_ = fml::RasterThreadMerger::CreateOrShareThreadMerger(
-        delegate_.GetParentRasterThreadMerger(), platform_id, gpu_id);
+    raster_thread_merger_ =
+        delegate_.GetShellGroupContext()->CreateOrShareThreadMerger(platform_id,
+                                                                    gpu_id);
   }
   if (raster_thread_merger_) {
     raster_thread_merger_->SetMergeUnmergeCallback([=]() {
@@ -690,10 +691,6 @@ void Rasterizer::AddNextFrameCallback(fml::closure callback) {
   next_frame_callbacks_.push_back(callback);
 }
 // END
-
-fml::RefPtr<fml::RasterThreadMerger> Rasterizer::GetRasterThreadMerger() {
-  return raster_thread_merger_;
-}
 
 void Rasterizer::FireNextFrameCallbackIfPresent() {
   // BD MOD: START
