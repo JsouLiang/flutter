@@ -270,6 +270,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       return this;
     }
 
+    // BD ADD: START
     /**
      * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method.
      * And should Use RootWrapContentWidget in Dart
@@ -279,6 +280,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       this.wrapOrientation = orientation;
       return this;
     }
+    // END
 
     /**
      * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
@@ -482,6 +484,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       return this;
     }
 
+    // BD ADD: START
     /**
      * {@link FlutterView} support wrap_content, you can set WrapOrientation by this method.
      * And should Use RootWrapContentWidget in Dart
@@ -491,6 +494,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       this.wrapOrientation = orientation;
       return this;
     }
+    // END
 
     /**
      * Support a {@link TransparencyMode#transparent} background within {@link FlutterView}, or
@@ -571,9 +575,11 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
       args.putString(
           ARG_FLUTTERVIEW_RENDER_MODE,
           renderMode != null ? renderMode.name() : RenderMode.surface.name());
+      // BD ADD: START
       if (wrapOrientation != null) {
         args.putString(ARG_FLUTTERVIEW_WRAP_ORIENTATION, wrapOrientation.name());
       }
+      // END
       args.putString(
           ARG_FLUTTERVIEW_TRANSPARENCY_MODE,
           transparencyMode != null ? transparencyMode.name() : TransparencyMode.transparent.name());
