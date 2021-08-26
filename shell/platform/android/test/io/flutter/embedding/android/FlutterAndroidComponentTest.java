@@ -20,6 +20,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+// BD ADD
+import io.flutter.embedding.android.WrapOrientation.java;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -321,6 +323,14 @@ public class FlutterAndroidComponentTest {
     public RenderMode getRenderMode() {
       return RenderMode.surface;
     }
+
+    // BD ADD: START
+    @Nullable
+    @Override
+    public WrapOrientation getWrapOrientation() {
+      return null;
+    }
+    // END
 
     @NonNull
     @Override
