@@ -1057,15 +1057,25 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
                   raster_task, should_post_raster_task,
                   is_post = is_createView_post_] {
                   // END
-    if (io_manager && !io_manager->GetResourceContext()) {
-      sk_sp<GrDirectContext> resource_context;
+    // BD MOD: START
+    // if (io_manager && !io_manager->GetResourceContext()) {
+    //   sk_sp<GrDirectContext> resource_context;
+    //   if (shared_resource_context) {
+    //     resource_context = shared_resource_context;
+    //   } else {
+    //     resource_context = platform_view->CreateResourceContext();
+    //   }
+    //   io_manager->NotifyResourceContextAvailable(resource_context);
+    // }
+    if (io_manager) {
       if (shared_resource_context) {
-        resource_context = shared_resource_context;
-      } else {
-        resource_context = platform_view->CreateResourceContext();
+          io_manager->UpdateResourceContext(shared_resource_context);
+      } else if (!io_manager->GetResourceContext()) {
+          io_manager->NotifyResourceContextAvailable(platform_view->CreateResourceContext());
       }
-      io_manager->NotifyResourceContextAvailable(resource_context);
     }
+    // END
+
     // Step 1: Next, post a task on the UI thread to tell the engine that it has
     // an output surface.
     fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);
