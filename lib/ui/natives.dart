@@ -158,7 +158,7 @@ dynamic instanceInvoke(dynamic instance, int invokeType, String functionName, Li
 
 /// END
 
-int64_t Performance_getRecordLastLayoutTime() native 'Performance_getRecordLastLayoutTime';
+int Performance_getRecordLastLayoutTime() native 'Performance_getRecordLastLayoutTime';
 void Performance_clearHugeFontCache() native 'Performance_clearHugeFontCache';
 void Performance_clearAllFontCache() native 'Performance_clearAllFontCache';
 void Performance_clearLayoutCache() native 'Performance_clearLayoutCache';

@@ -1,6 +1,7 @@
 
 #include <third_party/skia/include/core/SkGraphics.h>
 #include "performance.h"
+#include <flutter/third_party/txt/src/minikin/Layout.h>
 #include <chrono>
 
 using namespace std;
