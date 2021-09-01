@@ -170,6 +170,8 @@ class IsolateConfiguration {
                                  std::optional<std::string> entrypoint){
 
   }
+
+  static std::map<std::string,bool> loadedPackagePaths;
   // END
 
  protected:
