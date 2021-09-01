@@ -246,8 +246,8 @@ class Rasterizer final : public SnapshotDelegate {
   /// @param[in]  discardCallback if specified and returns true, the layer tree
   ///                             is discarded instead of being rendered
   ///
-  void Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
-            LayerTreeDiscardCallback discardCallback = NoDiscard);
+  RasterStatus Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline,
+                    LayerTreeDiscardCallback discardCallback = NoDiscard);
 
   //----------------------------------------------------------------------------
   /// @brief      The type of the screenshot to obtain of the previously
@@ -495,6 +495,8 @@ class Rasterizer final : public SnapshotDelegate {
   RasterStatus DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
 
   RasterStatus DrawToSurface(flutter::LayerTree& layer_tree);
+
+  RasterStatus DrawToSurfaceUnsafe(flutter::LayerTree& layer_tree);
 
   void FireNextFrameCallbackIfPresent();
 

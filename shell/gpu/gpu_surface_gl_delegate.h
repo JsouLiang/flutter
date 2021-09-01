@@ -71,6 +71,9 @@ class GPUSurfaceGLDelegate {
   // instrumentation to specific GL calls can specify custom GL functions
   // here.
   virtual GLProcResolver GetGLProcResolver() const;
+
+  // Whether to allow drawing to the surface when the GPU is disabled
+  virtual bool AllowsDrawingWhenGpuDisabled() const;
 };
 
 }  // namespace flutter

@@ -50,8 +50,12 @@ enum class RasterStatus {
   kEnqueuePipeline,
   // Failed to rasterize the frame.
   kFailed,
-  // Layer tree was discarded due to LayerTreeDiscardCallback
-  kDiscarded
+  // Layer tree was discarded due to LayerTreeDiscardCallback or inability to
+  // access the GPU.
+  kDiscarded,
+  // Drawing was yielded to allow the correct thread to draw as a result of the
+  // RasterThreadMerger.
+  kYielded,
 };
 
 class CompositorContext {
