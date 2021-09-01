@@ -360,27 +360,23 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernelList(
 }
 
 // BD ADD: START
-std::map<std::string,bool> IsolateConfiguration::loadedPackagePaths;
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForDynamicart(
         const Settings& settings, AssetManager& asset_manager) {
     // Running in Dynamicart mode.
     if (!settings.package_dill_path.empty()) {
-        if(loadedPackagePaths.find(settings.package_dill_path)==loadedPackagePaths.end()){
-          // 如果是动态模式，把动态包资源也加入asset_manager的查找范围中，且放在最前面，优先级最高。
-          // 根据package_dill_path的后缀判断有不同的处理逻辑：
-          // 如果.zip结尾就作为ZipAssetStore处理
-          // 如果不是那就作为DirectoryAssetBundle处理
-          loadedPackagePaths[settings.package_dill_path] = true;
-          size_t file_ext_index = settings.package_dill_path.rfind('.');
-          if (file_ext_index == std::string::npos ||
-              settings.package_dill_path.substr(file_ext_index) != ".zip") {
-              asset_manager.PushFront(std::make_unique<DirectoryAssetBundle>(
-                      fml::OpenDirectory(settings.package_dill_path.c_str(), false,
-                                         fml::FilePermission::kRead), true));
-          } else {
-              asset_manager.PushFront(std::make_unique<ZipAssetStore>(
-                      settings.package_dill_path.c_str(), "flutter_assets"));
-          }
+        // 如果是动态模式，把动态包资源也加入asset_manager的查找范围中，且放在最前面，优先级最高。
+        // 根据package_dill_path的后缀判断有不同的处理逻辑：
+        // 如果.zip结尾就作为ZipAssetStore处理
+        // 如果不是那就作为DirectoryAssetBundle处理
+        size_t file_ext_index = settings.package_dill_path.rfind('.');
+        if (file_ext_index == std::string::npos ||
+            settings.package_dill_path.substr(file_ext_index) != ".zip") {
+            asset_manager.PushFront(std::make_unique<DirectoryAssetBundle>(
+                    fml::OpenDirectory(settings.package_dill_path.c_str(), false,
+                                       fml::FilePermission::kRead), true));
+        } else {
+            asset_manager.PushFront(std::make_unique<ZipAssetStore>(
+                    settings.package_dill_path.c_str(), "flutter_assets"));
         }
 
         // 然后，从资源中找出kernel文件, 由此生成IsolateConfiguration
