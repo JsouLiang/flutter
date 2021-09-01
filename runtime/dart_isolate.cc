@@ -183,6 +183,10 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     return {};
   }
 
+  // BD ADD: START
+  isolate_configration->PrepareEntryPoint(isolate, dart_entrypoint_library, dart_entrypoint);
+  // END
+
   if (settings.root_isolate_create_callback) {
     // Isolate callbacks always occur in isolate scope and before user code has
     // had a chance to run.

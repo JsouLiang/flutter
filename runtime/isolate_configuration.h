@@ -165,6 +165,13 @@ class IsolateConfiguration {
 
   virtual bool IsNullSafetyEnabled(const DartSnapshot& snapshot) = 0;
 
+  // BD ADD: START
+  virtual void PrepareEntryPoint(std::weak_ptr<DartIsolate> isolate, std::optional<std::string> library_name,
+                                 std::optional<std::string> entrypoint){
+
+  }
+  // END
+
  protected:
   virtual bool DoPrepareIsolate(DartIsolate& isolate) = 0;
 

@@ -61,6 +61,19 @@ public:
       resolved_kernel_pieces_.emplace_back(piece.get());
     }
   }
+
+  void PrepareEntryPoint(std::weak_ptr<DartIsolate> isolate, std::optional<std::string> library_name,
+                         std::optional<std::string> entrypoint) override{
+    tonic::DartState::Scope scope(isolate.lock().get());
+    auto library_handle =
+        library_name.has_value() && !library_name.value().empty()
+        ? ::Dart_LookupLibrary(tonic::ToDart(library_name.value().c_str()))
+        : ::Dart_RootLibrary();
+    auto entrypoint_handle = entrypoint.has_value() && !entrypoint.value().empty()
+                             ? tonic::ToDart(entrypoint.value().c_str())
+                             : tonic::ToDart("main");
+    Dart_PrepareEntryPoint(library_handle, entrypoint_handle);
+  }
 private:
     std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
         kernel_piece_futures_;
