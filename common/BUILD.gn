@@ -18,7 +18,10 @@ source_set("common") {
     "task_runners.h",
   ]
 
-  deps = [ "//flutter/fml" ]
+  deps = [ "//flutter/fml",
+  # BD ADD:
+  "//third_party/rapidjson"
+  ]
 
   # BD ADD:
   sources += bd_fps_recorder_sources

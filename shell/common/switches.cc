@@ -366,19 +366,22 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
    if(command_line.HasOption(FlagForSwitch(Switch::OptSurfaceTexture))) {
       settings.opt_surfacetexture = true;
    }
-  // END
-
   command_line.GetOptionValue(FlagForSwitch(Switch::PackageDillPath),
                               &settings.package_dill_path);
   command_line.GetOptionValue(FlagForSwitch(Switch::PackagePreloadLibs),
-                                &settings.package_preload_libs);
+                              &settings.package_preload_libs);
   settings.dynamicart_host =
-          command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
-  
+      command_line.HasOption(FlagForSwitch(Switch::DynamicartHost));
+
   std::string appSoPath;
   command_line.GetOptionValue(FlagForSwitch(Switch::ApplicationLibraryPath), &appSoPath);
   if(appSoPath.size()!=0)
     settings.application_library_path.push_back(appSoPath);
+
+  std::string entryPointArgsJson;
+  command_line.GetOptionValue(FlagForSwitch(Switch::EntryPointArgsJson),
+                              &entryPointArgsJson);
+  settings.SetEntryPointArgsJson(entryPointArgsJson);
   // END
 
   if (settings.icu_initialization_required) {

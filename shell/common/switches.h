@@ -204,6 +204,7 @@ DEF_SWITCH(PackageDillPath, "package_dill_path", "Package Assets Path")
 DEF_SWITCH(PackagePreloadLibs, "package_preload_libs", "Package Preload Libs")
 DEF_SWITCH(DynamicartHost, "dynamicart-host", "indicate is a dynamicart host")
 DEF_SWITCH(ApplicationLibraryPath, "application_library_path", "app.so path")
+DEF_SWITCH(EntryPointArgsJson, "entry_point_args_json", "entry point args")
 // END
 DEF_SWITCH(OldGenHeapSize,
            "old-gen-heap-size",

@@ -4,6 +4,10 @@
 
 #include "flutter/common/settings.h"
 
+// BD ADD:
+#include "third_party/rapidjson/include/rapidjson/prettywriter.h"
+#include "third_party/rapidjson/include/rapidjson/document.h"
+// END
 #include <sstream>
 
 namespace flutter {
@@ -16,6 +20,33 @@ Settings::Settings(const Settings& other) = default;
 
 Settings::~Settings() = default;
 
+// BD ADD:
+void Settings::SetEntryPointArgsJson(std::string entryPointsArgsJson){
+  if(entryPointsArgsJson.empty()){
+    return;
+  }
+  rapidjson::Document document;
+  if(document.Parse(entryPointsArgsJson.c_str()).HasParseError()){
+    FML_LOG(ERROR)<< entryPointsArgsJson <<" is not a json string"<<std::endl;
+    return;
+  }
+  rapidjson::Value key;
+  rapidjson::Value value;
+  rapidjson::Document::AllocatorType allocator;
+  std::vector<std::string> tmp;
+  for(rapidjson::Value::ConstMemberIterator iter = document.MemberBegin(); iter!=document.MemberEnd();iter++){
+    key.CopyFrom(iter->name,allocator);
+    value.CopyFrom(iter->value, allocator);
+    if(!key.IsString() || !value.IsString()){
+      FML_LOG(ERROR)<< entryPointsArgsJson <<" has a illegal key or value"<<std::endl;
+      return;
+    }
+    tmp.push_back(key.GetString());
+    tmp.push_back(value.GetString());
+  }
+  dart_entrypoint_args = tmp;
+}
+// END
 std::string Settings::ToString() const {
   std::stringstream stream;
   stream << "Settings: " << std::endl;

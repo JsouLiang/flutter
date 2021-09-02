@@ -258,6 +258,9 @@ struct Settings {
   std::chrono::microseconds engine_start_timestamp = {};
 
   std::string ToString() const;
+  // BD ADD:
+  void SetEntryPointArgsJson(std::string entryPointsArgsJson);
+  // END
 };
 
 }  // namespace flutter
