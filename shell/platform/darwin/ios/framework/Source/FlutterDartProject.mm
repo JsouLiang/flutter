@@ -455,6 +455,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
   }
 }
 
+- (void)setEntryArguments:(NSString *)argsJson {
+  if (argsJson.length > 0) {
+    _settings.SetEntryPointArgsJson(argsJson.UTF8String);
+  }
+}
+
 - (void)checkIsDynamicHost {
 
   NSBundle *bundle = [NSBundle bundleWithIdentifier:[FlutterDartProject defaultBundleIdentifier]];
