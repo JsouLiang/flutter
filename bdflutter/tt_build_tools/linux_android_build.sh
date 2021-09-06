@@ -190,26 +190,33 @@ for liteMode in ${liteModes[@]}; do
               #upload file for flutter.gradle dependencies
               mapPlatform $platform
               echo $platformResult
+              # 发布jar到火山引擎的maven，依赖maven命令，同时需要配置/usr/share/maven/conf/settings_internal.xml，详见https://site.bytedance.net/docs/4291/9782/122624/
               if [ $liteMode != 'normal' ]; then
                 bd_upload $androidDir/${platformResult}_${mode}_${liteMode}.jar flutter/framework/io/flutter/${platformResult}_${mode}_${liteMode}/1.0.0-${tosDir}/${platformResult}_${mode}_${liteMode}-1.0.0-${tosDir}.jar
                 bd_upload $androidDir/${platformResult}_${mode}_${liteMode}.pom flutter/framework/io/flutter/${platformResult}_${mode}_${liteMode}/1.0.0-${tosDir}/${platformResult}_${mode}_${liteMode}-1.0.0-${tosDir}.pom
+                mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=${platformResult}_${mode}_${liteMode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/${platformResult}_${mode}_${liteMode}.pom -Dfile=$androidDir/${platformResult}_${mode}_${liteMode}.jar -Dversion=1.0.0-${tosDir}
                 if [ $platform = 'arm' ]; then
                     bd_upload $androidDir/flutter_embedding_${mode}_${liteMode}.jar flutter/framework/io/flutter/flutter_embedding_${mode}_${liteMode}/1.0.0-${tosDir}/flutter_embedding_${mode}_${liteMode}-1.0.0-${tosDir}.jar
                     bd_upload $androidDir/flutter_embedding_${mode}_${liteMode}.pom flutter/framework/io/flutter/flutter_embedding_${mode}_${liteMode}/1.0.0-${tosDir}/flutter_embedding_${mode}_${liteMode}-1.0.0-${tosDir}.pom
+                    mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=flutter_embedding_${mode}_${liteMode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/flutter_embedding_${mode}_${liteMode}.pom -Dfile=$androidDir/flutter_embedding_${mode}_${liteMode}.jar -Dversion=1.0.0-${tosDir}
                 fi
               elif [ $dynamic = 'dynamicart' ]; then
                 bd_upload $androidDir/${platformResult}_dynamicart_${mode}.jar flutter/framework/io/flutter/${platformResult}_dynamicart_${mode}/1.0.0-${tosDir}/${platformResult}_dynamicart_${mode}-1.0.0-${tosDir}.jar
                 bd_upload $androidDir/${platformResult}_dynamicart_${mode}.pom flutter/framework/io/flutter/${platformResult}_dynamicart_${mode}/1.0.0-${tosDir}/${platformResult}_dynamicart_${mode}-1.0.0-${tosDir}.pom
+                mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=${platformResult}_dynamicart_${mode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/${platformResult}_dynamicart_${mode}.pom -Dfile=$androidDir/${platformResult}_dynamicart_${mode}.jar -Dversion=1.0.0-${tosDir}
                 if [ $platform = 'arm' ]; then
                     bd_upload $androidDir/flutter_embedding_dynamicart_${mode}.jar flutter/framework/io/flutter/flutter_embedding_dynamicart_${mode}/1.0.0-${tosDir}/flutter_embedding_dynamicart_${mode}-1.0.0-${tosDir}.jar
                     bd_upload $androidDir/flutter_embedding_dynamicart_${mode}.pom flutter/framework/io/flutter/flutter_embedding_dynamicart_${mode}/1.0.0-${tosDir}/flutter_embedding_dynamicart_${mode}-1.0.0-${tosDir}.pom
+                    mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=flutter_embedding_dynamicart_${mode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/flutter_embedding_dynamicart_${mode}.pom -Dfile=$androidDir/flutter_embedding_dynamicart_${mode}.jar -Dversion=1.0.0-${tosDir}
                 fi
               else
                 bd_upload $androidDir/${platformResult}_${mode}.jar flutter/framework/io/flutter/${platformResult}_${mode}/1.0.0-${tosDir}/${platformResult}_${mode}-1.0.0-${tosDir}.jar
                 bd_upload $androidDir/${platformResult}_${mode}.pom flutter/framework/io/flutter/${platformResult}_${mode}/1.0.0-${tosDir}/${platformResult}_${mode}-1.0.0-${tosDir}.pom
+                mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=${platformResult}_${mode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/${platformResult}_${mode}.pom -Dfile=$androidDir/${platformResult}_${mode}.jar -Dversion=1.0.0-${tosDir}
                 if [ $platform = 'arm' ]; then
                     bd_upload $androidDir/flutter_embedding_${mode}.jar flutter/framework/io/flutter/flutter_embedding_${mode}/1.0.0-${tosDir}/flutter_embedding_${mode}-1.0.0-${tosDir}.jar
                     bd_upload $androidDir/flutter_embedding_${mode}.pom flutter/framework/io/flutter/flutter_embedding_${mode}/1.0.0-${tosDir}/flutter_embedding_${mode}-1.0.0-${tosDir}.pom
+                    mvn deploy:deploy-file --settings /usr/share/maven/conf/settings_internal.xml -DgroupId=io.flutter -DartifactId=flutter_embedding_${mode} -Durl=http://maven.byted.org/repository/bd_framework/ -DrepositoryId=bytedance-repo -Dpackaging=jar -DpomFile=$androidDir/flutter_embedding_${mode}.pom -Dfile=$androidDir/flutter_embedding_${mode}.jar -Dversion=1.0.0-${tosDir}
                 fi
               fi
           done
