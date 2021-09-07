@@ -34,6 +34,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+// BD ADD:
+import org.json.JSONObject;
 /** Finds Flutter resources in an application APK and also loads Flutter's native library. */
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
@@ -62,6 +64,9 @@ public class FlutterLoader {
   private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
   private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
+  // BD ADD
+  protected JSONObject mExtraDartParams;
+
 
   private static FlutterLoader instance;
 
@@ -87,6 +92,12 @@ public class FlutterLoader {
   public FlutterLoader() {
     this(new FlutterJNI());
   }
+
+  // BD ADD: START
+  public void setExtraDartParams(JSONObject object) {
+    mExtraDartParams = object;
+  }
+  // END
 
   /**
    * Creates a {@code FlutterLoader} with the specified {@link FlutterJNI}.
@@ -405,7 +416,11 @@ public class FlutterLoader {
           kernelPath,
           result.appStoragePath,
           result.engineCachesPath,
-          initTimeMillis);
+          // BD MOD: START
+          //initTimeMillis);
+          initTimeMillis,
+          mExtraDartParams);
+      // END
 
       // BD ADD: START
       if (BDFlutterInjector.instance().shouldLoadNative()) {

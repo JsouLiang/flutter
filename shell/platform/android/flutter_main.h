@@ -36,7 +36,11 @@ class FlutterMain {
                    jstring kernelPath,
                    jstring appStoragePath,
                    jstring engineCachesPath,
-                   jlong initTimeMillis);
+                   // BD MOD: START
+                   //jlong initTimeMillis);
+                   jlong initTimeMillis,
+                   jstring extraDartParams);
+                   // END
 
   void SetupObservatoryUriCallback(JNIEnv* env);
 

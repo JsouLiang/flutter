@@ -38,6 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import io.flutter.embedding.engine.loader.FlutterLoader;
+import org.json.JSONObject;
 // END
 
 /**
@@ -157,13 +158,20 @@ public class FlutterJNI {
       @Nullable String bundlePath,
       @NonNull String appStoragePath,
       @NonNull String engineCachesPath,
-      long initTimeMillis) {
+      // BD MOD: START
+      //long initTimeMillis) {
+      long initTimeMillis,
+      JSONObject extraDartParams) {
+      // END
     if (FlutterJNI.initCalled) {
       Log.w(TAG, "FlutterJNI.init called more than once");
     }
-
+    // BD MOD: START
+    //FlutterJNI.nativeInit(
+    //    context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis);
     FlutterJNI.nativeInit(
-        context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis);
+        context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis, extraDartParams!=null ? extraDartParams.toString() : null);
+    // END
     FlutterJNI.initCalled = true;
   }
 
@@ -189,7 +197,11 @@ public class FlutterJNI {
       @Nullable String bundlePath,
       @NonNull String appStoragePath,
       @NonNull String engineCachesPath,
-      long initTimeMillis);
+      // BD MOD: START
+      //long initTimeMillis);
+      long initTimeMillis,
+      @NonNull String extraDartParams);
+      // END
 
   /** @deprecated Use {@link #prefetchDefaultFontManager()} instead. */
   @Deprecated

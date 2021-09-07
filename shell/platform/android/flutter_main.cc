@@ -66,7 +66,11 @@ void FlutterMain::Init(JNIEnv* env,
                        jstring kernelPath,
                        jstring appStoragePath,
                        jstring engineCachesPath,
-                       jlong initTimeMillis) {
+                       // BD MOD: STAT
+                       //jlong initTimeMillis) {
+                       jlong initTimeMillis,
+                       jstring extraDartParams) {
+                      // END
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -76,6 +80,9 @@ void FlutterMain::Init(JNIEnv* env,
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line);
+
+  // BD ADD
+  settings.SetEntryPointArgsJson(fml::jni::JavaStringToString(env, extraDartParams));
 
   int64_t init_time_micros = initTimeMillis * 1000;
   settings.engine_start_timestamp =
@@ -199,7 +206,10 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                      // BD MOD: START
+                      //"lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V",
+                      // END
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       // BD ADD: START
