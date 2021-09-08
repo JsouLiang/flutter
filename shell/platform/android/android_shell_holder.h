@@ -118,6 +118,7 @@ class AndroidShellHolder {
   const int FLAG_ENGINE_MULTI_CHANNEL = 1 << 2;
   // BD ADD: START
   void UpdateSettings(const std::string& package_dill_path, const std::string& package_preload_libs);
+  void UpdateExtraDartParams(const std::string& extraDartParams);
   // END
 
  private:

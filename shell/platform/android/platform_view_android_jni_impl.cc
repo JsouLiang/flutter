@@ -577,6 +577,11 @@ static void UpdateSettings(JNIEnv *env, jobject jcaller, jlong shell_holder, jst
     // 每个Holder都拥有自己的Settings，需要设置不同的dynamic_dill_path
     ANDROID_SHELL_HOLDER->UpdateSettings(fml::jni::JavaStringToString(env, package_dill_path), fml::jni::JavaStringToString(env, package_preload_libs));
 }
+
+static void UpdateExtraDartParams(JNIEnv *env, jobject jcaller, jlong shell_holder, jstring params) {
+    // 每个Holder都拥有自己的Settings，需要设置不同的ExtraDartParams
+    ANDROID_SHELL_HOLDER->UpdateExtraDartParams(fml::jni::JavaStringToString(env, params));
+}
 // END
 
 static void SurfaceCreated(JNIEnv* env,
@@ -1246,15 +1251,20 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleBackgroundFrame),
       },
-            {
+      {
           .name = "nativeScheduleFrameNow",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&ScheduleFrameNow),
       },
       {
-              .name = "nativeUpdateSettings",
-              .signature = "(JLjava/lang/String;Ljava/lang/String;)V",
-              .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
+          .name = "nativeUpdateSettings",
+          .signature = "(JLjava/lang/String;Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&UpdateSettings),
+      },
+       {
+          .name = "nativeUpdateExtraDartParams",
+          .signature = "(JLjava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&UpdateExtraDartParams),
       },
       // END
       {

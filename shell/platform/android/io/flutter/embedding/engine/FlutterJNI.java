@@ -166,6 +166,7 @@ public class FlutterJNI {
     if (FlutterJNI.initCalled) {
       Log.w(TAG, "FlutterJNI.init called more than once");
     }
+
     // BD MOD: START
     //FlutterJNI.nativeInit(
     //    context, args, bundlePath, appStoragePath, engineCachesPath, initTimeMillis);
@@ -858,6 +859,7 @@ public class FlutterJNI {
 
   private native void nativeScheduleBackgroundFrame(long nativeShellHolderId);
   private native void nativeUpdateSettings(long nativePlatformViewId, String assetsPath);
+  private native void nativeUpdateExtraDartParams(long nativePlatformViewId, String params);
 
   //scheduleFrame  not wait vsync
   public void scheduleFrameNow() {
@@ -880,6 +882,12 @@ public class FlutterJNI {
   public void updateNative(String assetsPath, String preloadLibs) {
     ensureAttachedToNative();
     nativeUpdateSettings(nativeShellHolderId, assetsPath, preloadLibs);
+  }
+
+  @UiThread
+  public void  updateExtraDartParams(String extraDartParams) {
+    ensureAttachedToNative();
+    nativeUpdateExtraDartParams(nativeShellHolderId, extraDartParams);
   }
 
   private native void nativeUpdateSettings(long nativeShellHolderId, String assetsPath, String preloadLibs);

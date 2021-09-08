@@ -105,6 +105,10 @@ public class FlutterLoader {
   public void setExtraDartParams(JSONObject object) {
     mExtraDartParams = object;
   }
+
+  public JSONObject getExtraDartParams() {
+    return mExtraDartParams;
+  }
   // END
 
   /**

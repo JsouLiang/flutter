@@ -353,7 +353,6 @@ void AndroidShellHolder::UpdateSettings(const std::string& package_dill_path, co
     settings_.package_preload_libs = package_preload_libs;
 }
 
-// BD ADD: START
 void AndroidShellHolder::ScheduleBackgroundFrame() {
     if (!IsValid()) {
         return;
@@ -373,6 +372,14 @@ void AndroidShellHolder::ExitApp(fml::closure closure) {
         return;
     }
     shell_->ExitApp(std::move(closure));
+}
+
+void AndroidShellHolder::UpdateExtraDartParams(const std::string& params) {
+    if (!IsValid()) {
+        return;
+    }
+    settings_.SetEntryPointArgsJson(params);
+    FML_DLOG(ERROR) << "ztw UpdateExtraDartParams:"<<settings_.dart_entrypoint_args.size();
 }
 // END
 

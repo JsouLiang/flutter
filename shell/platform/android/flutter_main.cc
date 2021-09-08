@@ -83,7 +83,6 @@ void FlutterMain::Init(JNIEnv* env,
 
   // BD ADD
   settings.SetEntryPointArgsJson(fml::jni::JavaStringToString(env, extraDartParams));
-
   int64_t init_time_micros = initTimeMillis * 1000;
   settings.engine_start_timestamp =
       std::chrono::microseconds(Dart_TimelineGetMicros() - init_time_micros);
