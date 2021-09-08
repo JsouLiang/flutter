@@ -132,6 +132,14 @@ static std::string DartOldGenHeapSizeArgs(uint64_t heap_size) {
   return oss.str();
 }
 
+// BD ADD: START
+static std::string DartEnableTrimArgs() {
+  std::ostringstream oss;
+  oss << "--enable_trim";
+  return oss.str();
+}
+// BD END
+
 constexpr char kFileUriPrefix[] = "file://";
 constexpr size_t kFileUriPrefixLength = sizeof(kFileUriPrefix) - 1;
 
@@ -427,6 +435,12 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   PushBackAll(&args, kDartReleaseSystrace,
               fml::size(kDartReleaseSystrace));
 #endif
+  std::string enable_trim_args;
+  if (settings_.enable_trim) {
+    enable_trim_args = DartEnableTrimArgs();
+    args.push_back(enable_trim_args.c_str());
+    FML_LOG(ERROR) << "Dart trim is enabled." << std::endl;
+  }
 // END
   // BD ADD: START
   // 动态化 debug 宿主，需要打开解释器

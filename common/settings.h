@@ -231,6 +231,7 @@ struct Settings {
   bool disable_preload = false;
   bool high_qos = false;
   bool opt_surfacetexture = false;
+  bool enable_trim = false;
   // END
 
   // Callback to handle the timings of a rasterized frame. This is called as

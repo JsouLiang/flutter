@@ -223,6 +223,7 @@ DEF_SWITCH(DisablePreload,
 DEF_SWITCH(DisableLeakVM, "disable-leak-vm", "Set leak_vm in setting.h to false.")
 DEF_SWITCH(OptSurfaceTexture, "opt_surface_texture", "opt surface texture with ndk(true/false)")
 DEF_SWITCH(ExtraAssetDir, "extra-asset-dir", "Extra Asset Path")
+DEF_SWITCH(EnableTrimVM, "enable-trim-vm", "Enable trim to reduce memeory of dart.")
 // END
 DEF_SWITCHES_END
 

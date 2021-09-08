@@ -446,6 +446,11 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                                 &old_gen_heap_size);
     settings.old_gen_heap_size = std::stoi(old_gen_heap_size);
   }
+  // BD ADD: START
+  if(command_line.HasOption(FlagForSwitch(Switch::EnableTrimVM))) {
+    settings.enable_trim = true;
+  }
+  // BD END
   return settings;
 }
 

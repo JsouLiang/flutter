@@ -70,6 +70,7 @@ public class FlutterLoader {
   private static final String DEFAULT_OPTI_PROPS = "optimize.properties";
   private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
   private String flutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
+  private static final String ENABLE_TRIM_IN_VM = "io.flutter.embedding.android.EnableTrimVM";
 
   // BD ADD
   protected JSONObject mExtraDartParams;
@@ -412,6 +413,10 @@ public class FlutterLoader {
         shellArgs.add("--enable-skparagraph");
       }
       // BD ADD: START
+      boolean enableTrim = metaData != null ? metaData.getBoolean(ENABLE_TRIM_IN_VM, false) : false;
+      if (enableTrim) {
+        shellArgs.add("--enable-trim-vm");
+      }
       if (ResourceExtractor.isX86Device() &&
               !shellArgs.contains(FlutterShellArgs.ARG_ENABLE_SOFTWARE_RENDERING)) {
         shellArgs.add(FlutterShellArgs.ARG_ENABLE_SOFTWARE_RENDERING);

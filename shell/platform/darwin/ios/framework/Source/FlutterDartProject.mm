@@ -153,6 +153,15 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
     }
   }
 
+  // BD ADD: START
+  NSNumber* enableTrim = [[NSBundle mainBundle]
+          objectForInfoDictionaryKey:@"io.flutter.embedding.ios.EnableTrimVM"];
+  Boolean trimValue = (enableTrim == nil || [enableTrim boolValue]);
+  if (trimValue) {
+    settings.enable_trim = trimValue;
+  }
+  // BD END
+
   // Domain network configuration
   NSDictionary* appTransportSecurity =
       [mainBundle objectForInfoDictionaryKey:@"NSAppTransportSecurity"];
