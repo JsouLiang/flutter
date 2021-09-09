@@ -105,6 +105,32 @@ class Performance {
   /// Get Engine Init APM info
   List<dynamic> getEngineInitApmInfo() native 'Performance_getEngineInitApmInfo';
 
+  Future<List?> dumpRasterGrContext() {
+    return _futurize(
+          (_Callback<List?> callback) => _dumpRasterGrContext(callback),
+    );
+  }
+  String? _dumpRasterGrContext(_Callback<List?> callback) native 'Performance_dumpRasterGrContext';
+
+  Future<List?> dumpIOGrContext() {
+    return _futurize(
+          (_Callback<List?> callback) => _dumpIOGrContext(callback),
+    );
+  }
+  String? _dumpIOGrContext(_Callback<List?> callback) native 'Performance_dumpIOGrContext';
+
+  Future<List?> dumpSKGraphics() {
+    return _futurize(
+          (_Callback<List?> callback) => _dumpSKGraphics(callback),
+    );
+  }
+  String? _dumpSKGraphics(_Callback<List?> callback) native 'Performance_dumpSKGraphics';
+
+  void clearIOGrResource() native 'Performance_clearIOGrResource';
+
+  void clearSkGraphicsResource() native 'Performance_clearSkGraphicsResource';
+
+  void clearRasterGrResource() native 'Performance_clearRasterGrResource';
 
   void warmUpZeroSizeOnce(bool enable) native 'Performance_warmUpZeroSizeOnce';
 

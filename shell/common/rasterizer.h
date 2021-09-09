@@ -429,6 +429,8 @@ class Rasterizer final : public SnapshotDelegate {
   void getResourceCacheBytes(size_t* totalBytes, size_t* resourceBytes, size_t* purgeableBytes) const;
   // END
 
+  GrDirectContext* GetGrContext();
+
   //----------------------------------------------------------------------------
   /// @brief      Enables the thread merger if the external view embedder
   ///             supports dynamic thread merging.

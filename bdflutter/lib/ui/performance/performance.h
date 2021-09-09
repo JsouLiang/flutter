@@ -4,6 +4,7 @@
 #define FLUTTER_LIB_UI_PERFORMANCE_H_
 
 #include <atomic>
+#include <future>
 #include <flutter/fml/memory/weak_ptr.h>
 #include <flutter/shell/common/rasterizer.h>
 #include <flutter/shell/common/shell_io_manager.h>
@@ -24,6 +25,27 @@ class DartLibraryNatives;
 namespace flutter {
   static constexpr int kMemoryDetailsLength(11);
 
+class DumpData {
+ public:
+  const char* dumpName;
+  const char* valueName;
+  const char* units;
+  uint64_t value;
+  const char* str;
+
+  DumpData(const char* dumpName,
+           const char* valueName,
+           const char* units,
+           uint64_t value)
+      : dumpName(dumpName), valueName(valueName), units(units), value(value) {}
+  
+  DumpData(const char* dumpName,
+           const char* valueName,
+           const char* units,
+           const char* str)
+      : dumpName(dumpName), valueName(valueName), units(units), str(str) {}
+};
+
 class Performance {
  public:
   static Performance* GetInstance() {
@@ -41,6 +63,9 @@ class Performance {
                             int64_t* grResMem, int64_t* grPurgeableMem);
   void SetRasterizerAndIOManager(fml::TaskRunnerAffineWeakPtr<flutter::Rasterizer> rasterizer,
                                  fml::WeakPtr<flutter::ShellIOManager>);
+
+  fml::TaskRunnerAffineWeakPtr<flutter::Rasterizer> GetRasterizer();
+
   void GetSkGraphicMemUsageKB(int64_t* bitmapMem,
                               int64_t* fontMem, int64_t* imageFilter, int64_t* mallocSize);  // KB
 

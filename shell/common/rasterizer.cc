@@ -768,4 +768,10 @@ void Rasterizer::getResourceCacheBytes(size_t* totalBytes, size_t* resourceBytes
 }
 // END
 
+GrDirectContext* Rasterizer::GetGrContext() {
+    GrDirectContext* surface_context =
+            surface_ ? surface_->GetContext() : nullptr;
+    return surface_context;
+}
+
 }  // namespace flutter

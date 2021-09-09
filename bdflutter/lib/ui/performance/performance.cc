@@ -14,6 +14,7 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "bdflutter/common/fps_recorder.h"
 #include "boost.h"
+#include "third_party/skia/include/core/SkTraceMemoryDump.h"
 
 using tonic::DartConverter;
 using tonic::ToDart;
@@ -37,6 +38,50 @@ std::map<string, int> event_dict = {
         {"shell_wait", 12},
         {"plugin_registry", 13},
         {"execute_dart_entry", 14},
+};
+
+class BDSkTraceMemoryDump : public SkTraceMemoryDump {
+ public:
+  BDSkTraceMemoryDump(bool shouldDumpWrappedObjects)
+      : fShouldDumpWrappedObjects(shouldDumpWrappedObjects) {}
+  ~BDSkTraceMemoryDump() override {}
+
+  void dumpStringValue(const char* dumpName,
+                       const char* valueName,
+                       const char* value) override {
+      const char* dName = dumpName;
+      const char* vName = valueName;
+      const char* v = value;
+      dumps.push_back(DumpData(dName, vName, "string_value", v));   
+  }
+
+  void dumpNumericValue(const char* dumpName,
+                        const char* valueName,
+                        const char* units,
+                        uint64_t value) override {
+      const char* dName = dumpName;
+      const char* vName = valueName;
+      const char* u = units;
+      dumps.push_back(DumpData(dName, vName, u, value));   
+  }
+  void setMemoryBacking(const char* dumpName,
+                        const char* backingType,
+                        const char* backingObjectId) override {}
+  void setDiscardableMemoryBacking(
+      const char* dumpName,
+      const SkDiscardableMemory& discardableMemoryObject) override {}
+  LevelOfDetail getRequestedDetails() const override {
+    return SkTraceMemoryDump::kObjectsBreakdowns_LevelOfDetail;
+  }
+  bool shouldDumpWrappedObjects() const override {
+    return fShouldDumpWrappedObjects;
+  }
+
+ std::vector<DumpData> dumpData() const { return dumps; }
+
+ private:
+  bool fShouldDumpWrappedObjects;
+  std::vector<DumpData> dumps;
 };
 
 Performance::Performance():
@@ -300,6 +345,10 @@ void Performance::GetGpuCacheUsageKB(int64_t* grTotalMem,
     *grResMem = resourceBytes >> 10;
     *grPurgeableMem = purgeableBytes >> 10;
   }
+}
+
+fml::TaskRunnerAffineWeakPtr<flutter::Rasterizer> Performance::GetRasterizer() {
+    return rasterizer_;
 }
 
 void Performance::GetIOGpuCacheUsageKB(int64_t* grTotalMem,
@@ -654,6 +703,179 @@ void Performance_isEnableBoostVSync(Dart_NativeArguments args) {
   Dart_SetBooleanReturnValue(args, Performance::GetInstance()->isEnableBoostVSync());
 }
 
+void Performance_clearSkGraphicsResource(Dart_NativeArguments args) {
+    #if defined(OS_ANDROID)
+    SkGraphics::PurgeAllCaches();
+    #endif
+}
+
+void Performance_clearRasterGrResource(Dart_NativeArguments args) {
+    #if defined(OS_IOS) || defined(OS_ANDROID)
+    auto task_runners = UIDartState::Current() -> GetTaskRunners();
+    auto gpu_task = fml::MakeCopyable([]() mutable {
+        auto rasterizer = Performance::GetInstance()->GetRasterizer();
+        if (rasterizer) {
+              auto gr_context = rasterizer->GetGrContext();
+              if (gr_context) {
+                  gr_context->freeGpuResources();
+              }
+        }
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetRasterTaskRunner(), gpu_task);
+    #endif
+}
+
+void Performance_clearIOGrResource(Dart_NativeArguments args) {
+    #if defined(OS_IOS) || defined(OS_ANDROID)
+    auto io_manager = UIDartState::Current() -> GetIOManager();
+    auto task_runners = UIDartState::Current() -> GetTaskRunners();
+    auto io_task = fml::MakeCopyable([io_manager = std::move(io_manager)]() mutable {
+        if (io_manager) {
+            auto gr_context = io_manager->GetResourceContext();
+            if (gr_context) {
+                gr_context->freeGpuResources();
+            }
+        }
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetIOTaskRunner(), io_task);
+    #endif
+}
+
+void Performance_dumpRasterGrContext(Dart_NativeArguments args) {
+#if defined(OS_IOS) || defined(OS_ANDROID)
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
+    Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
+    auto task_runners = UIDartState::Current() -> GetTaskRunners();
+    flutter::BDSkTraceMemoryDump dump(false);
+    std::promise<flutter::BDSkTraceMemoryDump> dump_gpu_promise;
+    auto dump_gpu_future = dump_gpu_promise.get_future();
+    auto gpu_task = fml::MakeCopyable([&dump, &dump_gpu_promise]() mutable {
+        auto rasterizer = Performance::GetInstance()->GetRasterizer();
+        if (rasterizer) {
+              auto gr_context = rasterizer->GetGrContext();
+              if (gr_context) {
+                  gr_context->dumpMemoryStatistics(&dump);
+              }
+        }
+        dump_gpu_promise.set_value(std::move(dump));
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetRasterTaskRunner(), gpu_task);
+    dump = dump_gpu_future.get();
+
+    auto callback = new tonic::DartPersistentValue(UIDartState::Current(), callback_handle);
+    auto ui_task = fml::MakeCopyable([&dump, &callback]() mutable {
+        auto dart_state = callback->dart_state().lock();
+        if (!dart_state) {
+            return;
+        }
+        tonic::DartState::Scope scope(dart_state);
+        auto datas = dump.dumpData();
+        Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
+        for (size_t index = 0; index < datas.size(); ++index) {
+            flutter::DumpData data = datas[index];
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
+            if (strcmp(data.units, "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            } else {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
+            }
+        }
+        if (Dart_IsClosure(callback->value())) {
+            tonic::DartInvoke(callback->value(), {data_handle});
+        }
+        delete callback;
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetUITaskRunner(), ui_task);
+#endif
+#endif
+}
+
+void Performance_dumpSKGraphics(Dart_NativeArguments args) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
+    Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
+    auto task_runners = UIDartState::Current() -> GetTaskRunners();
+    flutter::BDSkTraceMemoryDump dump(false);
+    SkGraphics::DumpMemoryStatistics(&dump);
+    auto callback = new tonic::DartPersistentValue(UIDartState::Current(), callback_handle);
+    auto ui_task = fml::MakeCopyable([&dump, &callback]() mutable {
+        auto dart_state = callback->dart_state().lock();
+        if (!dart_state) {
+            return;
+        }
+        tonic::DartState::Scope scope(dart_state);
+        auto datas = dump.dumpData();
+        Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
+        for (size_t index = 0; index < datas.size(); ++index) {
+            flutter::DumpData data = datas[index];
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
+            if (strcmp(data.units, "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            } else {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
+            }
+        }
+        if (Dart_IsClosure(callback->value())) {
+            tonic::DartInvoke(callback->value(), {data_handle});
+        }
+        delete callback;
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetUITaskRunner(), ui_task);
+#endif
+}
+
+void Performance_dumpIOGrContext(Dart_NativeArguments args) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
+    Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
+    auto task_runners = UIDartState::Current() -> GetTaskRunners();
+    auto io_manager = UIDartState::Current() -> GetIOManager();
+    flutter::BDSkTraceMemoryDump dump(false);
+    std::promise<flutter::BDSkTraceMemoryDump> dump_io_promise;
+    auto dump_io_future = dump_io_promise.get_future();
+    auto io_task = fml::MakeCopyable([&dump, io_manager = std::move(io_manager), &dump_io_promise]() mutable {
+        if (io_manager) {
+            auto gr_context = io_manager->GetResourceContext();
+            if (gr_context) {
+                gr_context->dumpMemoryStatistics(&dump);
+            }
+        }
+        dump_io_promise.set_value(std::move(dump));
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetIOTaskRunner(), io_task);
+    dump = dump_io_future.get();
+
+    auto callback = new tonic::DartPersistentValue(UIDartState::Current(), callback_handle);
+    auto ui_task = fml::MakeCopyable([&dump, &callback]() mutable {
+        auto dart_state = callback->dart_state().lock();
+        if (!dart_state) {
+            return;
+        }
+        tonic::DartState::Scope scope(dart_state);
+        auto datas = dump.dumpData();
+        Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
+        for (size_t index = 0; index < datas.size(); ++index) {
+            flutter::DumpData data = datas[index];
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
+            if (strcmp(data.units, "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            } else {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
+            }
+        }
+        if (Dart_IsClosure(callback->value())) {
+            tonic::DartInvoke(callback->value(), {data_handle});
+        }
+        delete callback;
+    });
+    fml::TaskRunner::RunNowOrPostTask(task_runners.GetUITaskRunner(), ui_task);
+#endif
+}
+
 void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
       {"Performance_imageMemoryUsage", Performance_imageMemoryUsage, 1, true},
@@ -686,6 +908,12 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_allocateSchedulingEnd", Performance_allocateSchedulingEnd, 1, true},
       {"Performance_enableBoostVSync", Performance_enableBoostVSync, 2, true},
       {"Performance_isEnableBoostVSync", Performance_isEnableBoostVSync, 1, true},
+      {"Performance_dumpRasterGrContext", Performance_dumpRasterGrContext, 2, true},
+      {"Performance_dumpIOGrContext", Performance_dumpIOGrContext, 2, true},
+      {"Performance_dumpSKGraphics", Performance_dumpSKGraphics, 2, true},
+      {"Performance_clearIOGrResource", Performance_clearIOGrResource, 1, true},
+      {"Performance_clearSkGraphicsResource", Performance_clearSkGraphicsResource, 1, true},
+      {"Performance_clearRasterGrResource", Performance_clearRasterGrResource, 1, true},
   });
 }
 
