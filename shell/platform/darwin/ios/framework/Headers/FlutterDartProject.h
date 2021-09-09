@@ -158,7 +158,7 @@ FLUTTER_DARWIN_EXPORT
 * When entering main or othe entrypoint, we may need some arguments.
 * @param argsJson JsonString.
 */
-- (void)setEntryArguments:(NSString *)argsJson;
+- (void)setEntryArguments:(nullable NSString *)argsJson;
 
 // END
 

@@ -338,6 +338,18 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return _shell->GetTaskRunners().GetRasterTaskRunner();
 }
 
+
+// BD ADD
+- (void)updateDartEntryArgsJson:(NSString *)argsJson {
+  if (argsJson.length > 0) {
+    _shell->UpdateExtraDartParams(argsJson.UTF8String);
+  } else {
+    _shell->UpdateExtraDartParams("");
+  }
+}
+// END
+
+
 - (void)ensureSemanticsEnabled {
   // BD ADD: START
   if (self.iosPlatformView == nullptr) {

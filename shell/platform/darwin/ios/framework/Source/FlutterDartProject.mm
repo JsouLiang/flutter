@@ -467,6 +467,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle) {
 - (void)setEntryArguments:(NSString *)argsJson {
   if (argsJson.length > 0) {
     _settings.SetEntryPointArgsJson(argsJson.UTF8String);
+  } else {
+    _settings.SetEntryPointArgsJson("");
   }
 }
 

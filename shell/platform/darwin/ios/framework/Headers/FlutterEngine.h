@@ -171,6 +171,10 @@ FLUTTER_DARWIN_EXPORT
           restorationEnabled:(BOOL)restorationEnabled
                      preLoad:(BOOL)preLoad;
 
+
+- (void)updateDartEntryArgsJson:(NSString *)argsJson;
+
+
 + (NSArray*)getEngineInitApmInfos;
 
 + (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
