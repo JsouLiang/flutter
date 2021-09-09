@@ -378,8 +378,7 @@ void AndroidShellHolder::UpdateExtraDartParams(const std::string& params) {
     if (!IsValid()) {
         return;
     }
-    settings_.SetEntryPointArgsJson(params);
-    FML_DLOG(ERROR) << "ztw UpdateExtraDartParams:"<<settings_.dart_entrypoint_args.size();
+    shell_->UpdateExtraDartParams(params);
 }
 // END
 

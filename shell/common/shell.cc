@@ -2477,6 +2477,17 @@ void Shell::SetMultiChannelEnabled(bool enable) {
 
 bool Shell::GetMultiChannelEnabled() {
   return multi_channel_enabled_;
-};
+}
+
+void Shell::UpdateExtraDartParams(const std::string& params) {
+  settings_.SetEntryPointArgsJson(params);
+  fml::TaskRunner::RunNowOrPostTask(
+      GetTaskRunners().GetUITaskRunner(), fml::MakeCopyable([this, params]() {
+        auto engine = GetEngine();
+        if (engine) {
+          engine->GetSettings().dart_entrypoint_args = settings_.dart_entrypoint_args;
+        }
+      }));
+}
 // END
 }  // namespace flutter

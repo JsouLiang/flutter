@@ -437,6 +437,8 @@ class Shell final : public PlatformView::Delegate,
   void SetMultiChannelEnabled(bool enable);
 
   bool GetMultiChannelEnabled();
+
+  void UpdateExtraDartParams(const std::string& extraDartParams);
   // END
 
  private:
@@ -446,7 +448,9 @@ class Shell final : public PlatformView::Delegate,
 
   const TaskRunners task_runners_;
   const fml::RefPtr<ShellGroupContext> shell_group_context_;
-  const Settings settings_;
+  // BD MOD:
+  Settings settings_;
+  // END
   DartVMRef vm_;
   mutable std::mutex time_recorder_mutex_;
   std::optional<fml::TimePoint> latest_frame_target_time_;

@@ -897,9 +897,16 @@ class Engine final : public RuntimeDelegate,
   // BD ADD:
   bool IsViewportMetricsValid();
 
+  flutter::Settings& GetSettings() {
+    return settings_;
+  }
+  // END
+
  private:
   Engine::Delegate& delegate_;
-  const Settings settings_;
+  // BD MOD:
+  Settings settings_;
+  // END
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<RuntimeController> runtime_controller_;
 
