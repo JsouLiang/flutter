@@ -1251,6 +1251,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 // END
 
+// BD ADD : START
+- (FlutterDartProject *)dartProjectSetting {
+  return _dartProject.get();
+}
+// END
+
 @end
 
 @implementation FlutterEngineRegistrar {

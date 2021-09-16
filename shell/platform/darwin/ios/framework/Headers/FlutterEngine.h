@@ -175,6 +175,8 @@ FLUTTER_DARWIN_EXPORT
 - (void)updateDartEntryArgsJson:(NSString *)argsJson;
 
 
+- (FlutterDartProject *)dartProjectSetting;
+
 + (NSArray*)getEngineInitApmInfos;
 
 + (void)TraceApmStartAndEnd:(NSString*)event timestamp:(NSNumber*)timestamp;
