@@ -38,6 +38,13 @@ typedef NS_ENUM(NSInteger, FlutterCompressSizeModeErrorCode) {
 FLUTTER_DARWIN_EXPORT
 @interface FlutterDartProject : NSObject
 
+// BD ADD : START
+/**
+ * Whether should destroy iossurface when page disappear
+ */
+@property(nonatomic, assign) BOOL destroySurfaceWhenDisappear;
+// END
+
 /**
  * Initializes a Flutter Dart project from a bundle.
  */

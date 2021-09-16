@@ -81,6 +81,9 @@ class PlatformViewIOS final : public PlatformView {
    */
   void attachView();
 
+  // BD ADD
+  void NotifyDestroyed() override;
+
   /**
    * Called through when an external texture such as video or camera is
    * given to the `FlutterEngine` or `FlutterViewController`.

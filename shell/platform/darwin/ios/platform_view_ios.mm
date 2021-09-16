@@ -69,6 +69,21 @@ PlatformViewIOS::~PlatformViewIOS() {
   // END
 }
 
+// BD ADD : START
+void PlatformViewIOS::NotifyDestroyed() {
+  PlatformView::NotifyDestroyed();
+  FlutterEngine* ownerEngine = [owner_controller_.get() engine];
+  BOOL allowDestroy = ownerEngine.dartProjectSetting.destroySurfaceWhenDisappear;
+  if (allowDestroy) {
+    std::lock_guard<std::mutex> guard(ios_surface_mutex_);
+    if (ios_surface_) {
+      ios_surface_.reset();
+      accessibility_bridge_.Clear();
+    }
+  }
+}
+// END
+
 PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
   return platform_message_router_;
 }
@@ -118,7 +133,10 @@ void PlatformViewIOS::attachView() {
   FML_DCHECK(owner_controller_.get().isViewLoaded)
       << "FlutterViewController's view should be loaded "
          "before attaching to PlatformViewIOS.";
-  auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().view);
+  // BD MOD
+  // flutter_view will not be the root view of owner_controller_
+  // auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().view);
+  auto flutter_view = static_cast<FlutterView*>(owner_controller_.get().renderView);
   auto ca_layer = fml::scoped_nsobject<CALayer>{[[flutter_view layer] retain]};
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);

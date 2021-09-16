@@ -166,6 +166,9 @@ FLUTTER_DARWIN_EXPORT
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
           restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
 
+// BD ADD: START
+- (FlutterDartProject*)dartProjectSetting;
+
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
  * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects),
@@ -184,6 +187,9 @@ FLUTTER_DARWIN_EXPORT
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
+ *
+ *
+ *
  *
  * @param entrypoint The name of a top-level function from the same Dart
  *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or

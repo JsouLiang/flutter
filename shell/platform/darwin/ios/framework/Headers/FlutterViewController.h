@@ -248,6 +248,13 @@ FLUTTER_DARWIN_EXPORT
  */
 @property(nonatomic, readonly) BOOL engineAllowHeadlessExecution;
 
+// BD ADD
+/**
+ * flutterview is added to self.view as childview not as self.view
+ * platform_view_ios cannot get flutterview from flutterviewcontroller using owner_controller.view
+ */
+@property(nonatomic, readonly) UIView* renderView;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -109,8 +109,10 @@ typedef enum UIAccessibilityContrast : NSInteger {
   fml::scoped_nsobject<UIPanGestureRecognizer> _panGestureRecognizer API_AVAILABLE(ios(13.4));
   fml::scoped_nsobject<UIView> _keyboardAnimationView;
   MouseState _mouseState;
-  // BD ADD:
+  // BD ADD: START
   BOOL _surfaceCreated;
+  fml::scoped_nsobject<UIView> _snapshotView;
+  // END
 }
 
 @synthesize displayingFlutterUI = _displayingFlutterUI;
@@ -403,6 +405,15 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)loadView {
+  // BD ADD : START
+  BOOL allowDestroy = [self allowDestroySurfaceWhenDisappear];
+  if (allowDestroy) {
+    UIView* view = [[[UIView alloc] init] autorelease];
+    view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.view = view;
+    return;
+  }
+  // END
   self.view = GetViewOrPlaceholder(_flutterView.get());
   self.view.multipleTouchEnabled = YES;
   self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -436,6 +447,54 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
   packet->SetPointerData(0, pointer_data);
   [engine dispatchPointerDataPacket:std::move(packet)];
 }
+
+// BD ADD : START
+- (void)attachFlutterView {
+  // in order to save memory flutterview may be removed from self.view
+  UIView* payloadview = GetViewOrPlaceholder(_flutterView.get());
+  payloadview.frame = self.view.bounds;
+  payloadview.multipleTouchEnabled = YES;
+  payloadview.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  [self.view addSubview:payloadview];
+
+  [self installSplashScreenViewIfNecessary];
+  UIScrollView* scrollView = [[UIScrollView alloc] init];
+  scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+  // The color shouldn't matter since it is offscreen.
+  scrollView.backgroundColor = UIColor.whiteColor;
+  scrollView.delegate = self;
+  // This is an arbitrary small size.
+  scrollView.contentSize = CGSizeMake(kScrollViewContentSize, kScrollViewContentSize);
+  // This is an arbitrary offset that is not CGPointZero.
+  scrollView.contentOffset = CGPointMake(kScrollViewContentSize, kScrollViewContentSize);
+  [payloadview addSubview:scrollView];
+  _scrollView.reset(scrollView);
+
+  if (_engine && _engineNeedsLaunch) {
+    [_engine.get() launchEngine:nil libraryURI:nil entrypointArgs:nil];
+    [_engine.get() setViewController:self];
+    _engineNeedsLaunch = NO;
+  }
+
+  if ([_engine.get() viewController] == self) {
+    [_engine.get() attachView];
+  }
+
+  if (@available(iOS 13.4, *)) {
+    _hoverGestureRecognizer.reset(
+        [[UIHoverGestureRecognizer alloc] initWithTarget:self action:@selector(hoverEvent:)]);
+    _hoverGestureRecognizer.get().delegate = self;
+    [_flutterView.get() addGestureRecognizer:_hoverGestureRecognizer.get()];
+
+    _panGestureRecognizer.reset(
+        [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(scrollEvent:)]);
+    _panGestureRecognizer.get().delegate = self;
+    _panGestureRecognizer.get().allowedScrollTypesMask = UIScrollTypeMaskAll;
+    _panGestureRecognizer.get().allowedTouchTypes = @[ @(UITouchTypeIndirectPointer) ];
+    [_flutterView.get() addGestureRecognizer:_panGestureRecognizer.get()];
+  }
+}
+// END
 
 - (BOOL)scrollViewShouldScrollToTop:(UIScrollView*)scrollView {
   if (!_engine) {
@@ -486,6 +545,8 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)callViewRenderedCallback {
   self.displayingFlutterUI = YES;
+  // BD ADD
+  [_snapshotView.get() removeFromSuperview];
   if (_flutterViewRenderedCallback != nil) {
     _flutterViewRenderedCallback.get()();
     _flutterViewRenderedCallback.reset();
@@ -547,6 +608,12 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 }
 
 #pragma mark - Properties
+
+// BD ADD : START
+- (UIView*)renderView {
+  return _flutterView.get();
+}
+// END
 
 - (UIView*)splashScreenView {
   if (!_splashScreenView) {
@@ -686,6 +753,15 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 - (void)viewDidLoad {
   TRACE_EVENT0("flutter", "viewDidLoad");
 
+  // BD ADD : START
+  BOOL allowDestroy = [self allowDestroySurfaceWhenDisappear];
+  if (allowDestroy) {
+    [super viewDidLoad];
+    [self attachFlutterView];
+    return;
+  }
+  // END
+
   if (_engine && _engineNeedsLaunch) {
     // Register internal plugins before starting the engine.
     [self addInternalPlugins];
@@ -740,6 +816,17 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
 
 - (void)viewWillAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewWillAppear");
+
+  // BD ADD: START
+  // When the interface disappears, you need to remove the FluterView and reload it when it is
+  // displayed again
+  BOOL allowDestroy = [self allowDestroySurfaceWhenDisappear];
+  if (!_flutterView.get() && allowDestroy) {
+    _flutterView.reset([[FlutterView alloc] initWithDelegate:_engine opaque:self.isViewOpaque]);
+    [self attachFlutterView];
+  }
+  // END
+
   if ([_engine.get() viewController] == self) {
     // Send platform settings to Flutter, e.g., platform brightness.
     [self onUserSettingsChanged:nil];
@@ -786,6 +873,20 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
     [self flushOngoingTouches];
     [_engine.get() notifyLowMemory];
   }
+
+  // BD ADD : START
+  // 把flutterview移除之后侧滑返回场景会出现无内容展示的情况，需要使用截图占位
+  BOOL allowDestroy = [self allowDestroySurfaceWhenDisappear];
+  if (allowDestroy) {
+    UIView* flutterView = _flutterView.get();
+    UIView* snapshotView = [[flutterView snapshotViewAfterScreenUpdates:NO] retain];
+    [self.view addSubview:snapshotView];
+    _snapshotView.reset(snapshotView);
+
+    [flutterView removeFromSuperview];
+    _flutterView.reset();
+  }
+  // END
 
   [super viewDidDisappear:animated];
 }
@@ -1615,6 +1716,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return @"normal";
   }
 }
+
+// BD ADD : START
+- (BOOL)allowDestroySurfaceWhenDisappear {
+  FlutterEngine* engine = _engine.get();
+  return [engine dartProjectSetting].destroySurfaceWhenDisappear;
+}
+// END
 
 #pragma mark - Status bar style
 
