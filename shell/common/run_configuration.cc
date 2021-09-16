@@ -26,11 +26,6 @@ RunConfiguration RunConfiguration::InferFromSettings(
         fml::Duplicate(settings.assets_dir), true));
   }
 
-  asset_manager->PushBack(std::make_unique<DirectoryAssetBundle>(
-      fml::OpenDirectory(settings.assets_path.c_str(), false,
-                         fml::FilePermission::kRead),
-      true));
-
   // BD MOD: START
   if (!settings.zip_assets_file_path.empty()) {
     asset_manager->PushBack(std::make_unique<ZipAssetStore>(
