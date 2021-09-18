@@ -202,6 +202,8 @@ class HtmlImage implements ui.Image {
     } else {
       _requiresClone = true;
       imgElement.style.position = 'absolute';
+      // BD ADD:
+      imgElement.crossOrigin = '';
       return imgElement;
     }
   }
