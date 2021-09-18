@@ -1,7 +1,7 @@
 name: Build Engine
 trigger:
   change:
-    branches: [ bd_1.22, bd_2.0 ]
+    branches: [ bd_2.0 ]
     types: [ submit ]
     notification:
       when: [ start, success, failure ]
@@ -22,3 +22,11 @@ jobs:
         commands:
           - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
           - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} linux
+  auto_roll_engine:
+    name: Auto Roll Engine
+    image: hub.byted.org/codebase/ci_debian_buster:latest
+    depends: [ build_engine_on_mac, build_engine_on_linux ]
+    steps:
+      - name: Auto Roll Engine
+        commands:
+          - sh .codebase/auto_roll_engine.sh
