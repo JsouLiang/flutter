@@ -13,8 +13,11 @@
 namespace flutter {
 
 IOSContextMetal::IOSContextMetal() {
+  // BD MOD
+  // darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
+  // [[[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice] retain]};
   darwin_context_metal_ = fml::scoped_nsobject<FlutterDarwinContextMetal>{
-      [[[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice] retain]};
+      [[FlutterDarwinContextMetal alloc] initWithDefaultMTLDevice]};
 
   if (!darwin_context_metal_) {
     return;

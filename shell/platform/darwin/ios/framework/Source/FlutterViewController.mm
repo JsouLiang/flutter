@@ -403,7 +403,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   // BD ADD : START
   BOOL allowDestroy = [self allowDestroySurfaceWhenDisappear];
   if (allowDestroy) {
-    UIView* view = [[UIView alloc] init];
+    UIView* view = [[[UIView alloc] init] autorelease];
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.view = view;
     return ;
