@@ -27,11 +27,11 @@ namespace flutter {
 
 class DumpData {
  public:
-  const char* dumpName;
-  const char* valueName;
-  const char* units;
+  std::string dumpName;
+  std::string valueName;
+  std::string units;
   uint64_t value;
-  const char* str;
+  std::string str;
 
   DumpData(const char* dumpName,
            const char* valueName,

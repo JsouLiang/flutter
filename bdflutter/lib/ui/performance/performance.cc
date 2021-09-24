@@ -49,20 +49,14 @@ class BDSkTraceMemoryDump : public SkTraceMemoryDump {
   void dumpStringValue(const char* dumpName,
                        const char* valueName,
                        const char* value) override {
-      const char* dName = dumpName;
-      const char* vName = valueName;
-      const char* v = value;
-      dumps.push_back(DumpData(dName, vName, "string_value", v));   
+      dumps.emplace_back(DumpData(dumpName, valueName, "string_value", value));
   }
 
   void dumpNumericValue(const char* dumpName,
                         const char* valueName,
                         const char* units,
                         uint64_t value) override {
-      const char* dName = dumpName;
-      const char* vName = valueName;
-      const char* u = units;
-      dumps.push_back(DumpData(dName, vName, u, value));   
+      dumps.emplace_back(DumpData(dumpName, valueName, units, value));
   }
   void setMemoryBacking(const char* dumpName,
                         const char* backingType,
@@ -773,11 +767,11 @@ void Performance_dumpRasterGrContext(Dart_NativeArguments args) {
         Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
         for (size_t index = 0; index < datas.size(); ++index) {
             flutter::DumpData data = datas[index];
-            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
-            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
-            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
-            if (strcmp(data.units, "string_value") == 0) {
-              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units.c_str()));
+            if (strcmp(data.units.c_str(), "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str.c_str()));
             } else {
               Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
             }
@@ -809,11 +803,11 @@ void Performance_dumpSKGraphics(Dart_NativeArguments args) {
         Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
         for (size_t index = 0; index < datas.size(); ++index) {
             flutter::DumpData data = datas[index];
-            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
-            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
-            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
-            if (strcmp(data.units, "string_value") == 0) {
-              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units.c_str()));
+            if (strcmp(data.units.c_str(), "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str.c_str()));
             } else {
               Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
             }
@@ -858,11 +852,11 @@ void Performance_dumpIOGrContext(Dart_NativeArguments args) {
         Dart_Handle data_handle = Dart_NewList(datas.size() * 4);
         for (size_t index = 0; index < datas.size(); ++index) {
             flutter::DumpData data = datas[index];
-            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName));
-            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName));
-            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units));
-            if (strcmp(data.units, "string_value") == 0) {
-              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str));
+            Dart_ListSetAt(data_handle, 4 * index, Dart_NewStringFromCString(data.dumpName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 1, Dart_NewStringFromCString(data.valueName.c_str()));
+            Dart_ListSetAt(data_handle, 4 * index + 2, Dart_NewStringFromCString(data.units.c_str()));
+            if (strcmp(data.units.c_str(), "string_value") == 0) {
+              Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewStringFromCString(data.str.c_str()));
             } else {
               Dart_ListSetAt(data_handle, 4 * index + 3, Dart_NewInteger(data.value));
             }
