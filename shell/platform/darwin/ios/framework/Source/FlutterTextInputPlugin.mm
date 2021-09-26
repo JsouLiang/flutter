@@ -469,8 +469,8 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
     // BD ADD: START
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     [center addObserver:self
-               selector:@selector(keyboardWillBeHidden:)
-                   name:UIKeyboardWillHideNotification
+               selector:@selector(keyboardDidHidden:)
+                   name:UIKeyboardDidHideNotification
                  object:nil];
     // END
   }
@@ -479,7 +479,7 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 }
 
 // BD ADD: START
-- (void)keyboardWillBeHidden:(NSNotification*)notification {
+- (void)keyboardDidHidden:(NSNotification*)notification {
     [_textInputDelegate notifyKeyboardHide:_textInputClient];
 }
 // END
