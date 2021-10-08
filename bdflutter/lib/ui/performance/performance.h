@@ -25,6 +25,22 @@ class DartLibraryNatives;
 namespace flutter {
   static constexpr int kMemoryDetailsLength(11);
 
+class TextureData {
+ public:
+  std::string name;
+  char* tex;
+  uint64_t width;
+  uint64_t height;
+  uint64_t total;
+
+  TextureData(std::string name,
+           char* tex,
+           int width,
+           int height,
+           int total)
+      : name(std::move(name)), tex(tex), width(width), height(height), total(total) {}
+};
+
 class DumpData {
  public:
   std::string dumpName;

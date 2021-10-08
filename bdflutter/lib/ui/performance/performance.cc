@@ -821,6 +821,58 @@ void Performance_dumpSKGraphics(Dart_NativeArguments args) {
 #endif
 }
 
+void Performance_dumpIOTexture(Dart_NativeArguments args) {
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
+  std::string name = static_cast<std::string>(tonic::DartConverter<std::string>::FromDart(Dart_GetNativeArgument(args, 1)));
+  Dart_Handle callback_handle = Dart_GetNativeArgument(args, 2);
+  auto task_runners = UIDartState::Current() -> GetTaskRunners();
+  auto io_manager = UIDartState::Current() -> GetIOManager();
+  std::promise<TextureData> dump_texture_promise;
+  auto dump_texture_future = dump_texture_promise.get_future();
+  auto io_task = fml::MakeCopyable([&name, io_manager = std::move(io_manager), &dump_texture_promise]() mutable {
+    if (io_manager) {
+      auto gr_context = io_manager->GetResourceContext();
+      if (gr_context) {
+        int width;
+        int height;
+        int total;
+        auto tex = gr_context->dumpTextures(name, &height, &width, &total);
+        dump_texture_promise.set_value(
+            TextureData(name, tex, width, height, total));
+      }
+    }
+  });
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetIOTaskRunner(), io_task);
+  auto tex_data = dump_texture_future.get();
+
+  auto callback = new tonic::DartPersistentValue(UIDartState::Current(), callback_handle);
+  auto ui_task = fml::MakeCopyable([&callback, &tex_data]() mutable {
+    auto dart_state = callback->dart_state().lock();
+    if (!dart_state) {
+      return;
+    }
+    tonic::DartState::Scope scope(dart_state);
+
+    Dart_Handle data_handle = Dart_NewList(4);
+    Dart_ListSetAt(
+        data_handle, 0,
+        Dart_NewExternalTypedData(Dart_TypedData_kUint8, tex_data.tex, tex_data.total));
+    Dart_ListSetAt(data_handle, 1,
+                   Dart_NewInteger(tex_data.width));
+    Dart_ListSetAt(data_handle, 2,
+                   Dart_NewInteger(tex_data.height));
+    Dart_ListSetAt(data_handle, 3,
+                   Dart_NewInteger(tex_data.total));
+
+    if (Dart_IsClosure(callback->value())) {
+      tonic::DartInvoke(callback->value(), {data_handle});
+    }
+    delete callback;
+  });
+  fml::TaskRunner::RunNowOrPostTask(task_runners.GetUITaskRunner(), ui_task);
+#endif
+}
+
 void Performance_dumpIOGrContext(Dart_NativeArguments args) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_JIT_RELEASE
     Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
@@ -904,6 +956,7 @@ void Performance::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Performance_isEnableBoostVSync", Performance_isEnableBoostVSync, 1, true},
       {"Performance_dumpRasterGrContext", Performance_dumpRasterGrContext, 2, true},
       {"Performance_dumpIOGrContext", Performance_dumpIOGrContext, 2, true},
+      {"Performance_dumpIOTexture", Performance_dumpIOTexture, 3, true},
       {"Performance_dumpSKGraphics", Performance_dumpSKGraphics, 2, true},
       {"Performance_clearIOGrResource", Performance_clearIOGrResource, 1, true},
       {"Performance_clearSkGraphicsResource", Performance_clearSkGraphicsResource, 1, true},

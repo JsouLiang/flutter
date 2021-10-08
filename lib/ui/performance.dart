@@ -126,6 +126,14 @@ class Performance {
   }
   String? _dumpSKGraphics(_Callback<List?> callback) native 'Performance_dumpSKGraphics';
 
+  Future<List?> dumpIOTexture(String name) {
+    return _futurize(
+          (_Callback<List?> callback) => _dumpIOTexture(name, callback),
+    );
+  }
+
+  String? _dumpIOTexture(String name, _Callback<List?> callback) native 'Performance_dumpIOTexture';
+
   void clearIOGrResource() native 'Performance_clearIOGrResource';
 
   void clearSkGraphicsResource() native 'Performance_clearSkGraphicsResource';
