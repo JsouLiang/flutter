@@ -22,5 +22,7 @@ android_image_loader_java_sources = [
 android_lib_loader = [
   "$bd_flutter_android_path/io/flutter/embedding/engine/SafelyLibraryLoader.java",
   "$bd_flutter_android_path/io/flutter/embedding/engine/IoUtil.java",
+  "$bd_flutter_android_path/io/flutter/embedding/engine/ReflectUtils.java",
+  "$bd_flutter_android_path/io/flutter/embedding/engine/AssetUtil.java",
 ]
 

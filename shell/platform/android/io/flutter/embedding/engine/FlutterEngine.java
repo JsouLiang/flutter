@@ -7,8 +7,13 @@ package io.flutter.embedding.engine;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+// BD ADD: START
+import io.flutter.embedding.engine.ReflectUtils;
+import io.flutter.embedding.engine.AssetUtil;
+// END
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -36,6 +41,7 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -345,6 +351,15 @@ public class FlutterEngine {
     } catch (NameNotFoundException e) {
       assetManager = context.getAssets();
     }
+
+    // BD ADD: START
+    // 如果assetManager中是新创建的,则根据miraAssetManager更新
+    AssetManager miraAssetManager = context.getAssets();
+    if((assetManager != null) && (assetManager != miraAssetManager)) {
+      assetManager = AssetUtil.updateAssetManager(assetManager, miraAssetManager);
+    }
+    // END
+
     this.dartExecutor = new DartExecutor(flutterJNI, assetManager);
     this.dartExecutor.onAttachedToJNI();
 
