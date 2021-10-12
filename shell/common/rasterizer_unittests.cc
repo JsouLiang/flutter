@@ -24,13 +24,8 @@ class MockDelegate : public Rasterizer::Delegate {
   MOCK_METHOD0(GetFrameBudget, fml::Milliseconds());
   MOCK_CONST_METHOD0(GetLatestFrameTargetTime, fml::TimePoint());
   MOCK_CONST_METHOD0(GetTaskRunners, const TaskRunners&());
-  // BD MOD: START
-  //MOCK_CONST_METHOD0(GetIsGpuDisabledSyncSwitch,
-  //                   std::shared_ptr<fml::SyncSwitch>());
-  std::shared_ptr<fml::SyncSwitch> GetIsGpuDisabledSyncSwitch () const {
-                       return std::make_shared<fml::SyncSwitch>();
-  }
-  // END
+  MOCK_CONST_METHOD0(GetIsGpuDisabledSyncSwitch,
+                     std::shared_ptr<fml::SyncSwitch>());
   const fml::RefPtr<ShellGroupContext> GetShellGroupContext() const {
     return fml::MakeRefCounted<ShellGroupContext>();
   }
@@ -339,9 +334,14 @@ TEST(RasterizerTest,
 
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  auto is_gpu_disabled_sync_switch =
-      std::make_shared<const fml::SyncSwitch>(false);
+  //BD MOD
+  //auto is_gpu_disabled_sync_switch = std::make_shared<const fml::SyncSwitch>(false);
+  auto is_gpu_disabled_sync_switch = std::make_shared<fml::SyncSwitch>(false);
 
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+  
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
@@ -351,19 +351,23 @@ TEST(RasterizerTest,
   EXPECT_CALL(delegate, GetIsGpuDisabledSyncSwitch()).Times(0);
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
-  EXPECT_CALL(*surface, MakeRenderContextCurrent())
-      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+  //BD DEL
+  //EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
 
   rasterizer->Setup(std::move(surface));
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
-    auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    //BD MOD
+    //auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto pipeline = fml::AdoptRef(new Pipeline<LayerTree>(/*depth=*/10));
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
     bool result = pipeline->Produce().Complete(std::move(layer_tree));
     EXPECT_TRUE(result);
     auto no_discard = [](LayerTree&) { return false; };
-    rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    //BD MOD
+    //rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    rasterizer->Draw(pipeline, no_discard);
     latch.Signal();
   });
   latch.Wait();
@@ -387,9 +391,14 @@ TEST(
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  auto is_gpu_disabled_sync_switch =
-      std::make_shared<const fml::SyncSwitch>(true);
+  //BD MOD
+  //auto is_gpu_disabled_sync_switch = std::make_shared<const fml::SyncSwitch>(true);
+  auto is_gpu_disabled_sync_switch = std::make_shared<fml::SyncSwitch>(true);
 
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+  
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
@@ -399,20 +408,23 @@ TEST(
   EXPECT_CALL(delegate, GetIsGpuDisabledSyncSwitch()).Times(0);
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
-  EXPECT_CALL(*surface, MakeRenderContextCurrent())
-      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+  //BD DEL
+  //EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
 
   rasterizer->Setup(std::move(surface));
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
-    auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    //BD MOD
+    //auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto pipeline = fml::AdoptRef(new Pipeline<LayerTree>(/*depth=*/10));
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
     bool result = pipeline->Produce().Complete(std::move(layer_tree));
     EXPECT_TRUE(result);
     auto no_discard = [](LayerTree&) { return false; };
-    RasterStatus status =
-        rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    //BD MOD
+    //RasterStatus status = rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    RasterStatus status = rasterizer->Draw(pipeline, no_discard);
     EXPECT_EQ(status, RasterStatus::kSuccess);
     latch.Signal();
   });
@@ -437,9 +449,14 @@ TEST(
   EXPECT_CALL(delegate, OnFrameRasterized(_));
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  auto is_gpu_disabled_sync_switch =
-      std::make_shared<const fml::SyncSwitch>(false);
+  //BD MOD
+  //auto is_gpu_disabled_sync_switch = std::make_shared<const fml::SyncSwitch>(false);
+  auto is_gpu_disabled_sync_switch = std::make_shared<fml::SyncSwitch>(false);
 
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+  
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
@@ -448,20 +465,23 @@ TEST(
       .WillOnce(Return(is_gpu_disabled_sync_switch));
   EXPECT_CALL(*surface, AcquireFrame(SkISize()))
       .WillOnce(Return(ByMove(std::move(surface_frame))));
-  EXPECT_CALL(*surface, MakeRenderContextCurrent())
-      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+  //BD DEL
+  //EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
 
   rasterizer->Setup(std::move(surface));
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
-    auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    //BD MOD
+    //auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto pipeline = fml::AdoptRef(new Pipeline<LayerTree>(/*depth=*/10));
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
     bool result = pipeline->Produce().Complete(std::move(layer_tree));
     EXPECT_TRUE(result);
     auto no_discard = [](LayerTree&) { return false; };
-    RasterStatus status =
-        rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    //BD MOD
+    //RasterStatus status = rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    RasterStatus status = rasterizer->Draw(pipeline, no_discard);
     EXPECT_EQ(status, RasterStatus::kSuccess);
     latch.Signal();
   });
@@ -486,9 +506,14 @@ TEST(
   EXPECT_CALL(delegate, OnFrameRasterized(_)).Times(0);
   auto rasterizer = std::make_unique<Rasterizer>(delegate);
   auto surface = std::make_unique<MockSurface>();
-  auto is_gpu_disabled_sync_switch =
-      std::make_shared<const fml::SyncSwitch>(true);
+  //BD MOD
+  //auto is_gpu_disabled_sync_switch = std::make_shared<const fml::SyncSwitch>(true);
+  auto is_gpu_disabled_sync_switch = std::make_shared<fml::SyncSwitch>(true);
 
+  // BD ADD
+  // add for feat: The initialization of the shell does not block the platform thread.
+  ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
+  
   auto surface_frame = std::make_unique<SurfaceFrame>(
       /*surface=*/nullptr, /*supports_readback=*/true,
       /*submit_callback=*/[](const SurfaceFrame&, SkCanvas*) { return true; });
@@ -496,20 +521,23 @@ TEST(
   EXPECT_CALL(delegate, GetIsGpuDisabledSyncSwitch())
       .WillOnce(Return(is_gpu_disabled_sync_switch));
   EXPECT_CALL(*surface, AcquireFrame(SkISize())).Times(0);
-  EXPECT_CALL(*surface, MakeRenderContextCurrent())
-      .WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
+  //BD DEL
+  //EXPECT_CALL(*surface, MakeRenderContextCurrent()).WillOnce(Return(ByMove(std::make_unique<GLContextDefaultResult>(true))));
 
   rasterizer->Setup(std::move(surface));
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
-    auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    //BD MOD
+    //auto pipeline = std::make_shared<Pipeline<LayerTree>>(/*depth=*/10);
+    auto pipeline = fml::AdoptRef(new Pipeline<LayerTree>(/*depth=*/10));
     auto layer_tree = std::make_unique<LayerTree>(/*frame_size=*/SkISize(),
                                                   /*device_pixel_ratio=*/2.0f);
     bool result = pipeline->Produce().Complete(std::move(layer_tree));
     EXPECT_TRUE(result);
     auto no_discard = [](LayerTree&) { return false; };
-    RasterStatus status =
-        rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    //BD MOD
+    //RasterStatus status = rasterizer->Draw(CreateFinishedBuildRecorder(), pipeline, no_discard);
+    RasterStatus status = rasterizer->Draw(pipeline, no_discard);
     EXPECT_EQ(status, RasterStatus::kDiscarded);
     latch.Signal();
   });
