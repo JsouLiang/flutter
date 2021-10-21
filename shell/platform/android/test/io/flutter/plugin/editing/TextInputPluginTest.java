@@ -646,8 +646,7 @@ public class TextInputPluginTest {
             null));
 
     InputConnection connection =
-        textInputPlugin.createInputConnection(
-            testView, mock(KeyboardManager.class), new EditorInfo());
+        textInputPlugin.createInputConnection(testView, new EditorInfo());
     assertEquals(connection, null);
   }
 
