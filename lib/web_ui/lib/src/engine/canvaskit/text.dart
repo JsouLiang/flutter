@@ -12,6 +12,8 @@ import 'initialization.dart';
 import 'painting.dart';
 import 'skia_object_cache.dart';
 import 'util.dart';
+// BD ADD:
+import 'dart:html' as html;
 
 @immutable
 class CkParagraphStyle implements ui.ParagraphStyle {
@@ -28,6 +30,10 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    // BD ADD: START
+    bool? drawMinHeight,
+    bool? forceVerticalCenter,
+    // END
   })  : skParagraphStyle = toSkParagraphStyle(
           textAlign,
           textDirection,
@@ -41,6 +47,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           strutStyle,
           ellipsis,
           locale,
+          drawMinHeight,
+          forceVerticalCenter,
         ),
         _textDirection = textDirection ?? ui.TextDirection.ltr,
         _fontFamily = fontFamily,
@@ -144,6 +152,10 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    // BD ADD: START
+    bool? drawMinHeight,
+    bool? forceVerticalCenter,
+    // END
   ) {
     final SkParagraphStyleProperties properties = SkParagraphStyleProperties();
 
@@ -180,6 +192,10 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     properties.textStyle = toSkTextStyleProperties(
         fontFamily, fontSize, height, fontWeight, fontStyle);
 
+    // BD ADD: START
+    properties.drawMinHeight = drawMinHeight;
+    properties.forceVerticalCenter = forceVerticalCenter;
+    // END
     return canvasKit.ParagraphStyle(properties);
   }
 
@@ -563,11 +579,21 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
   /// is deleted.
   ui.ParagraphConstraints? _lastLayoutConstraints;
 
+  // BD ADD: START
+  static double lastDevicePixelRatio = 1.0;
+  // END
+
   @override
   SkParagraph get skiaObject => _ensureInitialized(_lastLayoutConstraints!);
 
   SkParagraph _ensureInitialized(ui.ParagraphConstraints constraints) {
     SkParagraph? paragraph = _skParagraph;
+    // BD ADD: START
+    if (paragraph != null && lastDevicePixelRatio != ui.window.devicePixelRatio) {
+      lastDevicePixelRatio = ui.window.devicePixelRatio;
+      paragraph!.setDevicePixelRatio(lastDevicePixelRatio);
+    }
+    // END
 
     // Paragraph objects are immutable. It's OK to skip initialization and reuse
     // existing object.

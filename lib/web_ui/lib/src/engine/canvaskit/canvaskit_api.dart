@@ -1635,6 +1635,10 @@ class SkParagraphStyleProperties {
   external set ellipsis(String? value);
   external set textStyle(SkTextStyleProperties? value);
   external set strutStyle(SkStrutStyleProperties? strutStyle);
+  // BD ADD: START
+  external set drawMinHeight(bool? drawMinHeight);
+  external set forceVerticalCenter(bool? forceVerticalCenter);
+  // END
 }
 
 @JS()
@@ -1844,6 +1848,8 @@ class SkParagraph {
   external SkTextRange getWordBoundary(int position);
   external void layout(double width);
   external void delete();
+  // BD ADD:
+  external void setDevicePixelRatio(double ratio);
 }
 
 @JS()

@@ -377,6 +377,10 @@ abstract class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
+    // BD ADD: START
+    bool? drawMinHeight,
+    bool? forceVerticalCenter,
+    // END
   }) {
     if (engine.useCanvasKit) {
       return engine.CkParagraphStyle(
@@ -392,6 +396,10 @@ abstract class ParagraphStyle {
         strutStyle: strutStyle,
         ellipsis: ellipsis,
         locale: locale,
+        // BD ADD: START
+        drawMinHeight: drawMinHeight,
+        forceVerticalCenter: forceVerticalCenter,
+        // END
       );
     } else {
       return engine.EngineParagraphStyle(
