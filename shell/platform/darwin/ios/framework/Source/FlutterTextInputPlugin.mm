@@ -497,7 +497,12 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
 
 // BD ADD: START
 - (void)keyboardDidHidden:(NSNotification*)notification {
-    [_textInputDelegate notifyKeyboardHide:_textInputClient];
+    //在iOS15的模拟器上弹出键盘之前会先发消失的通知，导致键盘无法显示，兼容判断
+    CGRect frameBegin = [notification.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+    CGRect frameEnd = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    if (frameBegin.origin.y != frameEnd.origin.y) {
+        [_textInputDelegate notifyKeyboardHide:_textInputClient];
+    }
 }
 // END
 
