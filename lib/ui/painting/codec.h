@@ -19,22 +19,12 @@ class DartLibraryNatives;
 
 namespace flutter {
 
-
-enum CodecType {
-    SingleFrame,
-    MultiFrame,
-    Native
-};
 // A handle to an SkCodec object.
 //
 // Doesn't mirror SkCodec's API but provides a simple sequential access API.
 class Codec : public RefCountedDartWrappable<Codec> {
   DEFINE_WRAPPERTYPEINFO();
 
- // BD ADD: START
- protected:
-  Codec* real_codec = nullptr;
- // END
  public:
   virtual int frameCount() const = 0;
 
@@ -42,20 +32,9 @@ class Codec : public RefCountedDartWrappable<Codec> {
 
   virtual Dart_Handle getNextFrame(Dart_Handle callback_handle) = 0;
 
-  // BD ADD
-  virtual CodecType getClassType() const  = 0;
-
   void dispose();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
-
-  // BD ADD: START
-  static std::map<std::string, Codec *> codec_recorder;
-  static std::vector<std::pair<std::string, int>> cached_images;
-  static std::vector<DartPersistentValue> dart_remove_cache_callbacks;
-  static std::vector<DartPersistentValue> dart_get_keys_callbacks;
-  static int max_cache_size;
-  // END
 };
 
 }  // namespace flutter

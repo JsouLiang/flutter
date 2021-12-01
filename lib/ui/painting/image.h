@@ -26,56 +26,16 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
     return fml::MakeRefCounted<CanvasImage>();
   }
 
-  // BD ADD: START
-  static fml::RefPtr<CanvasImage> Create(std::string key) {
-      return fml::MakeRefCounted<CanvasImage>(key);
-  }
+  int width() { return image_.get()->width(); }
 
-  static fml::RefPtr<CanvasImage> Create(CanvasImage * image) {
-      return fml::MakeRefCounted<CanvasImage>(image);
-  }
-  static std::map<std::string, CanvasImage *> image_recorder;
-  int duration = 0;
-  // END
-
-  // BD MOD :START
-//  int width() { return image_.get()->width(); }
-//
-//  int height() { return image_.get()->height(); }
-  int width() {
-    if (real_image_ != nullptr) {
-        return real_image_->width();
-    }
-    return image_.get()->width();
-  }
-
-  int height() {
-    if (real_image_ != nullptr) {
-        return real_image_->height();
-    }
-    return image_.get()->height();
-  }
-  // END
+  int height() { return image_.get()->height(); }
 
   Dart_Handle toByteData(int format, Dart_Handle callback);
 
   void dispose();
 
-  sk_sp<SkImage> image() const {
-    // BD ADD:START
-      if (real_image_ != nullptr) {
-          return real_image_->image();
-      }
-    // END
-      return image_.get();
-  }
+  sk_sp<SkImage> image() const { return image_.get(); }
   void set_image(flutter::SkiaGPUObject<SkImage> image) {
-      // BD ADD:START
-      if (real_image_ != nullptr) {
-          real_image_->set_image(std::move(image));
-          return;
-      }
-      // END
     image_ = std::move(image);
   }
 
@@ -87,10 +47,6 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   void ReleaseDartWrappableReference() const override;
   
   void setMips(bool isMips) {
-      if (real_image_ != nullptr) {
-          real_image_->setMips(isMips);
-          return;
-      }
     FML_LOG(INFO) << "[BDFlutterTesting]CanvasImage::setMips value=" << isMips;
     isMips_ = isMips;
   }
@@ -101,19 +57,10 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
  private:
   CanvasImage();
 
-  // BD ADD: START
-  explicit CanvasImage(std::string key);
-
-  explicit CanvasImage(CanvasImage* image);
-  // END
-
   flutter::SkiaGPUObject<SkImage> image_;
 
-  // BD ADD: START
+  // BD ADD:
   bool isMips_ = true;
-  std::string key_;
-  CanvasImage* real_image_ = nullptr;
-  // END
 };
 
 }  // namespace flutter

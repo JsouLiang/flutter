@@ -664,9 +664,7 @@ std::unique_ptr<Shell> Shell::Spawn(
         return engine->Spawn(/*delegate=*/delegate,
                              /*dispatcher_maker=*/dispatcher_maker,
                              /*settings=*/settings,
-                             /*animator=*/std::move(animator),
-                             /*io_namager=*/io_manager,
-                             /*snapshot_delegate=*/snapshot_delegate);
+                             /*animator=*/std::move(animator));
       },
       // BD ADD
       false,

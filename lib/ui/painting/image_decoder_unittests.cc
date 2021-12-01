@@ -669,9 +669,7 @@ TEST_F(ImageDecoderFixtureTest,
         return false;
       }
 
-      // BD MOD
-      // codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_codec));
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_codec), "test");
+      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_codec));
       codec->getNextFrame(closure);
       codec = nullptr;
       isolate_latch.Signal();

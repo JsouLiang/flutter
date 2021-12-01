@@ -24,8 +24,6 @@ static const tonic::DartWrapperInfo kDartWrapperInfo_ui_Image = {
 };
 const tonic::DartWrapperInfo& Image::dart_wrapper_info_ =
     kDartWrapperInfo_ui_Image;
-// BD ADD
-std::map<std::string, CanvasImage*> CanvasImage::image_recorder;
 
 #define FOR_EACH_BINDING(V) \
   V(Image, width)           \
@@ -41,39 +39,18 @@ void CanvasImage::RegisterNatives(tonic::DartLibraryNatives* natives) {
 
 CanvasImage::CanvasImage() = default;
 
-// BD ADD: START
-CanvasImage::CanvasImage(std::string key) : key_(std::move(key)) {
-    image_recorder.erase(key_);
-    image_recorder.insert(std::make_pair(key_, this));
-}
-
-CanvasImage::CanvasImage(CanvasImage *image) {
-    real_image_ = image;
-    real_image_->RetainDartWrappableReference();
-}
-
-CanvasImage::~CanvasImage() {
-  if (real_image_ == nullptr) {
-      image_recorder.erase(key_);
-      image_.reset();
-  } else {
-      real_image_->ReleaseDartWrappableReference();
-  }
-}
-// END
+CanvasImage::~CanvasImage() = default;
 
 Dart_Handle CanvasImage::toByteData(int format, Dart_Handle callback) {
   return EncodeImage(this, format, callback);
 }
 
 void CanvasImage::dispose() {
-  if (real_image_ == nullptr) {
-    auto hint_freed_delegate = UIDartState::Current()->GetHintFreedDelegate();
-    if (hint_freed_delegate) {
-        hint_freed_delegate->HintFreed(GetAllocationSize());
-    }
+  auto hint_freed_delegate = UIDartState::Current()->GetHintFreedDelegate();
+  if (hint_freed_delegate) {
+    hint_freed_delegate->HintFreed(GetAllocationSize());
   }
-
+  image_.reset();
   ClearDartWrapper();
 }
 
@@ -83,9 +60,6 @@ size_t CanvasImage::GetAllocationSize() const {
 }
 
 size_t CanvasImage::ComputeByteSize() const {
-    if (real_image_ != nullptr) {
-        return real_image_->ComputeByteSize();
-    }
   // END
   if (auto image = image_.get()) {
     const auto& info = image->imageInfo();

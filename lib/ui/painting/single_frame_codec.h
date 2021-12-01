@@ -17,10 +17,7 @@ class SingleFrameCodec : public Codec {
  public:
   SingleFrameCodec(fml::RefPtr<ImageDescriptor> descriptor,
                    uint32_t target_width,
-                   uint32_t target_height,
-                   std::string key);
-
-  SingleFrameCodec(Codec* codec, std::string key);
+                   uint32_t target_height);
 
   ~SingleFrameCodec() override;
 
@@ -29,10 +26,6 @@ class SingleFrameCodec : public Codec {
 
   // |Codec|
   int repetitionCount() const override;
-
-  CodecType getClassType() const override;
-
-  Dart_Handle innerDecodeImage(std::function<void()> listener);
 
   // |Codec|
   Dart_Handle getNextFrame(Dart_Handle args) override;
@@ -48,9 +41,6 @@ class SingleFrameCodec : public Codec {
   uint32_t target_height_;
   fml::RefPtr<CanvasImage> cached_image_;
   std::vector<DartPersistentValue> pending_callbacks_;
-  std::string key_;
-  size_t allocation_size_ = -1;
-  std::vector<std::function<void()>> listeners_;
 
   FML_FRIEND_MAKE_REF_COUNTED(SingleFrameCodec);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(SingleFrameCodec);

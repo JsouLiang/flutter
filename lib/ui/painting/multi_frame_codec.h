@@ -13,12 +13,7 @@ namespace flutter {
 
 class MultiFrameCodec : public Codec {
  public:
-  // BD MOD: START
-  // MultiFrameCodec(std::shared_ptr<SkCodecImageGenerator> generator);
-  MultiFrameCodec(std::shared_ptr<SkCodecImageGenerator> generator, std::string key);
-
-  MultiFrameCodec(Codec* codec);
-  // END
+  MultiFrameCodec(std::shared_ptr<SkCodecImageGenerator> generator);
 
   ~MultiFrameCodec() override;
 
@@ -28,13 +23,8 @@ class MultiFrameCodec : public Codec {
   // |Codec|
   int repetitionCount() const override;
 
-  CodecType getClassType() const override;
-
   // |Codec|
   Dart_Handle getNextFrame(Dart_Handle args) override;
-
-  // BD ADD
-  int getNextFrameWithCount(Dart_Handle args, int requireIndex);
 
  private:
   // Captures the state shared between the IO and UI task runners.
@@ -47,18 +37,11 @@ class MultiFrameCodec : public Codec {
   // shares it with the IO task runner's decoding work, and sets the live_
   // member to false when it is destructed.
   struct State {
-    // BD MOD
-    // State(std::shared_ptr<SkCodecImageGenerator> generator);
-    State(std::shared_ptr<SkCodecImageGenerator> generator,std::string key);
+    State(std::shared_ptr<SkCodecImageGenerator> generator);
 
     const std::shared_ptr<SkCodecImageGenerator> generator_;
     const int frameCount_;
     const int repetitionCount_;
-    // BD ADD: START
-    const std::string key_;
-    std::vector<DartPersistentValue> pending_callbacks_;
-    bool inProgress = false;
-    // END
 
     // The non-const members and functions below here are only read or written
     // to on the IO thread. They are not safe to access or write on the UI
@@ -87,12 +70,6 @@ class MultiFrameCodec : public Codec {
 
   // Shared across the UI and IO task runners.
   std::shared_ptr<State> state_;
-
-  // BD ADD: START
-  int requireIndex_ = 0;
-  int currentIndex_ = 0;
-  void realGetFrame(Dart_Handle args);
-  // END
 
   FML_FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);

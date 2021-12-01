@@ -23,8 +23,6 @@ class NativeCodec : public Codec {
   // |Codec|
   Dart_Handle getNextFrame(Dart_Handle args) override;
 
-  CodecType getClassType() const override;
-
   static int nativeCodecCount;
 
   static int nativeCodecIndex;
