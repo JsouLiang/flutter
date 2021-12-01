@@ -166,7 +166,7 @@ int NativeCodec::repetitionCount() const {
 }
 
 CodecType NativeCodec::getClassType() const {
-  return CodecType::Native;
+  return CodecType::NativeCodec;
 }
 // EMD
 }  // namespace flutter
