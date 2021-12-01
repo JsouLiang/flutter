@@ -48,9 +48,9 @@ MultiFrameCodec::~MultiFrameCodec() {
 
 MultiFrameCodec::State::State(std::shared_ptr<SkCodecImageGenerator> generator, std::string key)
     : generator_(std::move(generator)),
-      repetitionCount_(generator_->getRepetitionCount()),
-      frameCount_(generator_->getFrameCount()),
       key_(std::move(key)),
+      frameCount_(generator_->getFrameCount()),
+      repetitionCount_(generator_->getRepetitionCount()),
       nextFrameIndex_(0) {}
 
 static void InvokeNextFrameCallback(
