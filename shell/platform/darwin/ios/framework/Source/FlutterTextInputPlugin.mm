@@ -483,28 +483,10 @@ static FlutterAutofillType autofillTypeOf(NSDictionary* configuration) {
       _smartQuotesType = UITextSmartQuotesTypeYes;
       _smartDashesType = UITextSmartDashesTypeYes;
     }
-    // BD ADD: START
-    NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self
-               selector:@selector(keyboardDidHidden:)
-                   name:UIKeyboardDidHideNotification
-                 object:nil];
-    // END
   }
 
   return self;
 }
-
-// BD ADD: START
-- (void)keyboardDidHidden:(NSNotification*)notification {
-    //在iOS15的模拟器上弹出键盘之前会先发消失的通知，导致键盘无法显示，兼容判断
-    CGRect frameBegin = [notification.userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
-    CGRect frameEnd = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    if (frameBegin.origin.y != frameEnd.origin.y) {
-        [_textInputDelegate notifyKeyboardHide:_textInputClient];
-    }
-}
-// END
 
 - (void)configureWithDictionary:(NSDictionary*)configuration {
   NSDictionary* inputType = configuration[kKeyboardType];
