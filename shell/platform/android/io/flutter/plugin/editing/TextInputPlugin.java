@@ -162,6 +162,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     this.platformViewsController = platformViewsController;
     this.platformViewsController.attachTextInputPlugin(this);
     restartAlwaysRequired = isRestartAlwaysRequired();
+
+    // BD ADD:
+    mEditable = new ListenableEditingState(null, mView);
   }
 
   @NonNull
