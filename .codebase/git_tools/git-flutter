@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+BASENAME="${0%/*}"
+
+python $BASENAME/git_flutter.py $@

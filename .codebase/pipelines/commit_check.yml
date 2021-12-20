@@ -1,0 +1,17 @@
+name: Commit Check
+trigger:
+  change:
+    branches: [ bd_1.22_for_test ]
+    types: [ create ]
+    notification:
+      when: [ failure ]
+      to: ["6969779643066892291"]
+jobs:
+  commit_check:
+    name: Commit Check
+    image: hub.byted.org/codebase/ci_debian_buster:latest
+    steps:
+      - uses: actions/setup-proxy
+      - name: Commit Check
+        commands:
+          - .codebase/git_tools/git-flutter check
