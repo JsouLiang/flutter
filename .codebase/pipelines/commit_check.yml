@@ -1,7 +1,7 @@
 name: Commit Check
 trigger:
   change:
-    branches: [ bd_1.22_for_test ]
+    branches: [ bd_2.0 ]
     types: [ create ]
     notification:
       when: [ failure ]
