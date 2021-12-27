@@ -59,7 +59,7 @@ download_status=$(curl -o upload.zip "http://tosv.byted.org/obj/toutiao.ios.arch
 echo "上传脚本更新结果: ${download_status}"
 unzip -oq upload.zip -d upload
 
-LITEMODE='normal,lite'
+LITEMODE='normal'
 
 bash android_build.sh $JCOUNT $MODE $LITEMODE
 if [ $? -ne 0 ]; then
