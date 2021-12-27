@@ -311,7 +311,7 @@ void Animator::ScheduleMaybeClearTraceFlowIds() {
           TRACE_EVENT0("flutter",
                        "Animator::ScheduleMaybeClearTraceFlowIds - callback");
           while (!self->trace_flow_ids_.empty()) {
-            auto flow_id = self->trace_flow_ids_.front();
+            auto flow_id FML_ALLOW_UNUSED_TYPE = self->trace_flow_ids_.front();
             TRACE_FLOW_END("flutter", "PointerEvent", flow_id);
             self->trace_flow_ids_.pop_front();
           }
