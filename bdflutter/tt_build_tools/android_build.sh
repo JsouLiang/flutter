@@ -99,7 +99,7 @@ cd out/host_debug
 zip -rq ../../$cacheDir/flutter-web-sdk-darwin-x64.zip flutter_web_sdk
 cd ..
 cd ..
-bd_upload $cacheDir/flutter-web-sdk-darwin-x64.zip flutter_infra/flutter/$tosDir/flutter-web-sdk-darwin-x64.zip
+bd_upload $cacheDir/flutter-web-sdk-darwin-x64.zip flutter/framework/$tosDir/flutter-web-sdk-darwin-x64.zip
 
 ./flutter/tools/gn --runtime-mode=release --no-lto
 ninja -C out/host_release -j $jcount
