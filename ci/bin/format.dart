@@ -811,7 +811,9 @@ Future<String> _getDiffBaseRevision(ProcessManager processManager, Directory rep
     // not have a clear fork point, so we fall back to just the regular
     // merge-base in that case.
     result = await _runGit(
-      <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      // BD MOD:
+      // <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      <String>['rev-parse', '@{upstream}'],
       processRunner,
     );
   } on ProcessRunnerException {
@@ -888,10 +890,7 @@ Future<int> main(List<String> arguments) async {
   }
 
   const ProcessManager processManager = LocalProcessManager();
-  // BD MOD:
-  //final String baseGitRef = await _getDiffBaseRevision(processManager, repoDir);
-  final String baseGitRef = "40a99c595137e4b2f5b2efa8ff343ea23c1e16b8"; // 2.8
-
+  final String baseGitRef = await _getDiffBaseRevision(processManager, repoDir);
   bool result = true;
   final List<String> checks = options['check'] as List<String>;
   try {
