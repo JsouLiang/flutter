@@ -31,7 +31,7 @@ class GitRepo {
       defaultWorkingDirectory: root,
     );
     final ProcessRunnerResult fetchResult = await processRunner.runProcess(
-      <String>['git', 'fetch', 'upstream', 'main'],
+      <String>['git', 'fetch', 'upstream'],
       failOk: true,
     );
     if (fetchResult.exitCode != 0) {
@@ -39,23 +39,22 @@ class GitRepo {
         'git',
         'fetch',
         'origin',
-        'main',
       ]);
     }
     final Set<String> result = <String>{};
     ProcessRunnerResult mergeBaseResult = await processRunner.runProcess(
-      <String>['git', 'merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      // BD MOD: START
+      // <String>['git', 'merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      <String>['git', 'rev-parse', '@{upstream}'],
       failOk: true,
     );
-    if (mergeBaseResult.exitCode != 0) {
-      mergeBaseResult = await processRunner.runProcess(<String>[
-        'git',
-        'merge-base',
-        'FETCH_HEAD',
-        'HEAD',
-      ], failOk: false);
+    final String mergeBase;
+    if (mergeBaseResult.exitCode == 0) {
+      mergeBase = mergeBaseResult.stdout.trim();
+    } else {
+      // Fallback to engine version
+      mergeBase = 'ab46186b246f5a36bd1f3f295d14a43abb1e2f38'; // 2.10
     }
-    final String mergeBase = mergeBaseResult.stdout.trim();
     final ProcessRunnerResult masterResult = await processRunner
         .runProcess(<String>[
       'git',

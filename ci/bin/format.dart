@@ -814,18 +814,28 @@ Future<String> _getDiffBaseRevision(ProcessManager processManager, Directory rep
   if (upstreamUrl.isEmpty) {
     upstream = 'origin';
   }
-  await _runGit(<String>['fetch', upstream, 'main'], processRunner);
+  // BD MOD:
+  await _runGit(
+    <String>['fetch', upstream, 'main'],
+    processRunner,
+    failOk: true,
+  );
   String result = '';
   try {
     // This is the preferred command to use, but developer checkouts often do
     // not have a clear fork point, so we fall back to just the regular
     // merge-base in that case.
     result = await _runGit(
-      <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      // BD MOD:
+      // <String>['merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+      <String>['rev-parse', '@{upstream}'],
       processRunner,
     );
   } on ProcessRunnerException {
-    result = await _runGit(<String>['merge-base', 'FETCH_HEAD', 'HEAD'], processRunner);
+    result = await _runGit(<String>['merge-base', 'FETCH_HEAD', 'HEAD'], processRunner, failOk: true);
+    if (result.isEmpty) {
+      result = 'ab46186b246f5a36bd1f3f295d14a43abb1e2f38'; // 2.10
+    }
   }
   return result.trim();
 }

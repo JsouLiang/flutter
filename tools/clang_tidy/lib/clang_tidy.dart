@@ -222,7 +222,9 @@ class ClangTidy {
 
   Future<int> _runJobs(List<WorkerJob> jobs) async {
     int result = 0;
-    final ProcessPool pool = ProcessPool();
+    // BD MOD:
+    // final ProcessPool pool = ProcessPool();
+    final ProcessPool pool = ProcessPool(numWorkers: 32);
     await for (final WorkerJob job in pool.startWorkers(jobs)) {
       if (job.result.exitCode == 0) {
         continue;
