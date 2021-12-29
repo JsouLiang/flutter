@@ -65,7 +65,7 @@ cd ..
 
 cacheDir=out/tt_android_cache
 rm -rf $cacheDir
-mkdir $cacheDir
+mkdir -p $cacheDir
 
 ./flutter/tools/gn --no-lto --full-dart-sdk
 ninja -C out/host_debug -j $jcount
@@ -197,7 +197,7 @@ for liteMode in ${liteModes[@]}; do
               fi
 
               rm -f $cacheDir/$modeDir
-              mkdir $cacheDir/$modeDir
+              mkdir -p $cacheDir/$modeDir
 
               # 非debug还要带上gen_snapshot
               if [ $mode != 'debug' ]; then
@@ -262,7 +262,7 @@ done
 # darwin-x64.zip
 modeDir=darwin-x64
 rm -rf $cacheDir/$modeDir
-mkdir $cacheDir/$modeDir
+mkdir -p $cacheDir/$modeDir
 cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
 cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
 zip -rjq $cacheDir/$modeDir/artifacts.zip out/host_debug/flutter_tester out/host_debug/gen/frontend_server.dart.snapshot \
@@ -272,7 +272,7 @@ $cacheDir/$modeDir/product_vm_isolate_snapshot.bin out/host_debug/gen_snapshot
 bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/$modeDir/artifacts.zip
 
 rm -rf $cacheDir/pkg
-mkdir $cacheDir/pkg
+mkdir -p $cacheDir/pkg
 cp -rf out/host_debug/gen/dart-pkg/sky_engine $cacheDir/pkg/sky_engine
 rm -rf $cacheDir/pkg/sky_engine/packages
 cd $cacheDir/pkg

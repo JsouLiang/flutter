@@ -2,11 +2,13 @@
 if [ ! -d "./flutter" ];then
   git clone git@code.byted.org:tech_client/flutter.git
 fi
+# framework分支为bd_2.8
 cd flutter
-git checkout -b bd_2.0_pre origin/bd_2.0_pre
+git checkout -b bd_2.8 origin/bd_2.8
 
+#engine分支为bd_2.8_pre
 cd ../
-git checkout -b bd_2.0 origin/bd_2.0
+git checkout -b bd_2.8_pre origin/bd_2.8_pre
 
 git log --pretty=format:"%h :%ae  %s  %ad" > a.text
 cur_engine=`head -c 10 a.text`
@@ -35,6 +37,6 @@ then
   cd ./flutter
   git add ./bin/internal/ttengine.version
   git commit -m "feat: roll engine version to ${complete_cur_engine}" -m "${message}"
-  git push https://ci_flutter:hs7y4aZwT3Ggi9uzx3-X@code.byted.org/tech_client/flutter.git bd_2.0_pre
+  git push https://ci_flutter:hs7y4aZwT3Ggi9uzx3-X@code.byted.org/tech_client/flutter.git bd_2.8
 fi
 

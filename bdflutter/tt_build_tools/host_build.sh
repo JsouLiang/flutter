@@ -50,7 +50,7 @@ cd ..
 
 cacheDir=out/tt_android_cache
 rm -rf $cacheDir
-mkdir $cacheDir
+mkdir -p $cacheDir
 
 if [ "$(uname)" == "Darwin" ]
 then
@@ -122,7 +122,7 @@ then
   # darwin-x64.zip
   modeDir=darwin-x64
   rm -rf $cacheDir/$modeDir
-  mkdir $cacheDir/$modeDir
+  mkdir -p $cacheDir/$modeDir
   cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
   cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
   zip -rjq $cacheDir/$modeDir/artifacts.zip out/host_debug/flutter_tester out/host_debug/gen/frontend_server.dart.snapshot \
@@ -136,7 +136,7 @@ then
   bd_upload $cacheDir/$modeDir/artifacts.zip flutter/framework/$tosDir/darwin-x64-release/artifacts.zip
 
   rm -rf $cacheDir/pkg
-  mkdir $cacheDir/pkg
+  mkdir -p $cacheDir/pkg
   cp -rf out/host_debug/gen/dart-pkg/sky_engine $cacheDir/pkg/sky_engine
   rm -rf $cacheDir/pkg/sky_engine/packages
   cd $cacheDir/pkg
@@ -178,7 +178,7 @@ else
   # linux-x64.zip
   modeDir=linux-x64
   rm -rf $cacheDir/$modeDir
-  mkdir $cacheDir/$modeDir
+  mkdir -p $cacheDir/$modeDir
   cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
   cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
   zip -rjq $cacheDir/$modeDir/artifacts.zip out/host_debug/flutter_tester out/host_debug/gen/frontend_server.dart.snapshot \

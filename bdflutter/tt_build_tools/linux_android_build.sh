@@ -72,7 +72,7 @@ cd ..
 
 cacheDir=out/tt_android_cache
 rm -rf $cacheDir
-mkdir $cacheDir
+mkdir -p $cacheDir
 
 for liteMode in ${liteModes[@]}; do
   if [ "$liteMode" != "normal" ]; then
@@ -155,7 +155,7 @@ for liteMode in ${liteModes[@]}; do
               fi
 
               rm -f $cacheDir/$modeDir
-              mkdir $cacheDir/$modeDir
+              mkdir -p $cacheDir/$modeDir
 
               # 非debug还要带上gen_snapshot
               if [ $mode != 'debug' ]; then
