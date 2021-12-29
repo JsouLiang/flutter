@@ -104,7 +104,7 @@ for liteMode in ${liteModes[@]}; do
     fi
 
 		[ -d $cacheDir ] && rm -rf $cacheDir
-		mkdir $cacheDir
+		mkdir -p $cacheDir
 
 #		./flutter/tools/gn --runtime-mode=$mode
 #		ninja -C $hostDir -j $jcount
