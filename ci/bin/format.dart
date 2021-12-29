@@ -888,7 +888,9 @@ Future<int> main(List<String> arguments) async {
   }
 
   const ProcessManager processManager = LocalProcessManager();
-  final String baseGitRef = await _getDiffBaseRevision(processManager, repoDir);
+  // BD MOD:
+  //final String baseGitRef = await _getDiffBaseRevision(processManager, repoDir);
+  final String baseGitRef = "40a99c595137e4b2f5b2efa8ff343ea23c1e16b8"; // 2.8
 
   bool result = true;
   final List<String> checks = options['check'] as List<String>;

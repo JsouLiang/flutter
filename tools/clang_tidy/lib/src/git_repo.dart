@@ -43,19 +43,21 @@ class GitRepo {
       ]);
     }
     final Set<String> result = <String>{};
-    ProcessRunnerResult mergeBaseResult = await processRunner.runProcess(
-      <String>['git', 'merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
-      failOk: true,
-    );
-    if (mergeBaseResult.exitCode != 0) {
-      mergeBaseResult = await processRunner.runProcess(<String>[
-        'git',
-        'merge-base',
-        'FETCH_HEAD',
-        'HEAD',
-      ], failOk: false);
-    }
-    final String mergeBase = mergeBaseResult.stdout.trim();
+    // BD MOD: START
+    // ProcessRunnerResult mergeBaseResult = await processRunner.runProcess(
+    //   <String>['git', 'merge-base', '--fork-point', 'FETCH_HEAD', 'HEAD'],
+    //   failOk: true,
+    // );
+    // if (mergeBaseResult.exitCode != 0) {
+    //   mergeBaseResult = await processRunner.runProcess(<String>[
+    //     'git',
+    //     'merge-base',
+    //     'FETCH_HEAD',
+    //     'HEAD',
+    //   ], failOk: false);
+    // }
+    final String mergeBase = "40a99c595137e4b2f5b2efa8ff343ea23c1e16b8";
+    // END
     final ProcessRunnerResult masterResult = await processRunner
         .runProcess(<String>[
       'git',
