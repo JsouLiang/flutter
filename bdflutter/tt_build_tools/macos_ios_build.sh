@@ -49,10 +49,17 @@ echo "IOS build modes: ${liteModes[@]}"
 releaseModeArg=$4
 releaseModes=(${releaseModeArg//,/ })
 if [ ${#releaseModes[@]} == 0 ];then
-    releaseModes=('debug' 'profile' 'release' 'release_dynamicart')
+    releaseModes=('debug' 'profile' 'release' )
 fi
 echo "Android release modes: ${releaseModes[@]}"
 
+#zzm 屏蔽lite dynamicart
+if [[ $liteModes ==  lite* ]];then
+  exit
+fi
+if [ ${#releaseModes[@]} == 3 ];then
+    releaseModes=( 'release' )
+fi
 function checkResult() {
     if [ $? -ne 0 ]; then
         echo "Host debug compile failed !"
