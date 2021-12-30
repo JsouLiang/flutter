@@ -36,6 +36,13 @@ liteModes=(${liteModeArg//,/ })
 if [ ${#liteModes[@]} == 0 ];then
     liteModes=('normal')
 fi
+# zzm 屏蔽 lite dynamic
+if [ ${#liteModes[@]} == 3 ];then
+    exit
+fi
+
+dynamics=('normal')
+
 echo "Android build modes: ${liteModes[@]}"
 
 releaseModeArg=$4
