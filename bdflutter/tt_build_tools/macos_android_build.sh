@@ -9,7 +9,7 @@ echo "user is $gitUser"
 echo "gitMessage is $gitMessage"
 
 source $(cd "$(dirname "$0")";pwd)/utils.sh
-
+unset ANDROID_SDK_ROOT
 cd ..
 
 jcount=$1
@@ -120,14 +120,16 @@ for liteMode in ${liteModes[@]}; do
                     continue
                 fi
             else
-                ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix --only-gen-snapshot
+                # zzm 暂时注释掉
+                #./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix --only-gen-snapshot
+                ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix
                 androidDir=out/android_${mode}${platformPostFix}
             fi
 
               if [ "$liteMode" != 'normal' ]; then
                   androidDir=${androidDir}_${liteMode}
               fi
-        androidDir=${androidDir}_gen_snapshot
+#        androidDir=${androidDir}_gen_snapshot
 			  ninja -C $androidDir -j $jcount
               checkResult
 
