@@ -2,7 +2,7 @@ name: Build Engine
 trigger:
   change:
     branches: [ bd_2.8_pre ]
-    types: [ submit ]
+    types: [ submit, push ]
     notification:
       when: [ start, success, failure ]
 jobs:
