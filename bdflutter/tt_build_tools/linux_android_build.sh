@@ -21,12 +21,15 @@ fi
 isFast=$2
 
 # 现在fast和非fast相同
+# zzm 暂时去掉dynamicart
 if [ $isFast = 'fast' ]; then
     platforms=('arm' 'arm64' 'x64' 'x86')
-    dynamics=('normal' 'dynamicart')
+    #dynamics=('normal' 'dynamicart')
+    dynamics=('normal')
 else
     platforms=('arm' 'x64' 'x86' 'arm64')
-    dynamics=('normal' 'dynamicart')
+    #dynamics=('normal' 'dynamicart')
+    dynamics=('normal')
 fi
 
 tosDir=$(git rev-parse HEAD)
@@ -77,6 +80,7 @@ mkdir -p $cacheDir
 for liteMode in ${liteModes[@]}; do
   if [ "$liteMode" != "normal" ]; then
      echo 'Warning: dynamicart dont compile lite mode for android'
+     exit
      coutinue
   fi
   liteModeComdSuffix=''

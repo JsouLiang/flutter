@@ -48,8 +48,7 @@ def main():
     classpath.append(args.build_config_path)
 
   # BD ADD START:
-  script_path = os.path.dirname(os.path.realpath(__file__))
-  classpath.append(os.path.abspath(os.path.join(script_path, '..', '..',  '..', 'flutter/bdflutter/shell/platform/android')))
+  classpath.append(os.path.abspath(os.path.join(SCRIPT_DIR, '..', '..',  '..', 'flutter/bdflutter/shell/platform/android')))
   # END
 
   packages = [
