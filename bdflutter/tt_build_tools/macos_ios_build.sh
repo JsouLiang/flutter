@@ -49,6 +49,8 @@ echo "IOS build modes: ${liteModes[@]}"
 releaseModeArg=$4
 releaseModes=(${releaseModeArg//,/ })
 if [ ${#releaseModes[@]} == 0 ];then
+    #zzm
+    #releaseModes=('debug' 'profile' 'release' 'release_dynamicart')
     releaseModes=('debug' 'profile' 'release' )
 fi
 echo "Android release modes: ${releaseModes[@]}"

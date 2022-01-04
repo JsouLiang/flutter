@@ -75,11 +75,13 @@ def main():
     'io.flutter.view',
   ]
 
+  android_package_list = os.path.join(script_path, 'android_reference')
+
   command = [
     JavadocBin(),
     '-classpath', ':'.join(classpath),
     '-d', args.out_dir,
-    '-link', 'https://developer.android.com/reference/',
+    '-linkoffline', 'https://developer.android.com/reference/', android_package_list,
     '-source', '1.8',
   ] + packages
 
