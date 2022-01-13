@@ -29,6 +29,11 @@ vars = {
   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': 'fd3f23f90f5787fa52326e0c161b8e9d2a10363b',
 
+  # BD ADD: START
+  'bd_dart_git': 'ssh://git@code.byted.org/tech_client/dart',
+  'bd_dart_revision': '0d68847c30d4d7b1e66ac2d087e7bd39de505db2',
+  # END
+
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
   'canvaskit_cipd_instance': '8MSYGWVWzrTJIoVL00ZquruZs-weuwLBy1kt1AawJiIC',
@@ -170,7 +175,9 @@ deps = {
    'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
   'src/third_party/dart':
-   Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
+   # BD MOD:
+   #Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
+   Var('bd_dart_git') + '@' + Var('bd_dart_revision'),
 
   # WARNING: Unused Dart dependencies in the list below till "WARNING:" marker are removed automatically - see create_updated_flutter_deps.py.
 
