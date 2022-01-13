@@ -16,15 +16,16 @@ namespace flutter {
     public:
         AndroidExternalImageLoader(const fml::jni::JavaObjectWeakGlobalRef& android_image_loader);
         ~AndroidExternalImageLoader() override;
-
+        
         void Load(const std::string url,
                   const int width,
                   const int height,
                   const float scale,
+                  const std::string paramsJson,
                   ImageLoaderContext contextPtr,
                   std::function<void(sk_sp<SkImage> image)> callback) override;
 
-        void LoadCodec(const std::string url, const int width, const int height, const float scale, ImageLoaderContext contextPtr, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) override;
+        void LoadCodec(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext contextPtr, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) override;
 
         void GetNextFrame(ImageLoaderContext contextPtr, int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage>)> callback) override;
     private:

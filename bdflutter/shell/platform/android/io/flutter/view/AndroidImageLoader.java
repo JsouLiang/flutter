@@ -40,20 +40,43 @@ public class AndroidImageLoader {
     abstract public void getNextFrame(int currentFrame, Object codec, NativeLoadCallback callback, String key);
   }
 
+  abstract public static class ImageLoaderPro extends ImageLoader {
+    /**
+     * load the given url and more features
+     *
+     * @param url      the image url to load
+     * @param paramsJson features params of the image
+     * @param callback the callback to notify load result
+     */
+    abstract public void load(String url, int width, int height, float scale, String paramsJson, NativeLoadCallback callback, String key);
+
+    @Override
+    public void load(String url, int width, int height, float scale, NativeLoadCallback callback, String key) {
+      load(url, width, height, scale, "", callback, key);
+    }
+  }
+
   private RealImageLoader realImageLoader;
 
   /**
-   * load the given url
+   * load the given url and more features
    *
    * @param url      the image url to load
+   * @param paramsJson features params of the image
    * @param callback the callback to notify load result
    */
-  void load(String url, int width, int height, float scale, NativeLoadCallback callback, String key) {
+  void load(String url, int width, int height, float scale, String paramsJson, NativeLoadCallback callback, String key) {
     if (realImageLoader == null) {
       callback.onLoadFail(key);
       return;
     }
-    realImageLoader.load(url, width, height, scale, callback, key);
+    if (realImageLoader instanceof ImageLoaderPro) {
+      ImageLoaderPro imageLoader = (ImageLoaderPro) realImageLoader;
+      imageLoader.load(url, width, height, scale, paramsJson, callback, key);
+    } else if (realImageLoader instanceof ImageLoader) {
+      ImageLoader imageLoader = (ImageLoader) realImageLoader;
+      imageLoader.load(url, width, height, scale, callback, key);
+    }
   }
 
   void getNextFrame(int currentFrame, Object codec, NativeLoadCallback callback, String key) {

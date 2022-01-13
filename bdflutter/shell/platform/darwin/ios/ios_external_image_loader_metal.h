@@ -19,12 +19,12 @@ namespace flutter {
         
         ~IOSMetalExternalImageLoader() override = default;
 
-        void LoadCodec(const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) override;
+        void LoadCodec(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) override;
 
         void GetNextFrame(ImageLoaderContext loaderContext, int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage> skimage)> callback) override;
         
-        void Load(const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) override;
-        
+        void Load(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) override;
+
     private:
         fml::scoped_nsprotocol<id<MTLDevice>> device_;
         fml::CFRef<CVMetalTextureCacheRef> cache_ref_;

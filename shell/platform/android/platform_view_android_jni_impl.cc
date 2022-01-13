@@ -433,7 +433,8 @@ static inline void eraseImageLoadContextWithLock(const std::string &cKey) {
 /**
  * BD ADD: call android to load image
  */
-void CallJavaImageLoader(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) {
+
+void CallJavaImageLoader(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
   auto key = url + std::to_string(reinterpret_cast<jlong>(loadContext.get()));
@@ -441,11 +442,12 @@ void CallJavaImageLoader(jobject android_image_loader, const std::string url, co
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
-                      reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
+                      reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, fml::jni::StringToJavaString(env, paramsJson).obj(), 
+                      nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
   env->DeleteLocalRef(callObject);
 }
 
-void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) {
+void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string url, const int width, const int height, const float scale, std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto loadContext = std::make_shared<AndroidImageLoadContext>(callback, loaderContext, env->NewGlobalRef(android_image_loader));
   auto key = url + std::to_string(reinterpret_cast<jlong>(loadContext.get()));
@@ -453,7 +455,8 @@ void CallJavaImageLoaderForCodec(jobject android_image_loader, const std::string
   auto callObject = env->NewObject(g_image_loader_callback_class->obj(), g_native_callback_constructor);
   auto nativeCallback = new fml::jni::ScopedJavaLocalRef<jobject>(env, callObject);
   env->CallVoidMethod(android_image_loader, g_image_loader_class_load, fml::jni::StringToJavaString(env, url).obj(),
-                      reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
+                      reinterpret_cast<jint>(width), reinterpret_cast<jint>(height), scale, fml::jni::StringToJavaString(env, paramsJson).obj(), 
+                      nativeCallback->obj(), fml::jni::StringToJavaString(env, key).obj());
   env->DeleteLocalRef(callObject);
 }
 
@@ -1717,7 +1720,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       return false;
   }
 
-  g_image_loader_class_load = env->GetMethodID(g_image_loader_class->obj(), "load", "(Ljava/lang/String;IIFLio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
+  g_image_loader_class_load = env->GetMethodID(g_image_loader_class->obj(), "load", "(Ljava/lang/String;IIFLjava/lang/String;Lio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
   if (g_image_loader_class_load == nullptr) {
     FML_LOG(ERROR) << "Could not locate AndroidImageLoader load method";
     return false;
@@ -1725,7 +1728,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   g_image_loader_class_load_gif = env->GetMethodID(g_image_loader_class->obj(), "getNextFrame", "(ILjava/lang/Object;Lio/flutter/view/NativeLoadCallback;Ljava/lang/String;)V");
   if (g_image_loader_class_load == nullptr) {
-    FML_LOG(ERROR) << "Could not locate AndroidImageLoader load method";
+    FML_LOG(ERROR) << "Could not locate AndroidImageLoader getNextFrame method";
     return false;
   }
 

@@ -26,11 +26,11 @@ namespace flutter {
 
         virtual ~ImageLoader();
 
-        virtual void LoadCodec(const std::string url, const int width, const int height, const float scale, ImageLoaderContext contextPtr, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) = 0;
+        virtual void LoadCodec(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext contextPtr, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) = 0;
 
         virtual void GetNextFrame(ImageLoaderContext contextPtr, int currentFrame, std::shared_ptr<NativeExportCodec> codec, std::function<void(sk_sp<SkImage>)> callback) = 0;
-
-        virtual void Load(const std::string url, const int width, const int height, const float scale, ImageLoaderContext contextPtr, std::function<void(sk_sp<SkImage> image)> callback) = 0;
+        
+        virtual void Load(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext contextPtr, std::function<void(sk_sp<SkImage> image)> callback) = 0;
 
         FML_DISALLOW_COPY_AND_ASSIGN(ImageLoader);
     };

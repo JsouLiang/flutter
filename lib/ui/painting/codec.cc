@@ -108,6 +108,7 @@ void GetNativeImage(Dart_NativeArguments args) {
   const int width = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 2));
   const int height = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 3));
   const float scale = tonic::DartConverter<float>::FromDart(Dart_GetNativeArgument(args, 4));
+  const std::string paramsJson = tonic::DartConverter<std::string>::FromArguments(args, 5, exception);
     
   auto* dart_state = UIDartState::Current();
 
@@ -119,6 +120,7 @@ void GetNativeImage(Dart_NativeArguments args) {
                          width,
                          height,
                          scale,
+                         paramsJson,
                          task_runners,
                          ui_task_runner = task_runners.GetUITaskRunner(),
                          queue = UIDartState::Current()->GetSkiaUnrefQueue(),
@@ -141,7 +143,7 @@ void GetNativeImage(Dart_NativeArguments args) {
         }
       
         imageLoader->Load(
-            url, width, height, scale, contextPtr,
+            url, width, height, scale, paramsJson, contextPtr,
             fml::MakeCopyable([ui_task_runner,
                                queue,
                                callback = std::move(callback),
@@ -188,11 +190,12 @@ static void InstantiateNativeImageCodec(Dart_NativeArguments args) {
   const int width = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 2));
   const int height = tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 3));
   const float scale = tonic::DartConverter<float>::FromDart(Dart_GetNativeArgument(args, 4));
+  const std::string paramsJson = tonic::DartConverter<std::string>::FromArguments(args, 5, exception);
 
   auto* dart_state = UIDartState::Current();
   const auto& task_runners = dart_state->GetTaskRunners();
   task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
-    [url, width, height, scale, trace_id, task_runners,
+    [url, width, height, scale, paramsJson, trace_id, task_runners,
       ui_task_runner = task_runners.GetUITaskRunner(),
       io_manager = dart_state->GetIOManager(),
       callback = std::make_unique<DartPersistentValue>(dart_state, callback_handle)]() mutable {
@@ -214,7 +217,7 @@ static void InstantiateNativeImageCodec(Dart_NativeArguments args) {
       }
       // load codec
       imageLoader->LoadCodec(
-        url, width, height, scale, contextPtr,
+        url, width, height, scale, paramsJson, contextPtr,
         fml::MakeCopyable([ui_task_runner,
                             callback = std::move(callback),
                             trace_id](std::unique_ptr<NativeExportCodec> codec) mutable {
@@ -237,12 +240,13 @@ static void InstantiateNativeImageCodec(Dart_NativeArguments args) {
 void Codec::RegisterNatives(tonic::DartLibraryNatives* natives) {
   // BD ADD: START
   natives->Register({
-      {"getNativeImage", GetNativeImage, 5, true},
+      {"getNativeImage", GetNativeImage, 6, true},
   });
 
   natives->Register({
-    {"instantiateNativeImageCodec", InstantiateNativeImageCodec, 5, true},
+    {"instantiateNativeImageCodec", InstantiateNativeImageCodec, 6, true},
     });
+
   // END
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }

@@ -107,8 +107,9 @@ namespace flutter {
         }
     }
 
-    void IOSMetalExternalImageLoader::Load(const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) {
+    void IOSMetalExternalImageLoader::Load(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(sk_sp<SkImage> image)> callback) {
         NSString* urlStr = [NSString stringWithCString:url.c_str() encoding:[NSString defaultCStringEncoding]];
+        NSString* paramsJsonStr = [NSString stringWithCString:paramsJson.c_str() encoding:[NSString defaultCStringEncoding]];
         const auto& task_runners = loaderContext.task_runners;
         auto io_task_runner = task_runners.GetIOTaskRunner();
         fml::WeakPtr<GrDirectContext> context = loaderContext.resourceContext;
@@ -120,16 +121,20 @@ namespace flutter {
             this->ImageLoaderCallback(imageInfo, imageLoaderCallbackContext);
         };
         
-        if ([imageLoader_ respondsToSelector:@selector(loadImage:width:height:scale:complete:)]) {
+        if ([imageLoader_ respondsToSelector:@selector(loadImage:width:height:scale:paramsJson:complete:)]) {
+            [imageLoader_ loadImage:urlStr width:width height:height scale:scale paramsJson:paramsJsonStr complete:complete];
+        } else if ([imageLoader_ respondsToSelector:@selector(loadImage:paramsJson:complete:)]) {
+            [imageLoader_ loadImage:urlStr paramsJson:paramsJsonStr complete:complete];
+        } else if ([imageLoader_ respondsToSelector:@selector(loadImage:width:height:scale:complete:)]) {
             [imageLoader_ loadImage:urlStr width:width height:height scale:scale complete:complete];
         } else if ([imageLoader_ respondsToSelector:@selector(loadImage:complete:)]) {
             [imageLoader_ loadImage:urlStr complete:complete];
         }
     }
 
-
-    void IOSMetalExternalImageLoader::LoadCodec(const std::string url, const int width, const int height, const float scale, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) {
+    void IOSMetalExternalImageLoader::LoadCodec(const std::string url, const int width, const int height, const float scale, const std::string paramsJson, ImageLoaderContext loaderContext, std::function<void(std::unique_ptr<NativeExportCodec> codec)> callback) {
         NSString *urlStr = [NSString stringWithCString:url.c_str() encoding:[NSString defaultCStringEncoding]];
+        NSString* paramsJsonStr = [NSString stringWithCString:paramsJson.c_str() encoding:[NSString defaultCStringEncoding]];
         const auto& task_runners = loaderContext.task_runners;
         auto io_task_runner = task_runners.GetIOTaskRunner();
         std::shared_ptr<ImageLoaderCallbackContext<void(std::unique_ptr<NativeExportCodec> codec)>> imageLoaderCallbackContext = std::make_shared<ImageLoaderCallbackContext<void(std::unique_ptr<NativeExportCodec> codec)>>(callback);
@@ -146,7 +151,9 @@ namespace flutter {
             ));
         };
 
-        if ([imageLoader_ respondsToSelector:@selector(loadCodec:width:height:scale:complete:)]) {
+        if ([imageLoader_ respondsToSelector:@selector(loadCodec:width:height:scale:paramsJson:complete:)]) {
+            [imageLoader_ loadCodec:urlStr width:width height:height scale:scale paramsJson:paramsJsonStr complete:complete];
+        } else if ([imageLoader_ respondsToSelector:@selector(loadCodec:width:height:scale:complete:)]) {
             [imageLoader_ loadCodec:urlStr width:width height:height scale:scale complete:complete];
         }
     }

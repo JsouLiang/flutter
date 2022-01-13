@@ -30,8 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterImageLoader <NSObject>
 typedef void(^callback)(IOSImageInfo);
 - (void)loadImage:(NSString*)url complete:(callback)complete;
+- (void)loadImage:(NSString*)url paramsJson:(NSString*)paramsJson complete:(callback)complete;
 - (void)loadImage:(NSString*)url width:(NSInteger)width height:(NSInteger)height scale:(CGFloat)scale complete:(callback)complete;
+- (void)loadImage:(NSString*)url width:(NSInteger)width height:(NSInteger)height scale:(CGFloat)scale paramsJson:(NSString*)paramsJson complete:(callback)complete;
 - (void)loadCodec:(NSString*)url width:(NSInteger)width height:(NSInteger)height scale:(CGFloat)scale complete:(void (^)(NSObject<IOSImageCodec>*))complete;
+- (void)loadCodec:(NSString*)url width:(NSInteger)width height:(NSInteger)height scale:(CGFloat)scale paramsJson:(NSString*)paramsJson complete:(void (^)(NSObject<IOSImageCodec>*))complete;
 @end
 
 @protocol FlutterImageLoaderRegistry <NSObject>
