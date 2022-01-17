@@ -38,6 +38,7 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -429,12 +430,13 @@ public class FlutterEngine {
           "Spawn can only be called on a fully constructed FlutterEngine");
     }
 
+    List<String> dartEntrypointArgs = new ArrayList<>(Arrays.asList(dartVmArgs));
     FlutterJNI newFlutterJNI =
         flutterJNI.spawn(
             dartEntrypoint.dartEntrypointFunctionName,
             dartEntrypoint.dartEntrypointLibrary,
             dartEntrypoint.dartEntrypointLibrary,
-            new ArrayList<>());
+            dartEntrypointArgs);
     return new FlutterEngine(
         context, flutterLoader, newFlutterJNI, dartVmArgs, automaticallyRegisterPlugins);
   }
