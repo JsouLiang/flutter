@@ -67,7 +67,7 @@ cacheDir=out/tt_android_cache
 rm -rf $cacheDir
 mkdir -p $cacheDir
 
-./flutter/tools/gn --no-lto --full-dart-sdk
+./flutter/tools/gn --no-prebuilt-dart-sdk --no-lto --full-dart-sdk
 ninja -C out/host_debug -j $jcount
 checkResult
 
@@ -101,7 +101,7 @@ cd ..
 cd ..
 bd_upload $cacheDir/flutter-web-sdk-darwin-x64.zip flutter/framework/$tosDir/flutter-web-sdk-darwin-x64.zip
 
-./flutter/tools/gn --runtime-mode=release --no-lto
+./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
 ninja -C out/host_release -j $jcount
 checkResult
 
@@ -170,14 +170,14 @@ for liteMode in ${liteModes[@]}; do
             # dynamicart只打release
             if [ $dynamic = 'dynamicart' ]; then
                 if [ $mode = 'release' -o $mode = 'profile' ]; then
-                    ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix
+                    ./flutter/tools/gn --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix
                     androidDir=out/android_${mode}${platformPostFix}_dynamicart
                     modeDir=$modeDir-dynamicart
                 else
                     continue
                 fi
             else
-                ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix
                 androidDir=out/android_${mode}${platformPostFix}
             fi
 

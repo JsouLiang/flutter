@@ -88,7 +88,7 @@ for liteMode in ${liteModes[@]}; do
 		[ -d $cacheDir ] && rm -rf $cacheDir
 		mkdir -p $cacheDir
 
-#		./flutter/tools/gn --runtime-mode=$mode
+#		./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=$mode
 #		ninja -C $hostDir -j $jcount
 
 		# 编译各种架构引擎
@@ -98,33 +98,33 @@ for liteMode in ${liteModes[@]}; do
             then
                 iOSArm64Dir=out/ios_release_${liteMode}_dynamicart
                 iOSArmV7Dir=out/ios_release_arm_${liteMode}_dynamicart
-                ./flutter/tools/gn --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
                 ninja -C $iOSArm64Dir -j $jcount
                 checkResult
 
-                ./flutter/tools/gn --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
                 ninja -C $iOSArmV7Dir -j $jcount
                 checkResult
             else
-                ./flutter/tools/gn --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
                 ninja -C $iOSArm64Dir -j $jcount
                 checkResult
 
-                ./flutter/tools/gn --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
                 ninja -C $iOSArmV7Dir -j $jcount
                 checkResult
             fi
         else
-            ./flutter/tools/gn --ios --runtime-mode=$mode $modeSuffix $modeSuffix
+            ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=$mode $modeSuffix $modeSuffix
             ninja -C $iOSArm64Dir -j $jcount
             checkResult
 
-            ./flutter/tools/gn --ios --runtime-mode=$mode --ios-cpu=arm $modeSuffix
+            ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=$mode --ios-cpu=arm $modeSuffix
             ninja -C $iOSArmV7Dir -j $jcount
             checkResult
         fi
 
-	    ./flutter/tools/gn --ios --runtime-mode=debug --simulator $modeSuffix
+	    ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=debug --simulator $modeSuffix
 	    ninja -C $iOSSimDir -j $jcount
 	    checkResult
 

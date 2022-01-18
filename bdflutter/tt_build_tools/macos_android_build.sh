@@ -120,7 +120,7 @@ for liteMode in ${liteModes[@]}; do
             # dynamicart只打release
             if [ $dynamic = 'dynamicart' ]; then
                 if [ $mode = 'release' ]; then
-                    ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix --only-gen-snapshot
+                    ./flutter/tools/gn --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix --only-gen-snapshot
                     androidDir=out/android_${mode}${platformPostFix}_dynamicart
                     modeDir=$modeDir-dynamicart
                 else
@@ -128,8 +128,8 @@ for liteMode in ${liteModes[@]}; do
                 fi
             else
                 # zzm 暂时注释掉
-                #./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix --only-gen-snapshot
-                ./flutter/tools/gn --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix
+                #./flutter/tools/gn --no-prebuilt-dart-sdk --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix --only-gen-snapshot
+                ./flutter/tools/gn --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform $liteModeComdSuffix
                 androidDir=out/android_${mode}${platformPostFix}
             fi
 

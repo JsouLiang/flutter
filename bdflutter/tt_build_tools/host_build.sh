@@ -54,7 +54,7 @@ mkdir -p $cacheDir
 
 if [ "$(uname)" == "Darwin" ]
 then
-  ./flutter/tools/gn --no-lto --full-dart-sdk
+  ./flutter/tools/gn --no-prebuilt-dart-sdk --no-lto --full-dart-sdk
   ninja -C out/host_debug -j $jcount
   checkResult
 
@@ -97,7 +97,7 @@ then
   # darwin-x64-profile/FlutterMacOS.framework
   bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-profile/FlutterMacOS.framework.zip
 
-  ./flutter/tools/gn --runtime-mode=release --no-lto
+  ./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
   ninja -C out/host_release -j $jcount
   checkResult
 
@@ -146,7 +146,7 @@ then
   cd ..
   bd_upload $cacheDir/pkg/sky_engine.zip flutter/framework/$tosDir/sky_engine.zip
 else
-  ./flutter/tools/gn --no-lto --full-dart-sdk
+  ./flutter/tools/gn --no-prebuilt-dart-sdk --no-lto --full-dart-sdk
   ninja -C out/host_debug -j $jcount
   checkResult
 
@@ -171,7 +171,7 @@ else
   cd ..
   bd_upload $cacheDir/flutter-web-sdk-linux-x64.zip flutter/framework/$tosDir/flutter-web-sdk-linux-x64.zip
 
-  ./flutter/tools/gn --runtime-mode=release --no-lto
+  ./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
   ninja -C out/host_release -j $jcount
   checkResult
 
