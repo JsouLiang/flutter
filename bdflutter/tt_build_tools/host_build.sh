@@ -54,6 +54,38 @@ mkdir -p $cacheDir
 
 if [ "$(uname)" == "Darwin" ]
 then
+  rm -rf out/host_debug
+  ./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
+    ninja -C out/host_release -j $jcount
+    checkResult
+
+    # flutter_patched_sdk_product.zip
+    rm -f $cacheDir/flutter_patched_sdk_product.zip
+    rm -rf $cacheDir/flutter_patched_sdk_product
+    cp -r out/host_release/flutter_patched_sdk $cacheDir/flutter_patched_sdk_product
+    cd $cacheDir
+    zip -rq flutter_patched_sdk_product.zip flutter_patched_sdk_product
+    cd ..
+    cd ..
+
+    bd_upload $cacheDir/flutter_patched_sdk_product.zip flutter/framework/$tosDir/flutter_patched_sdk_product.zip
+
+    # FlutterMacOS.framework.zip
+    cd out/host_release
+    zip -ryq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+    cd ..
+    cd ..
+    bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-release/FlutterMacOS.framework.zip
+
+    # darwin-x64.zip
+    modeDir=darwin-x64
+    rm -rf $cacheDir/$modeDir
+    mkdir -p $cacheDir/$modeDir
+    cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
+    cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
+
+    rm -rf out/host_release
+    gclient sync -D -f --jobs=12 --no-history
   ./flutter/tools/gn --no-prebuilt-dart-sdk --no-lto --full-dart-sdk
   ninja -C out/host_debug -j $jcount
   checkResult
@@ -97,34 +129,34 @@ then
   # darwin-x64-profile/FlutterMacOS.framework
   bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-profile/FlutterMacOS.framework.zip
 
-  ./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
-  ninja -C out/host_release -j $jcount
-  checkResult
-
-  # flutter_patched_sdk_product.zip
-  rm -f $cacheDir/flutter_patched_sdk_product.zip
-  rm -rf $cacheDir/flutter_patched_sdk_product
-  cp -r out/host_release/flutter_patched_sdk $cacheDir/flutter_patched_sdk_product
-  cd $cacheDir
-  zip -rq flutter_patched_sdk_product.zip flutter_patched_sdk_product
-  cd ..
-  cd ..
-
-  bd_upload $cacheDir/flutter_patched_sdk_product.zip flutter/framework/$tosDir/flutter_patched_sdk_product.zip
-
-  # FlutterMacOS.framework.zip
-  cd out/host_release
-  zip -ryq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
-  cd ..
-  cd ..
-  bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-release/FlutterMacOS.framework.zip
-
-  # darwin-x64.zip
-  modeDir=darwin-x64
-  rm -rf $cacheDir/$modeDir
-  mkdir -p $cacheDir/$modeDir
-  cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
-  cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
+#  ./flutter/tools/gn --no-prebuilt-dart-sdk --runtime-mode=release --no-lto
+#  ninja -C out/host_release -j $jcount
+#  checkResult
+#
+#  # flutter_patched_sdk_product.zip
+#  rm -f $cacheDir/flutter_patched_sdk_product.zip
+#  rm -rf $cacheDir/flutter_patched_sdk_product
+#  cp -r out/host_release/flutter_patched_sdk $cacheDir/flutter_patched_sdk_product
+#  cd $cacheDir
+#  zip -rq flutter_patched_sdk_product.zip flutter_patched_sdk_product
+#  cd ..
+#  cd ..
+#
+#  bd_upload $cacheDir/flutter_patched_sdk_product.zip flutter/framework/$tosDir/flutter_patched_sdk_product.zip
+#
+#  # FlutterMacOS.framework.zip
+#  cd out/host_release
+#  zip -ryq ../../$cacheDir/FlutterMacOS.framework.zip FlutterMacOS.framework
+#  cd ..
+#  cd ..
+#  bd_upload $cacheDir/FlutterMacOS.framework.zip flutter/framework/$tosDir/darwin-x64-release/FlutterMacOS.framework.zip
+#
+#  # darwin-x64.zip
+#  modeDir=darwin-x64
+#  rm -rf $cacheDir/$modeDir
+#  mkdir -p $cacheDir/$modeDir
+#  cp out/host_release/gen/flutter/lib/snapshot/isolate_snapshot.bin $cacheDir/$modeDir/product_isolate_snapshot.bin
+#  cp out/host_release/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin $cacheDir/$modeDir/product_vm_isolate_snapshot.bin
   zip -rjq $cacheDir/$modeDir/artifacts.zip out/host_debug/flutter_tester out/host_debug/gen/frontend_server.dart.snapshot \
   third_party/icu/flutter/icudtl.dat out/host_debug/gen/flutter/lib/snapshot/isolate_snapshot.bin \
   out/host_debug/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin out/host_debug/gen/const_finder.dart.snapshot $cacheDir/$modeDir/product_isolate_snapshot.bin \
