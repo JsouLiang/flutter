@@ -191,7 +191,11 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // BD ADD:
   fml::AutoResetWaitableEvent latch;
 
-  fml::TaskRunner::RunNowOrPostTask(
+//  BD MOD
+//  when spawn engine immediately after create main engine
+//  platform thread may wait for ui task posted to main engine
+//  fml::TaskRunner::RunNowOrPostTask(
+  fml::TaskRunner::RunNowOrPostTaskAtHead(
       shell->GetTaskRunners().GetUITaskRunner(),
       fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),
