@@ -142,7 +142,7 @@ TEST_F(ShellTest, AnimatorStartsPaused) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-TEST_F(ShellTest, AnimatorDoesNotNotifyIdleBeforeRender) {
+TEST_F(ShellTest, DISABLED_AnimatorDoesNotNotifyIdleBeforeRender) {
   FakeAnimatorDelegate delegate;
   TaskRunners task_runners = {
       "test",

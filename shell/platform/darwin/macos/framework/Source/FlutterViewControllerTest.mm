@@ -155,7 +155,7 @@ TEST(FlutterViewControllerTest, TestKeyEventsAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsAreSentToFramework]);
 }
 
-TEST(FlutterViewControllerTest, TestKeyEventsArePropagatedIfNotHandled) {
+TEST(FlutterViewControllerTest, DISABLED_TestKeyEventsArePropagatedIfNotHandled) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsArePropagatedIfNotHandled]);
 }
 
