@@ -151,7 +151,7 @@ TEST(FlutterViewController, CanSetMouseTrackingModeBeforeViewLoaded) {
   ASSERT_EQ(viewController.mouseTrackingMode, FlutterMouseTrackingModeInActiveApp);
 }
 
-TEST(FlutterViewControllerTest, TestKeyEventsAreSentToFramework) {
+TEST(FlutterViewControllerTest, DISABLED_TestKeyEventsAreSentToFramework) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsAreSentToFramework]);
 }
 
@@ -159,16 +159,16 @@ TEST(FlutterViewControllerTest, DISABLED_TestKeyEventsArePropagatedIfNotHandled)
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsArePropagatedIfNotHandled]);
 }
 
-TEST(FlutterViewControllerTest, TestKeyEventsAreNotPropagatedIfHandled) {
+TEST(FlutterViewControllerTest, DISABLED_TestKeyEventsAreNotPropagatedIfHandled) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testKeyEventsAreNotPropagatedIfHandled]);
 }
 
-TEST(FlutterViewControllerTest, TestFlagsChangedEventsArePropagatedIfNotHandled) {
+TEST(FlutterViewControllerTest, DISABLED_TestFlagsChangedEventsArePropagatedIfNotHandled) {
   ASSERT_TRUE(
       [[FlutterViewControllerTestObjC alloc] testFlagsChangedEventsArePropagatedIfNotHandled]);
 }
 
-TEST(FlutterViewControllerTest, TestPerformKeyEquivalentSynthesizesKeyUp) {
+TEST(FlutterViewControllerTest, DISABLED_TestPerformKeyEquivalentSynthesizesKeyUp) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testPerformKeyEquivalentSynthesizesKeyUp]);
 }
 
