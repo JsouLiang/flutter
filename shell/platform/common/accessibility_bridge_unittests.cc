@@ -70,7 +70,7 @@ TEST(AccessibilityBridgeTest, basicTest) {
   EXPECT_EQ(child2_node->GetName(), "child 2");
 }
 
-TEST(AccessibilityBridgeTest, canFireChildrenChangedCorrectly) {
+TEST(AccessibilityBridgeTest, DISABLED_canFireChildrenChangedCorrectly) {
   TestAccessibilityBridgeDelegate* delegate =
       new TestAccessibilityBridgeDelegate();
   std::unique_ptr<TestAccessibilityBridgeDelegate> ptr(delegate);
