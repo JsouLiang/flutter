@@ -11,7 +11,7 @@
 
 namespace flutter::testing {
 
-TEST(FlutterFrameBufferProviderTest, TestCreate) {
+TEST(FlutterFrameBufferProviderTest, DISABLED_TestCreate) {
   NSOpenGLPixelFormatAttribute attributes[] = {
       NSOpenGLPFAColorSize, 24, NSOpenGLPFAAlphaSize, 8, 0,
   };
