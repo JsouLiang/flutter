@@ -34,6 +34,8 @@ vars = {
   'bd_dart_revision': '0d68847c30d4d7b1e66ac2d087e7bd39de505db2',
   'bd_skia_git': 'ssh://git@code.byted.org/tech_client/skia',
   'bd_skia_revision': '0ea60830e205df29f9d9c8c69e2076505128ab59',
+  'bd_icu_git': 'ssh://git@code.byted.org/tech_client/icu.git',
+  'bd_icu_revision': '28cf4895725bc4df73876dde55265d2e619cb998',
   # END
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
@@ -159,7 +161,9 @@ deps = {
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2b50fa94b07b601293d7c1f791e853bba8ffbb84',
+  # BD MOD:
+  #  Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '2b50fa94b07b601293d7c1f791e853bba8ffbb84',
+   Var('bd_icu_git') + '@' + Var('bd_icu_revision'),
 
   'src/third_party/khronos':
    Var('chromium_git') + '/chromium/src/third_party/khronos.git' + '@' + '7122230e90547962e0f0c627f62eeed3c701f275',
