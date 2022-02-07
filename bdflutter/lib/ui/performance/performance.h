@@ -10,7 +10,6 @@
 #include <atomic>
 #include <map>
 #include <string>
-#include <third_party/libcxx/include/string>
 #include <vector>
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE ||     \
