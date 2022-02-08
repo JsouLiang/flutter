@@ -283,7 +283,7 @@ public final class AssetUtil {
         int assetsCount = (int) ReflectUtils.invokeMethod(assetManager.getClass(), "getStringBlockCount", assetManager);
         for (int i = 0; i < assetsCount; i++) {
           // Cookies map 计数从 1 开始
-          assetPath = (String) ReflectUtils.invokeMethod(assetManager.getClass(), "getCookieName", i + 1, assetManager);
+          assetPath = (String) ReflectUtils.invokeMethod(assetManager.getClass(), "getCookieName", new Class[] { int.class }, new Object[] { i + 1 }, assetManager);
           if (!TextUtils.isEmpty(assetPath)) {
             assetPaths.add(assetPath);
           }
