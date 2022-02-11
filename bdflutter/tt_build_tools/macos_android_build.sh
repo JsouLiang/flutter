@@ -119,6 +119,7 @@ for liteMode in ${liteModes[@]}; do
 
             # dynamicart只打release
             if [ $dynamic = 'dynamicart' ]; then
+              gclient sync -D -f
                 if [ $mode = 'release' ]; then
                     ./flutter/tools/gn --no-prebuilt-dart-sdk --android --runtime-mode=$mode --android-cpu=$platform --dynamicart $liteModeComdSuffix --only-gen-snapshot
                     androidDir=out/android_${mode}${platformPostFix}_dynamicart

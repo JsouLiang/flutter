@@ -12,8 +12,7 @@ jobs:
     steps:
       - name: Build Engine On Mac
         commands:
-#          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_bd_2.8_pre.py -o trigger_cloud_build_engine.py
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
           - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} mac
   build_engine_on_linux:
     name: Build Engine On Linux

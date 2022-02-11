@@ -125,32 +125,35 @@ for liteMode in ${liteModes[@]}; do
             then
                 iOSArm64Dir=out/ios_release_${liteMode}_dynamicart
                 iOSArmV7Dir=out/ios_release_arm_${liteMode}_dynamicart
+                gclient sync -D -f --jobs=12 --no-history
                 ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
                 ninja -C $iOSArm64Dir -j $jcount
                 checkResult
-
+                gclient sync -D -f --jobs=12 --no-history
                 ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
                 ninja -C $iOSArmV7Dir -j $jcount
                 checkResult
             else
+                gclient sync -D -f --jobs=12 --no-history
                 ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --dynamicart $modeSuffix
                 ninja -C $iOSArm64Dir -j $jcount
                 checkResult
-
+                gclient sync -D -f --jobs=12 --no-history
                 ./flutter/tools/gn  --no-prebuilt-dart-sdk --ios --runtime-mode=${real_mode} --ios-cpu=arm --dynamicart $modeSuffix
                 ninja -C $iOSArmV7Dir -j $jcount
                 checkResult
             fi
         else
+            gclient sync -D -f --jobs=12 --no-history
             ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=$mode $modeSuffix $modeSuffix
             ninja -C $iOSArm64Dir -j $jcount
             checkResult
-
+            gclient sync -D -f --jobs=12 --no-history
             ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=$mode --ios-cpu=arm $modeSuffix
             ninja -C $iOSArmV7Dir -j $jcount
             checkResult
         fi
-
+      gclient sync -D -f --jobs=12 --no-history
 	    ./flutter/tools/gn --no-prebuilt-dart-sdk --ios --runtime-mode=debug --simulator $modeSuffix
 	    ninja -C $iOSSimDir -j $jcount
 	    checkResult
