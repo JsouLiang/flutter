@@ -470,6 +470,25 @@ Future<Codec> instantiateImageCodec(
   }
 }
 
+
+// BD ADD: START
+Future<Image> getNativeImage(String url, {int width = 0, int height = 0, double scale = 1.0}) {
+  return _futurize(
+        (_Callback<Image> callback) => _getNativeImage(url, callback, width, height, scale),
+  );
+}
+
+String _getNativeImage(String url, _Callback<Image> callback, int width, int height, double scale) { return ''; }
+
+Future<Codec> instantiateNativeImageCodec(String url, {int width = 0, int height = 0, double scale = 1.0}) {
+  return _futurize(
+        (_Callback<Codec> callback) => _instantiateNativeImageCodec(url, callback, width, height, scale),
+  );
+}
+
+String _instantiateNativeImageCodec(String url, _Callback<Codec> callback, int width, int height, double scale) { return ''; }
+// END
+
 Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
   {engine.WebOnlyImageCodecChunkCallback? chunkCallback}) {
   if (engine.useCanvasKit) {

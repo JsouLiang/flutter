@@ -35,6 +35,8 @@ part 'src/ui/semantics.dart';
 part 'src/ui/text.dart';
 part 'src/ui/tile_mode.dart';
 part 'src/ui/window.dart';
+// BD ADD:
+part 'src/ui/performance.dart';
 
 /// Provides a compile time constant to customize flutter framework and other
 /// users of ui engine for web runtime.
