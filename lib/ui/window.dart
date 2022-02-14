@@ -750,7 +750,9 @@ class SingletonFlutterWindow extends FlutterWindow {
   set exitApp(VoidCallback? callback) {
     performance.exitApp = callback;
   }
-  // END
+
+  void addNextFrameCallback(VoidCallback callback) => performance.addNextFrameCallback(callback);
+// END
 }
 
 /// Additional accessibility features that may be enabled by the platform.
