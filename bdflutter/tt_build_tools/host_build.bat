@@ -15,6 +15,10 @@ echo "user is %gitUser%"
 echo "gitMessage is %gitMessage%"
 echo "gitDate is %gitDate%"
 
+set gitUser=""
+set gitMessage=""
+set gitDate=""
+
 cd ..
 
 set jcount=%1
