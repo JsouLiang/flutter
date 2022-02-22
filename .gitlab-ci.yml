@@ -23,14 +23,14 @@ stages:
 BuildEngineMac:
   <<: *common_branch_config
   script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_new.py -o trigger_cloud_build_engine_new.py
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_2.10.py -o trigger_cloud_build_engine_new.py
     - python3 -u trigger_cloud_build_engine_new.py $CI_COMMIT_REF_NAME mac
     - echo "SUCCESS" > .job_status
 
 BuildEngineLinux:
   <<: *common_branch_config
   script:
-    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_new.py -o trigger_cloud_build_engine_new.py
+    - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_2.10.py -o trigger_cloud_build_engine_new.py
     - python3 -u trigger_cloud_build_engine_new.py $CI_COMMIT_REF_NAME linux
     - echo "SUCCESS" > .job_status
 

@@ -44,7 +44,7 @@ echo "Android build modes: ${liteModes[@]}"
 releaseModeArg=$4
 releaseModes=(${releaseModeArg//,/ })
 if [ ${#releaseModes[@]} == 0 ];then
-    releaseModes=('debug' 'profile' 'release')
+    releaseModes=('debug' 'profile' 'release' 'jit_release')
 fi
 echo "Android release modes: ${releaseModes[@]}"
 
@@ -94,8 +94,8 @@ for liteMode in ${liteModes[@]}; do
   for mode in ${releaseModes[@]}; do
       for platform in ${platforms[@]}; do
           # x64和x86只打debug
-          if [ $mode != 'debug' ]; then
-              if [ $platform = 'x86' ]; then
+          if [ $mode != 'debug'  ]; then
+              if [ $platform = 'x86' -a $mode != 'jit_release' ]; then
                   continue
               fi
           fi
@@ -150,8 +150,10 @@ for liteMode in ${liteModes[@]}; do
 			  ninja -C $androidDir -j $jcount
               checkResult
 
-              if [ $mode != 'debug' ]; then
-                  modeDir=$modeDir-$mode
+              if [ $mode = 'jit_release' ]; then
+                modeDir=$modeDir-jit-release
+              elif [ $mode != 'debug' ]; then
+                modeDir=$modeDir-$mode
               fi
 
               if [ "$liteMode" != 'normal' ]; then
