@@ -37,7 +37,9 @@ void PlatformMessageResponseDart::Complete(std::unique_ptr<fml::Mapping> data) {
       [callback = std::move(callback_), data = std::move(data)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
-        if (!dart_state) {
+        // BD MOD
+        // if (!dart_state) {
+        if (!dart_state || dart_state->IsShuttingDown()) {
           return;
         }
         tonic::DartState::Scope scope(dart_state);
@@ -58,7 +60,9 @@ void PlatformMessageResponseDart::CompleteEmpty() {
       fml::MakeCopyable([callback = std::move(callback_)]() mutable {
         std::shared_ptr<tonic::DartState> dart_state =
             callback.dart_state().lock();
-        if (!dart_state) {
+        // BD MOD
+        // if (!dart_state) {
+        if (!dart_state || dart_state->IsShuttingDown()) {
           return;
         }
         tonic::DartState::Scope scope(dart_state);
