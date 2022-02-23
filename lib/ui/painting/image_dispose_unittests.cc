@@ -68,13 +68,24 @@ TEST_F(ImageDisposeTest, ImageReleasedAfterFrame) {
 
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
-  TaskRunners task_runners("test",                  // label
-                           GetCurrentTaskRunner(),  // platform
-                           task_runner,             // raster
-                           task_runner,             // ui
-                           task_runner              // io
-  );
-
+    // BD MOD : START
+    // optimize spawnEngine performance will post task at head in ui_task_runner
+    // which may block thread when ui_task_runner same with io_task_runner
+    // TaskRunners task_runners("test",                  // label
+    //                         GetCurrentTaskRunner(),  // platform
+    //                         task_runner,             // raster
+    //                         task_runner,             // ui
+    //                         task_runner              // io
+    //);
+    auto ui_task_runner = CreateNewThread();
+    TaskRunners task_runners("test",                  // label
+                             GetCurrentTaskRunner(),  // platform
+                             task_runner,             // raster
+                             ui_task_runner,          // ui
+                             task_runner              // io
+    );
+    // END
+    
   AddNativeCallback("CaptureImageAndPicture",
                     CREATE_NATIVE_ENTRY(native_capture_image_and_picture));
   AddNativeCallback("OnBeginFrameDone",
