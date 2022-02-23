@@ -199,7 +199,14 @@ VulkanDebugReport::VulkanDebugReport(
       .sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,
       .pNext = nullptr,
       .flags = flags,
+      // BD MOD: START
+      // .pfnCallback = &vulkan::OnVulkanDebugReportCallback,
+#ifdef WIN_X86
+      .pfnCallback = nullptr,
+#else
       .pfnCallback = &vulkan::OnVulkanDebugReportCallback,
+#endif
+      // END
       .pUserData = nullptr,
   };
 
