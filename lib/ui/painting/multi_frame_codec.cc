@@ -33,7 +33,9 @@ static void InvokeNextFrameCallback(
     std::unique_ptr<DartPersistentValue> callback,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
-  if (!dart_state) {
+  // BD MOD
+  // if (!dart_state) {
+  if (!dart_state || !dart_state->IsShuttingDown()) {
     FML_DLOG(ERROR) << "Could not acquire Dart state while attempting to fire "
                        "next frame callback.";
     return;
