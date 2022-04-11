@@ -77,6 +77,7 @@ static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_loader_callback_class = nu
  * BD ADD: android image loader class
  */
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_image_loader_class = nullptr;
+static inline void eraseImageLoadContextWithLock(const std::string &cKey);
 
 // Called By Native
 
@@ -203,13 +204,16 @@ public:
     }
 
     void onLoadForCodecSuccess(JNIEnv *env, std::string cKey, jobject jCodec) {
-      if (!loaderContext.task_runners.IsValid()) {
+      if (!loaderContext.task_runners.IsValid() || !codecCallback) {
         return;
       }
       auto loaderContentRef = loaderContext;
       loaderContext.task_runners.GetUITaskRunner()->PostTask([loaderContentRef, jCodec, cKey,
                                                                androidImageLoader = androidImageLoader,
                                                                codecCallback = std::move(codecCallback)] {
+        if (!codecCallback) {
+          return;
+        }
         JNIEnv *env = fml::jni::AttachCurrentThread();
         AndroidNativeExportCodec *codec = new AndroidNativeExportCodec(env, cKey, jCodec);
         auto context = loaderContentRef.resourceContext;
@@ -220,6 +224,9 @@ public:
             [cKey, task_runners, context,
               codecCallback = std::move(codecCallback),
                codec, jObject, jCodec, androidImageLoader]() {
+              if (!codecCallback) {
+                return;
+              }
               JNIEnv *env = fml::jni::AttachCurrentThread();
               codec->skImage = uploadTexture(env, jObject, context);
               if (codec->skImage){
@@ -228,6 +235,7 @@ public:
               } else {
                 codecCallback(nullptr);
               }
+              eraseImageLoadContextWithLock(cKey);
               task_runners.GetPlatformTaskRunner()->PostTask([jCodec] {
                 JNIEnv *env = fml::jni::AttachCurrentThread();
                   env->DeleteGlobalRef(jCodec);
@@ -254,7 +262,8 @@ public:
               JNIEnv *env = fml::jni::AttachCurrentThread();
               env->CallVoidMethod(androidImageLoader, g_image_loader_class_release,
                                   fml::jni::StringToJavaString(env, cKey).obj());
-              task_runners.GetIOTaskRunner()->PostTask([androidImageLoader = androidImageLoader] {
+              task_runners.GetIOTaskRunner()->PostTask([androidImageLoader = androidImageLoader, cKey] {
+                eraseImageLoadContextWithLock(cKey);
                 JNIEnv *env = fml::jni::AttachCurrentThread();
                 env->DeleteGlobalRef(androidImageLoader);
               });
@@ -948,14 +957,6 @@ static void ExternalImageLoadForCodecSuccess(JNIEnv *env,
     return;
   }
   loadContext->onLoadForCodecSuccess(env, cKey, env->NewGlobalRef(jCodec));
-
-  auto loaderContext = static_cast<ImageLoaderContext>(loadContext->loaderContext);
-  if (!loaderContext.task_runners.IsValid()) {
-    return;
-  }
-  loaderContext.task_runners.GetIOTaskRunner()->PostTask(fml::MakeCopyable([cKey = std::move(cKey)](){
-    eraseImageLoadContextWithLock(cKey);
-  }));
 }
 
 static void ExternalImageLoadForGetNextFrameSuccess(JNIEnv *env,
