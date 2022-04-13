@@ -739,7 +739,7 @@ static void SendFakeTouchEvent(FlutterEngine* engine,
     [_engine.get() platformViewsController]->SetFlutterViewController(self);
     [_engine.get() iosPlatformView]->NotifyCreated();
     _surfaceCreated = YES;
-  } else {
+  } else if (!appeared && _surfaceCreated) {
     self.displayingFlutterUI = NO;
     [_engine.get() iosPlatformView]->NotifyDestroyed();
     [_engine.get() platformViewsController]->SetFlutterView(nullptr);
