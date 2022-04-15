@@ -134,6 +134,9 @@ abstract class SingletonFlutterWindow extends FlutterWindow {
   }
 
   void setIsolateDebugName(String name) => PlatformDispatcher.instance.setIsolateDebugName(name);
+
+  // BD ADD:
+  void addNextFrameCallback(VoidCallback callback) => performance.addNextFrameCallback(callback);
 }
 
 class AccessibilityFeatures {
