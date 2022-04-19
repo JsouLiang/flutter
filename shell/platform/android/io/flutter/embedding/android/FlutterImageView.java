@@ -220,20 +220,12 @@ public class FlutterImageView extends View implements RenderSurface {
 
     // Close resources.
     closeCurrentImage();
-    // Close the current image reader, then create a new one with the new size.
-    // Image readers cannot be resized once created.
-    closeImageReader();
-    imageReader = createImageReader(width, height);
-  }
 
-  /**
-   * Closes the image reader associated with the current {@code FlutterImageView}.
-   *
-   * <p>Once the image reader is closed, calling {@code acquireLatestImage} will result in an {@code
-   * IllegalStateException}.
-   */
-  public void closeImageReader() {
+    // Close all the resources associated with the image reader,
+    // including the images.
     imageReader.close();
+    // Image readers cannot be resized once created.
+    imageReader = createImageReader(width, height);
   }
 
   @Override

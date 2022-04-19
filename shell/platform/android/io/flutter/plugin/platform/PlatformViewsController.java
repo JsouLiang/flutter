@@ -978,7 +978,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     for (int i = 0; i < overlayLayerViews.size(); i++) {
       final FlutterImageView overlayView = overlayLayerViews.valueAt(i);
       overlayView.detachFromRenderer();
-      overlayView.closeImageReader();
       // Don't remove overlayView from the view hierarchy since this method can
       // be called while the Android framework is iterating over the array of views.
       // See ViewGroup#dispatchDetachedFromWindow(), and
