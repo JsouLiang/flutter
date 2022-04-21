@@ -193,8 +193,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         fontFamily, fontSize, height, fontWeight, fontStyle);
 
     // BD ADD: START
-    properties.drawMinHeight = drawMinHeight;
-    properties.forceVerticalCenter = forceVerticalCenter;
+    // properties.drawMinHeight = drawMinHeight;
+    // properties.forceVerticalCenter = forceVerticalCenter;
     // END
     return canvasKit.ParagraphStyle(properties);
   }
@@ -591,7 +591,7 @@ class CkParagraph extends SkiaObject<SkParagraph> implements ui.Paragraph {
     // BD ADD: START
     if (paragraph != null && lastDevicePixelRatio != ui.window.devicePixelRatio) {
       lastDevicePixelRatio = ui.window.devicePixelRatio;
-      paragraph!.setDevicePixelRatio(lastDevicePixelRatio);
+      // paragraph!.setDevicePixelRatio(lastDevicePixelRatio);
     }
     // END
 

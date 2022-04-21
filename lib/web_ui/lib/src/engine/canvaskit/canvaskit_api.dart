@@ -1636,8 +1636,8 @@ class SkParagraphStyleProperties {
   external set textStyle(SkTextStyleProperties? value);
   external set strutStyle(SkStrutStyleProperties? strutStyle);
   // BD ADD: START
-  external set drawMinHeight(bool? drawMinHeight);
-  external set forceVerticalCenter(bool? forceVerticalCenter);
+  // external set drawMinHeight(bool? drawMinHeight);
+  // external set forceVerticalCenter(bool? forceVerticalCenter);
   // END
 }
 
@@ -1849,7 +1849,7 @@ class SkParagraph {
   external void layout(double width);
   external void delete();
   // BD ADD:
-  external void setDevicePixelRatio(double ratio);
+  // external void setDevicePixelRatio(double ratio);
 }
 
 @JS()
