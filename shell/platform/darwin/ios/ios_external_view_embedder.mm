@@ -27,6 +27,10 @@ void IOSExternalViewEmbedder::CancelFrame() {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::CancelFrame");
   FML_CHECK(platform_views_controller_);
   platform_views_controller_->CancelFrame();
+  // BD ADD
+  // Committing the current transaction as |BeginFrame| will create a nested
+  // CATransaction otherwise.
+  [CATransaction commit];
 }
 
 // |ExternalViewEmbedder|
@@ -38,6 +42,8 @@ void IOSExternalViewEmbedder::BeginFrame(
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::BeginFrame");
   FML_CHECK(platform_views_controller_);
   platform_views_controller_->BeginFrame(frame_size);
+  // BD ADD
+  [CATransaction begin];
 }
 
 // |ExternalViewEmbedder|
@@ -55,6 +61,12 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
   FML_CHECK(platform_views_controller_);
   PostPrerollResult result = platform_views_controller_->PostPrerollAction(raster_thread_merger);
+  // BD ADD : START
+  if (result == PostPrerollResult::kSkipAndRetryFrame) {
+    // Commit the current transaction if the frame is dropped.
+    [CATransaction commit];
+  }
+  // END
   return result;
 }
 
@@ -76,7 +88,13 @@ void IOSExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
                                           std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFrame");
   FML_CHECK(platform_views_controller_);
-  platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  // BD MOD : START
+  // platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  bool submitted = platform_views_controller_->SubmitFrame(std::move(context), ios_context_, std::move(frame));
+  if (submitted) {
+      [CATransaction commit];
+  }
+  // END
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
