@@ -326,7 +326,7 @@ void Performance::TraceApmInTimelineOneEvent(const string& event) {
     start_time = engine_launch_infos[index * 2] + timeline_base;
     end_time = engine_launch_infos[index * 2 + 1] + timeline_base;
   }
-  if (start_time == end_time) {
+  if (start_time == timeline_base || end_time == timeline_base) {
     return;
   }
   auto id = fml::tracing::TraceNonce();
@@ -372,7 +372,7 @@ void Performance::TraceApmStartAndEnd(const string& event, int64_t start) {
   } else if (event == "read_isolate_snapshort") {
     int index = event_dict.find(event)->second;
     if (engine_launch_infos[index * 2] != 0 ||
-        engine_launch_infos[event_dict.find("ui_animator_pre")->second] == 0) {
+        engine_launch_infos[event_dict.find("ui_animator_pre")->second * 2] == 0) {
       return;
     }
     engine_launch_infos[index * 2] = start;
