@@ -38,31 +38,7 @@ std::map<string, int> event_dict = {
         {"shell_wait", 12},
         {"plugin_registry", 13},
         {"execute_dart_entry", 14},
-#ifdef FLUTTER_TRACE_ENGINE_INIT
-        {"bd_engine_trace", -1},
-#endif
 };
-
-#ifdef FLUTTER_TRACE_ENGINE_INIT
-std::map<string, string> event_dict_for_perf = {
-    {"init_task", "bd_3_init_task"},
-    {"native_init", "bd_2_native_init"},
-    {"ber_shell_create", "bd_8_ber_shell_create"},
-    {"log_icu_init", "bd_4_log_icu_init"},
-    {"dartvm_create", "bd_5_dartvm_create"},
-    {"platform_view_init", "bd_6_platform_view_init"},
-    {"vsync_waiter", "bd_7_vsync_waiter"},
-    {"rasterizer_init", "bd_f_rasterizer_init"},
-    {"shell_io_manger", "bd_g_shell_io_manger"},
-    {"ui_animator_pre", "bd_c_ui_animator_pre"},
-    {"read_isolate_snapshort", "bd_d_read_isolate_snapshort"},
-    {"ui_animator_after", "bd_e_ui_animator_after"},
-    {"shell_wait", "bd_9_ber_shell_create"},
-    {"plugin_registry", "bd_a_plugin_registry"},
-    {"execute_dart_entry", "bd_b_execute_dart_entry"},
-    {"bd_engine_trace", "bd_1_engine_trace"},
-};
-#endif
 
 class BDSkTraceMemoryDump : public SkTraceMemoryDump {
  public:
@@ -104,7 +80,7 @@ class BDSkTraceMemoryDump : public SkTraceMemoryDump {
 
 Performance::Performance():
     dart_image_memory_usage(0),
-    engine_launch_infos(ENGINE_LAUNCH_INFO_MAX) {}
+    engine_launch_infos(30) {}
 
 int64_t Performance::GetImageMemoryUsageKB() {
   int64_t sizeInKB = dart_image_memory_usage.load(std::memory_order_relaxed);
@@ -284,110 +260,15 @@ int64_t Performance::CurrentTimestamp() {
   return chrono::system_clock::now().time_since_epoch().count();
 }
 
-#ifdef FLUTTER_TRACE_ENGINE_INIT
-void Performance::TraceApmInTimeline() {
-
-  AdjustTraceApmInfo();
-
-  TraceApmInTimelineOneEvent("bd_engine_trace");
-
-  // trace io thread event
-  TraceApmInTimelineOneEvent("shell_io_manger");
-
-  // trace raster thread event
-  TraceApmInTimelineOneEvent("rasterizer_init");
-
-  // trace ui thread event
-  TraceApmInTimelineOneEvent("ui_animator_pre");
-  TraceApmInTimelineOneEvent("read_isolate_snapshort");
-  TraceApmInTimelineOneEvent("ui_animator_after");
-
-  // trace platform thread event
-  TraceApmInTimelineOneEvent("init_task");
-  TraceApmInTimelineOneEvent("native_init");
-  TraceApmInTimelineOneEvent("dartvm_create");
-  TraceApmInTimelineOneEvent("log_icu_init");
-  TraceApmInTimelineOneEvent("platform_view_init");
-  TraceApmInTimelineOneEvent("vsync_waiter");
-  TraceApmInTimelineOneEvent("ber_shell_create");
-  TraceApmInTimelineOneEvent("plugin_registry");
-  TraceApmInTimelineOneEvent("execute_dart_entry");
-}
-
-void Performance::TraceApmInTimelineOneEvent(const string& event) {
-  const char* label = event_dict_for_perf.find(event)->second.c_str();
-  int64_t start_time;
-  int64_t end_time;
-  if (event_dict.find(event)->second == -1) {
-    start_time = engine_launch_infos[event_dict.find("native_init")->second * 2] + timeline_base;
-    end_time = engine_launch_infos[event_dict.find("read_isolate_snapshort")->second * 2 + 1] + timeline_base;
-  } else {
-    int index = event_dict.find(event)->second;
-    start_time = engine_launch_infos[index * 2] + timeline_base;
-    end_time = engine_launch_infos[index * 2 + 1] + timeline_base;
-  }
-  if (start_time == 0 && start_time == end_time) {
-    return;
-  }
-  auto id = fml::tracing::TraceNonce();
-
-  Dart_TimelineEvent(
-      label,                                     // label
-      start_time,                                // timestamp0
-      id,                                        // timestamp1_or_async_id
-      Dart_Timeline_Event_Async_Begin,           // event type
-      0,                                         // argument_count
-      nullptr,                                   // argument_names
-      nullptr                                    // argument_values
-  );
-
-  Dart_TimelineEvent(
-      label,                                     // label
-      end_time,                                  // timestamp0
-      id,                                        // timestamp1_or_async_id
-      Dart_Timeline_Event_Async_End,             // event type
-      0,                                         // argument_count
-      nullptr,                                   // argument_names
-      nullptr                                    // argument_values
-  );
-}
-#endif
-
 void Performance::TraceApmStartAndEnd(const string& event, int64_t start) {
   std::lock_guard<std::mutex> lck (mtx);
-  // clean engine infos
-  if (is_first_engine_trace) {
-    for (int i = 0; i < ENGINE_LAUNCH_INFO_MAX; i++) {
-      engine_launch_infos[i] = 0;
-    }
-    is_first_engine_trace = false;
-  }
   if (event == "ui_animator") {
-        timeline_base = Dart_TimelineGetMicros() - CurrentTimestamp();
         int index = event_dict.find(event + "_pre")->second;
-        if (engine_launch_infos[index * 2] != 0) {
-          return;
-        }
         engine_launch_infos[index * 2] = start;
-  } else if (event == "read_isolate_snapshort") {
-    int index = event_dict.find(event)->second;
-    if (engine_launch_infos[index * 2] != 0 ||
-        engine_launch_infos[event_dict.find("ui_animator_pre")->second] == 0) {
-      return;
-    }
-    engine_launch_infos[index * 2] = start;
-    engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
-    index = event_dict.find("ui_animator_after")->second;
-    engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
-    engine_launch_infos[index * 2] = CurrentTimestamp();
-#ifdef FLUTTER_TRACE_ENGINE_INIT
-    TraceApmInTimeline();
-#endif
+        index = event_dict.find(event + "_after")->second;
+        engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
   } else {
         int index = event_dict.find(event)->second;
-        if (engine_launch_infos[index * 2] != 0) {
-          return;
-        }
         engine_launch_infos[index * 2] = start;
         engine_launch_infos[index * 2 + 1] = CurrentTimestamp();
   }
@@ -408,17 +289,13 @@ void Performance_warmUpZeroSizeOnce(Dart_NativeArguments args) {
   Performance::GetInstance()->WarmUpZeroSizeOnce(warmUpForOnce);
 }
 
-void Performance::AdjustTraceApmInfo() {
-  engine_launch_infos[4] = engine_launch_infos[3];  // ber_shell_create_start = native_init_end
-  engine_launch_infos[5] = engine_launch_infos[6];  // ber_shell_create_end = log_icu_init_start
-  engine_launch_infos[19] = engine_launch_infos[20];  // animator_pre_end = read_isolate_snapshort_start
-  engine_launch_infos[22] = engine_launch_infos[21];  // animator_after_start = read_isolate_snapshort_end
-}
-
 vector<int64_t> Performance::GetEngineInitApmInfo() {
   std::lock_guard<std::mutex> lck (mtx);
-  AdjustTraceApmInfo();
   vector<int64_t> engine_init_apm_info(engine_launch_infos);
+  engine_init_apm_info[4] = engine_launch_infos[3];  // ber_shell_create_start = native_init_end
+  engine_init_apm_info[5] = engine_launch_infos[6];  // ber_shell_create_end = log_icu_init_start
+  engine_init_apm_info[19] = engine_launch_infos[20];  // animator_pre_end = read_isolate_snapshort_start
+  engine_init_apm_info[22] = engine_launch_infos[21];  // animator_after_start = read_isolate_snapshort_end
   return engine_init_apm_info;
 }
 

@@ -218,7 +218,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto snapshot_delegate = snapshot_delegate_future.get();
 
         int64_t ui_animator_pre_start_timestamp = Performance::CurrentTimestamp();
-        Performance::GetInstance()->TraceApmStartAndEnd("ui_animator", ui_animator_pre_start_timestamp);
         // BD ADD: END
 
         // The animator is owned by the UI thread but it gets its vsync pulses
@@ -274,6 +273,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                   snapshot_delegate,  //
                                   shell->volatile_path_tracker_));
         }
+        Performance::GetInstance()->TraceApmStartAndEnd("ui_animator", ui_animator_pre_start_timestamp);
         // BD MOD: END
       }));
 
@@ -437,7 +437,7 @@ std::unique_ptr<Shell> Shell::Create(
                        // BD ADD:
                        preLoad,
                        is_gpu_disable
-
+                       
   );
 }
 
@@ -481,7 +481,7 @@ std::unique_ptr<Shell> Shell::Create(
                          // BD ADD:
                          preLoad,
                          is_gpu_disabled
-
+                         
   ]() mutable {
         auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
@@ -1057,15 +1057,25 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
                   raster_task, should_post_raster_task,
                   is_post = is_createView_post_] {
                   // END
-    if (io_manager && !io_manager->GetResourceContext()) {
-      sk_sp<GrDirectContext> resource_context;
+    // BD MOD: START
+    // if (io_manager && !io_manager->GetResourceContext()) {
+    //   sk_sp<GrDirectContext> resource_context;
+    //   if (shared_resource_context) {
+    //     resource_context = shared_resource_context;
+    //   } else {
+    //     resource_context = platform_view->CreateResourceContext();
+    //   }
+    //   io_manager->NotifyResourceContextAvailable(resource_context);
+    // }
+    if (io_manager) {
       if (shared_resource_context) {
-        resource_context = shared_resource_context;
-      } else {
-        resource_context = platform_view->CreateResourceContext();
+          io_manager->UpdateResourceContext(shared_resource_context);
+      } else if (!io_manager->GetResourceContext()) {
+          io_manager->NotifyResourceContextAvailable(platform_view->CreateResourceContext());
       }
-      io_manager->NotifyResourceContextAvailable(resource_context);
     }
+    // END
+
     // Step 1: Next, post a task on the UI thread to tell the engine that it has
     // an output surface.
     fml::TaskRunner::RunNowOrPostTask(ui_task_runner, ui_task);

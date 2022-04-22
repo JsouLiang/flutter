@@ -34,7 +34,6 @@
 #include "third_party/tonic/logging/dart_error.h"
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/typed_data/typed_list.h"
-#include "flutter/bdflutter/lib/ui/performance/performance.h"
 
 namespace dart {
 namespace observatory {
@@ -506,9 +505,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
           nullptr,                                   // argument_names
           nullptr                                    // argument_values
       );
-      // BD ADD:
-      Performance::GetInstance()->TraceApmStartAndEnd("native_init", Performance::GetInstance()->CurrentTimestamp() -
-                                                      (Dart_TimelineGetMicros() - settings_.engine_start_timestamp.count()));
     }
   }
 

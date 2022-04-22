@@ -12,13 +12,10 @@
 #include <string>
 #include <map>
 #include <third_party/skia/include/core/SkGraphics.h>
+#include <third_party/libcxx/include/string>
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE || FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_JIT_RELEASE || !defined(NDEBUG)
 #define NO_REALTIME_MEM 1
-#endif
-
-#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG || FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_PROFILE)
-#define FLUTTER_TRACE_ENGINE_INIT 1
 #endif
 
 namespace tonic {
@@ -57,7 +54,7 @@ class DumpData {
            const char* units,
            uint64_t value)
       : dumpName(dumpName), valueName(valueName), units(units), value(value) {}
-
+  
   DumpData(const char* dumpName,
            const char* valueName,
            const char* units,
@@ -90,11 +87,6 @@ class Performance {
 
   // APM
   void TraceApmStartAndEnd(const std::string& event, int64_t start);
-  void AdjustTraceApmInfo();
-#ifdef FLUTTER_TRACE_ENGINE_INIT
-  void TraceApmInTimeline();
-  void TraceApmInTimelineOneEvent(const std::string& event);
-#endif
   std::vector<int64_t> GetEngineInitApmInfo();
   static int64_t CurrentTimestamp();
 
@@ -124,7 +116,6 @@ class Performance {
 
  private:
   Performance();
-  static const int ENGINE_LAUNCH_INFO_MAX = 30;
 
   std::atomic_int64_t dart_image_memory_usage;  // KB
 
@@ -165,8 +156,6 @@ class Performance {
   // boost VSync
   // request VSync immediately, when begin frame
   std::atomic_bool boostVSync = true;
-  int64_t timeline_base;
-  bool is_first_engine_trace = true;
 };
 
 }

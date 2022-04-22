@@ -444,9 +444,9 @@ public class FlutterLoader {
       // END
 
       // BD ADD: START
-//       if (BDFlutterInjector.instance().shouldLoadNative()) {
-//           FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
-//       }
+      if (BDFlutterInjector.instance().shouldLoadNative()) {
+          FlutterJNI.nativeTraceEngineInitApmStartAndEnd("native_init", nativeInitStartTimestamp);
+      }
 	  // END
 
       initialized = true;
