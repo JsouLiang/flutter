@@ -218,6 +218,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto snapshot_delegate = snapshot_delegate_future.get();
 
         int64_t ui_animator_pre_start_timestamp = Performance::CurrentTimestamp();
+        Performance::GetInstance()->TraceApmStartAndEnd("ui_animator", ui_animator_pre_start_timestamp);
         // BD ADD: END
 
         // The animator is owned by the UI thread but it gets its vsync pulses
@@ -273,7 +274,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                   snapshot_delegate,  //
                                   shell->volatile_path_tracker_));
         }
-        Performance::GetInstance()->TraceApmStartAndEnd("ui_animator", ui_animator_pre_start_timestamp);
         // BD MOD: END
       }));
 
@@ -437,7 +437,7 @@ std::unique_ptr<Shell> Shell::Create(
                        // BD ADD:
                        preLoad,
                        is_gpu_disable
-                       
+
   );
 }
 
@@ -481,7 +481,7 @@ std::unique_ptr<Shell> Shell::Create(
                          // BD ADD:
                          preLoad,
                          is_gpu_disabled
-                         
+
   ]() mutable {
         auto isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
         shell = CreateShellOnPlatformThread(std::move(vm),
