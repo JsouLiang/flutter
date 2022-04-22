@@ -12,16 +12,16 @@ jobs:
     steps:
       - name: Build Engine On Mac
         commands:
-          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-          - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} mac
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_2.10.py -o trigger_cloud_build_engine_2.10.py
+          - python3 -u trigger_cloud_build_engine_2.10.py ${{Head.Branch}} mac
   build_engine_on_linux:
     name: Build Engine On Linux
     image: hub.byted.org/codebase/ci_debian_buster:latest
     steps:
       - name: Build Engine On Linux
         commands:
-          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine.py -o trigger_cloud_build_engine.py
-          - python3 -u trigger_cloud_build_engine.py ${{Head.Branch}} linux
+          - curl -s http://tosv.byted.org/obj/toutiao.ios.arch/flutter/trigger_cloud_build_engine_2.10.py -o trigger_cloud_build_engine_2.10.py
+          - python3 -u trigger_cloud_build_engine_2.10.py ${{Head.Branch}} linux
   auto_roll_engine:
     name: Auto Roll Engine
     image: hub.byted.org/codebase/ci_debian_buster:latest
