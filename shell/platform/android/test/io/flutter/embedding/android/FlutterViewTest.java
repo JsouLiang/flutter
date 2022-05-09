@@ -153,7 +153,6 @@ public class FlutterViewTest {
     assertFalse(view instanceof FlutterImageView);
   }
 
-
   @Test
   public void onConfigurationChanged_fizzlesWhenNullEngine() {
     FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
@@ -855,7 +854,6 @@ public class FlutterViewTest {
     assertEquals(1, imageView.getImageReader().getWidth());
     assertEquals(1, imageView.getImageReader().getHeight());
   }
-
 
   @Test
   public void flutterSurfaceView_GathersTransparentRegion() {
