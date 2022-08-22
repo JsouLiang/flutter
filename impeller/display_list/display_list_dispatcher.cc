@@ -447,6 +447,10 @@ void DisplayListDispatcher::setColorFilter(
         return FilterContents::MakeLinearToSrgbFilter({input});
       };
       return;
+    case flutter::DlColorFilterType::kComposedFilter:
+      FML_LOG(ERROR) << "requested DlColorFilterType::kComposedFilter";
+      UNIMPLEMENTED;
+      return;
     case flutter::DlColorFilterType::kUnknown:
       FML_LOG(ERROR) << "requested DlColorFilterType::kUnknown";
       UNIMPLEMENTED;
